@@ -26,3 +26,6 @@ hs_err_pid*
 # Project files
 .idea/
 *.iml
+
+# Test server
+server/
