@@ -7,10 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 public class MinecraftServer {
-    private final Process serverProcess;
+    private Process serverProcess;
+    private final ProcessBuilder pB;
+    private boolean running = false;
 
-    public MinecraftServer(String serverFolder, String serverFilename, int initialHeap, int maxHeap) throws IOException {
-        ProcessBuilder pB = new ProcessBuilder();
+    public MinecraftServer(String serverFolder, String serverFilename, int initialHeap, int maxHeap) {
+        pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
 
         pB.command("java",
@@ -19,8 +21,6 @@ public class MinecraftServer {
                 "-jar",
                 Paths.get(serverFolder, serverFilename).toString(),
                 "nogui");
-
-        serverProcess = pB.start();
     }
 
     public Process getServerProcess() {
@@ -34,5 +34,22 @@ public class MinecraftServer {
         OutputStream out = serverProcess.getOutputStream();
         out.write(cmd.getBytes(StandardCharsets.UTF_8));
         out.flush();
+    }
+
+    public MinecraftServer run() throws IOException {
+        serverProcess = pB.start();
+        return this;
+    }
+
+    public void stop() throws IOException {
+        sendCommand("stop");
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 }
