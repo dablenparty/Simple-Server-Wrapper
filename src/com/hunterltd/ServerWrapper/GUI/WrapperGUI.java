@@ -6,6 +6,7 @@ import com.hunterltd.ServerWrapper.Server.StreamGobbler;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -42,5 +43,25 @@ public class WrapperGUI extends JFrame {
         Consumer<String> addText = text -> consoleTextArea.setText(consoleTextArea.getText() + "\n" + text);
         StreamGobbler gobbler = new StreamGobbler(server.getServerProcess().getInputStream(), addText);
         Executors.newSingleThreadExecutor().submit(gobbler);
+
+        sendButton.addActionListener(e -> sendCommand(consoleTextArea.getText()));
+        consolePane.registerKeyboardAction(e -> {
+                sendCommand(commandTextField.getText());
+                commandTextField.setText("");
+            },
+                KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+    private void sendCommand(String cmd) {
+        try {
+            server.sendCommand(cmd);
+        } catch (IOException ioException) {
+            //TODO: dialog that the command couldn't be sent
+            ioException.printStackTrace();
+        }
+    }
+
+    public MinecraftServer getServer() {
+        return server;
     }
 }
