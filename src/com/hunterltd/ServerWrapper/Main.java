@@ -5,6 +5,7 @@ import com.hunterltd.ServerWrapper.GUI.WrapperGUI;
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
@@ -28,7 +29,11 @@ public class Main {
                             JOptionPane.YES_NO_OPTION
                     );
                     if (result == JOptionPane.YES_OPTION) {
-                        //TODO: stop server
+                        try {
+                            wrapperGUI.getServer().sendCommand("stop");
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
                         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     }
                 }
