@@ -51,6 +51,7 @@ public class WrapperGUI extends JFrame {
 
     private void startServer() {
         consoleTextArea.setText(""); // Essentially flushes the console output window
+        runButton.setText("Stop");
         try {
             server = new MinecraftServer(serverInfo.getDirectory(), serverInfo.getFile(), 4096, 4096).run();
         } catch (IOException e) {
@@ -64,6 +65,7 @@ public class WrapperGUI extends JFrame {
     }
 
     private void stopServer() {
+        runButton.setText("Run");
         try {
             server.stop();
         } catch (IOException ignored) {
