@@ -37,9 +37,9 @@ public class Main {
                                     ioException.printStackTrace();
                                 }
                             }
+                            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                         }
                     }
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 }
             });
             wrapperGUI.pack();
