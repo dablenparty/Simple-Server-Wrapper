@@ -22,22 +22,24 @@ public class Main {
                 @Override
                 public void windowClosing(WindowEvent e) {
                     JFrame frame = (JFrame) e.getSource();
-                    int result = JOptionPane.showConfirmDialog(
-                            frame,
-                            "Are you sure you want to exit the server wrapper? This will stop the server if it's running.",
-                            "Exit Server Wrapper",
-                            JOptionPane.YES_NO_OPTION
-                    );
-                    if (result == JOptionPane.YES_OPTION) {
-                        if (wrapperGUI.getServer().isRunning() && wrapperGUI.getServer().getServerProcess().isAlive()) {
-                            try {
-                                wrapperGUI.getServer().sendCommand("stop");
-                            } catch (IOException ioException) {
-                                ioException.printStackTrace();
+                    if (wrapperGUI.getServer() != null) {
+                        int result = JOptionPane.showConfirmDialog(
+                                frame,
+                                "Are you sure you want to exit the server wrapper? This will stop the server if it's running.",
+                                "Exit Server Wrapper",
+                                JOptionPane.YES_NO_OPTION
+                        );
+                        if (result == JOptionPane.YES_OPTION) {
+                            if (wrapperGUI.getServer().isRunning() && wrapperGUI.getServer().getServerProcess().isAlive()) {
+                                try {
+                                    wrapperGUI.getServer().sendCommand("stop");
+                                } catch (IOException ioException) {
+                                    ioException.printStackTrace();
+                                }
                             }
                         }
-                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     }
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 }
             });
             wrapperGUI.pack();
