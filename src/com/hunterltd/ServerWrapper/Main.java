@@ -16,11 +16,13 @@ public class Main {
         }
         SwingUtilities.invokeLater(() -> {
             WrapperGUI wrapperGUI = new WrapperGUI();
+            // If server is running, it needs to be shut down before the wrapper closes
             wrapperGUI.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             wrapperGUI.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
                     JFrame frame = (JFrame) e.getSource();
+                    // If a server hasn't even been started yet, this happens
                     if (wrapperGUI.getServer() != null) {
                         int result = JOptionPane.showConfirmDialog(
                                 frame,
@@ -29,6 +31,7 @@ public class Main {
                                 JOptionPane.YES_NO_OPTION
                         );
                         if (result == JOptionPane.YES_OPTION) {
+                            // Checks if the server is running and its internal process is alive before issuing the stop command
                             if (wrapperGUI.getServer().isRunning() && wrapperGUI.getServer().getServerProcess().isAlive()) {
                                 try {
                                     wrapperGUI.getServer().sendCommand("stop");
