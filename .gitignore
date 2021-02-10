@@ -28,6 +28,6 @@ hs_err_pid*
 *.iml
 
 # Test server
-server/
+test-server/
 
 .DS_Store
