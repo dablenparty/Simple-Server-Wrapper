@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 public class MinecraftServer {
     private Process serverProcess;
     private final ProcessBuilder pB;
-    private boolean running = false;
 
     public MinecraftServer(String serverFolder, String serverFilename, int initialHeap, int maxHeap) {
         pB = new ProcessBuilder();
@@ -46,10 +45,6 @@ public class MinecraftServer {
     }
 
     public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
+        return serverProcess.isAlive();
     }
 }
