@@ -35,11 +35,14 @@ public class Main {
                                 wrapperGUI.getServer().stop();
                             } catch (IOException ioException) {
                                 ioException.printStackTrace();
-                                wrapperGUI.getServer().getServerProcess().destroy(); // Failsafe (haven't needed it yet)
+                                wrapperGUI.getServer().getServerProcess().destroy(); // Failsafe
                             }
+                            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                         }
+                    } else {
+                        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     }
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
                 }
             });
             wrapperGUI.pack();
