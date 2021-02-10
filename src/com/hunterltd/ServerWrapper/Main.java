@@ -22,26 +22,24 @@ public class Main {
                 @Override
                 public void windowClosing(WindowEvent e) {
                     JFrame frame = (JFrame) e.getSource();
-                    // If a server hasn't even been started yet, this happens
-                    if (wrapperGUI.getServer() != null) {
+
+                    if (wrapperGUI.getServer() != null && wrapperGUI.getServer().isRunning()) {
                         int result = JOptionPane.showConfirmDialog(
                                 frame,
-                                "Are you sure you want to exit the server wrapper? This will stop the server if it's running.",
+                                "Are you sure you want to exit the server wrapper? This will stop the server.",
                                 "Exit Server Wrapper",
                                 JOptionPane.YES_NO_OPTION
                         );
                         if (result == JOptionPane.YES_OPTION) {
-                            // Checks if the server is running and its internal process is alive before issuing the stop command
-                            if (wrapperGUI.getServer().isRunning() && wrapperGUI.getServer().getServerProcess().isAlive()) {
-                                try {
-                                    wrapperGUI.getServer().sendCommand("stop");
-                                } catch (IOException ioException) {
-                                    ioException.printStackTrace();
-                                }
+                            try {
+                                wrapperGUI.getServer().stop();
+                            } catch (IOException ioException) {
+                                ioException.printStackTrace();
+                                wrapperGUI.getServer().getServerProcess().destroy(); // Failsafe (haven't needed it yet)
                             }
-                            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                         }
                     }
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 }
             });
             wrapperGUI.pack();
