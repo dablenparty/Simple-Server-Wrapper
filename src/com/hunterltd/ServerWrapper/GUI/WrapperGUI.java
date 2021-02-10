@@ -11,10 +11,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class WrapperGUI extends JFrame {
+    private static final long serialVersionUID = 1L;
     private FileDialog serverInfo;
     private JButton openDialogButton;
     private JButton runButton;
@@ -56,6 +56,7 @@ public class WrapperGUI extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
+
     private void sendCommand(String cmd) {
         try {
             server.sendCommand(cmd);
