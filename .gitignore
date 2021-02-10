@@ -29,3 +29,5 @@ hs_err_pid*
 
 # Test server
 server/
+
+.DS_Store
