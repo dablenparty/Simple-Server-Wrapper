@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class InfoDialog extends JDialog {
+    private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
