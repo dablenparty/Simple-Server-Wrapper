@@ -6,6 +6,8 @@ import com.hunterltd.ServerWrapper.Server.StreamGobbler;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -17,13 +19,27 @@ public class WrapperGUI extends JFrame {
     private JButton openDialogButton;
     private JButton runButton;
     private JButton sendButton;
+    private JPanel consolePanel;
     private JPanel rootPanel;
     private JScrollPane consoleScrollPane;
-    private JTabbedPane consolePane;
-    private JTextField commandTextField;
+    private JScrollPane errorScrollPane;
+    private JTabbedPane tabbedPane;
     private JTextArea consoleTextArea;
+    private JTextArea errorTextArea;
+    private JTextField commandTextField;
     private JTextField serverPathTextField;
     private MinecraftServer server;
+    private Timer timer;
+
+    private final ActionListener timerListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (!server.isRunning()) {
+                timer.stop();
+                runButton.setText("Run");
+            }
+        }
+    };
 
     public WrapperGUI() {
         add(rootPanel);
@@ -33,7 +49,7 @@ public class WrapperGUI extends JFrame {
         openDialogButton.addActionListener(e -> selectNewFile());
         runButton.addActionListener(e -> runButtonAction());
 
-        consolePane.registerKeyboardAction(e -> {
+        consolePanel.registerKeyboardAction(e -> {
                 sendCommand(commandTextField.getText());
                 commandTextField.setText("");
             },
@@ -50,8 +66,9 @@ public class WrapperGUI extends JFrame {
     }
 
     private void startServer() {
-        consoleTextArea.setText(""); // Essentially flushes the console output window
-        runButton.setText("Stop");
+        // Essentially flushes the output windows
+        consoleTextArea.setText("");
+        errorTextArea.setText("");
         try {
             server = new MinecraftServer(serverInfo.getDirectory(), serverInfo.getFile(), 4096, 4096).run();
         } catch (IOException e) {
@@ -59,15 +76,22 @@ public class WrapperGUI extends JFrame {
             e.printStackTrace();
             return;
         }
-        Consumer<String> addText = text -> consoleTextArea.setText(consoleTextArea.getText() + "\n" + text);
-        StreamGobbler gobbler = new StreamGobbler(server.getServerProcess().getInputStream(), addText);
-        Executors.newSingleThreadExecutor().submit(gobbler);
+
+        Consumer<String> addConsoleText = text -> consoleTextArea.setText(consoleTextArea.getText() + "\n" + text);
+        Consumer<String> addErrorText = text -> errorTextArea.setText(errorTextArea.getText() + "\n" + text);
+
+        // Pipes the server outputs into the GUI using the pre-defined consumers
+        StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
+        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addErrorText);
+        timer = new Timer(100, timerListener);
+        timer.start();
+        runButton.setText("Stop");
     }
 
     private void stopServer() {
-        runButton.setText("Run");
         try {
             server.stop();
+            timer.stop();
         } catch (IOException ignored) {
             // this usually happens when the stream is already closed but you try to send the stop command anyways
         }
@@ -80,8 +104,6 @@ public class WrapperGUI extends JFrame {
         } else {
             stopServer();
         }
-        server.setRunning(!server.isRunning());
-        System.out.println(server.isRunning());
     }
 
     private void selectNewFile() {
