@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 public class WrapperGUI extends JFrame {
     private static final long serialVersionUID = 1L;
-    private FileDialog serverInfo;
+    private FileDialog serverFileInfo;
     private JButton openDialogButton;
     private JButton runButton;
     private JButton sendButton;
@@ -28,6 +28,7 @@ public class WrapperGUI extends JFrame {
     private JTextArea errorTextArea;
     private JTextField commandTextField;
     private JTextField serverPathTextField;
+    private JPanel errorPanel;
     private MinecraftServer server;
     private Timer timer;
 
@@ -45,7 +46,7 @@ public class WrapperGUI extends JFrame {
         add(rootPanel);
         ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); // Automatic scrolling
 
-        sendButton.addActionListener(e -> sendCommand(consoleTextArea.getText()));
+        sendButton.addActionListener(e -> sendCommand(commandTextField.getText()));
         openDialogButton.addActionListener(e -> selectNewFile());
         runButton.addActionListener(e -> runButtonAction());
 
@@ -71,7 +72,7 @@ public class WrapperGUI extends JFrame {
         consoleTextArea.setText("");
         errorTextArea.setText("");
         try {
-            server = new MinecraftServer(serverInfo.getDirectory(), serverInfo.getFile(), 4096, 4096).run();
+            server = new MinecraftServer(serverFileInfo.getDirectory(), serverFileInfo.getFile(), 4096, 4096).run();
         } catch (IOException e) {
             //TODO: dialog that the server couldn't be opened
             e.printStackTrace();
@@ -86,11 +87,17 @@ public class WrapperGUI extends JFrame {
         StreamGobbler.execute(server.getServerProcess().getErrorStream(), addErrorText);
         timer = new Timer(100, timerListener);
         timer.start();
+        serverPathTextField.setEnabled(false);
+        commandTextField.setEnabled(true);
+        sendButton.setEnabled(true);
         runButton.setText("Stop");
     }
 
     private void stopServer() {
         try {
+            serverPathTextField.setEnabled(true);
+            commandTextField.setEnabled(false);
+            sendButton.setEnabled(false);
             server.stop();
             timer.stop();
         } catch (IOException ignored) {
@@ -112,7 +119,7 @@ public class WrapperGUI extends JFrame {
         fd.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
         fd.setVisible(true);
         serverPathTextField.setText(Paths.get(fd.getDirectory(), fd.getFile()).toString());
-        serverInfo = fd;
+        serverFileInfo = fd;
     }
 
     public MinecraftServer getServer() {
