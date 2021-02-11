@@ -42,13 +42,11 @@ public class InfoDialog extends JDialog {
         );
     }
 
-    private void onOK() {
-        // add your code here
+    protected void onOK() {
         dispose();
     }
 
-    private void onCancel() {
-        // add your code here if necessary
+    protected void onCancel() {
         dispose();
     }
 }
