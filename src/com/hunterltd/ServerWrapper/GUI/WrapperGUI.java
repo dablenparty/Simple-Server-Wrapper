@@ -88,6 +88,7 @@ public class WrapperGUI extends JFrame {
         timer = new Timer(100, timerListener);
         timer.start();
         serverPathTextField.setEnabled(false);
+        openDialogButton.setEnabled(false);
         commandTextField.setEnabled(true);
         sendButton.setEnabled(true);
         runButton.setText("Stop");
@@ -97,12 +98,14 @@ public class WrapperGUI extends JFrame {
         try {
             serverPathTextField.setEnabled(true);
             commandTextField.setEnabled(false);
+            openDialogButton.setEnabled(true);
             sendButton.setEnabled(false);
             server.stop();
             timer.stop();
         } catch (IOException ignored) {
             // this usually happens when the stream is already closed but you try to send the stop command anyways
         }
+        runButton.setText("Run");
     }
 
     private void runButtonAction() {
