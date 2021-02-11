@@ -1,5 +1,6 @@
 package com.hunterltd.ServerWrapper.GUI;
 
+import com.hunterltd.ServerWrapper.GUI.Dialogs.InternalErrorDialog;
 import com.hunterltd.ServerWrapper.Server.MinecraftServer;
 import com.hunterltd.ServerWrapper.Server.StreamGobbler;
 
@@ -62,8 +63,10 @@ public class WrapperGUI extends JFrame {
         try {
             server.sendCommand(cmd);
         } catch (IOException ioException) {
-            //TODO: dialog that the command couldn't be sent
             ioException.printStackTrace();
+            InternalErrorDialog errDialog = new InternalErrorDialog();
+            errDialog.pack();
+            errDialog.setVisible(true);
         }
     }
 
@@ -74,8 +77,13 @@ public class WrapperGUI extends JFrame {
         try {
             server = new MinecraftServer(serverFileInfo.getDirectory(), serverFileInfo.getFile(), 4096, 4096).run();
         } catch (IOException e) {
-            //TODO: dialog that the server couldn't be opened
             e.printStackTrace();
+            InternalErrorDialog errDialog = new InternalErrorDialog();
+            errDialog.pack();
+            errDialog.setVisible(true);
+            if (server != null && server.isRunning()) {
+                server.getServerProcess().destroy();
+            }
             return;
         }
 
