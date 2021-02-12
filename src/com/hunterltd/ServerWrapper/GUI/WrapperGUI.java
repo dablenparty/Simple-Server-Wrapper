@@ -1,6 +1,7 @@
 package com.hunterltd.ServerWrapper.GUI;
 
 import com.hunterltd.ServerWrapper.GUI.Dialogs.InternalErrorDialog;
+import com.hunterltd.ServerWrapper.GUI.Dialogs.SettingsDialog;
 import com.hunterltd.ServerWrapper.Server.MinecraftServer;
 import com.hunterltd.ServerWrapper.Server.StreamGobbler;
 
@@ -59,6 +60,20 @@ public class WrapperGUI extends JFrame {
 
         //TODO: add menu bar for settings & other stuff
         MenuBar menuBar = new MenuBar();
+        Menu fileMenu = new Menu("File");
+        MenuItem settingsItem = new MenuItem("Settings");
+        fileMenu.add(settingsItem);
+        menuBar.add(fileMenu);
+        this.setMenuBar(menuBar);
+        settingsItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SettingsDialog settings = new SettingsDialog();
+                settings.pack();
+                settings.setVisible(true);
+            }
+        });
+
 
         add(rootPanel);
     }
