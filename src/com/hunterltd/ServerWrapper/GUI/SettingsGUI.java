@@ -2,13 +2,13 @@ package com.hunterltd.ServerWrapper.GUI;
 
 import javax.swing.*;
 
-public class SettingsForm {
+public class SettingsGUI {
     private JTabbedPane settingsTabbedPane;
     private JPanel rootPanel;
     private JPanel generalSettingsPanel;
     private JComboBox<Integer> memoryComboBox;
 
-    public SettingsForm() {
+    public SettingsGUI() {
         /* TODO:
             - default server
             - automatic server detection
