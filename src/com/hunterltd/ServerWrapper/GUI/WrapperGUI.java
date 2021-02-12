@@ -44,7 +44,6 @@ public class WrapperGUI extends JFrame {
     };
 
     public WrapperGUI() {
-        add(rootPanel);
         ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); // Automatic scrolling
 
         sendButton.addActionListener(e -> sendCommand(commandTextField.getText()));
@@ -57,6 +56,11 @@ public class WrapperGUI extends JFrame {
             },
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        //TODO: add menu bar for settings & other stuff
+        MenuBar menuBar = new MenuBar();
+
+        add(rootPanel);
     }
 
     private void sendCommand(String cmd) {
