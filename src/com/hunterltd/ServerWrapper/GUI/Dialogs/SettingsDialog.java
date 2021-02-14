@@ -1,26 +1,19 @@
 package com.hunterltd.ServerWrapper.GUI.Dialogs;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentListener;
-import java.util.Arrays;
 
-public class SettingsDialog extends JDialog implements ActionListener, ChangeListener {
+public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
     private JButton buttonSave;
     private JButton buttonCancel;
     private JPanel buttonPanel;
     private JPanel contentPanel;
-    private JTabbedPane tabbedPane1;
+    private JTabbedPane settingsTabs;
     private JComboBox<Double> memoryComboBox;
     private JSlider memorySlider;
     private JCheckBox separateErrorTabCheckBox;
-    private boolean unsavedChanges = false;
+    private JLabel memoryLabel;
+    private boolean directChange = true;
 
     public SettingsDialog() {
         setContentPane(rootPanel);
@@ -40,14 +33,20 @@ public class SettingsDialog extends JDialog implements ActionListener, ChangeLis
             memoryComboBox.addItem(i);
         }
 
-        memorySlider.addChangeListener(e -> memoryComboBox.setSelectedIndex(memorySlider.getValue() - 1));
-        memorySlider.addChangeListener(this);
-        memoryComboBox.addActionListener(this);
-        separateErrorTabCheckBox.addActionListener(this);
+        memorySlider.addChangeListener(e -> {
+            directChange = false;
+            memoryComboBox.setSelectedIndex(memorySlider.getValue() - 1);
+            directChange = true;
+        });
+
+        memoryComboBox.addActionListener(e -> {
+            if (directChange) {
+                memorySlider.setValue(memoryComboBox.getSelectedIndex() + 1);
+            }
+        });
     }
 
     private void onSave() {
-        // add your code here
         dispose();
     }
 
@@ -56,19 +55,14 @@ public class SettingsDialog extends JDialog implements ActionListener, ChangeLis
     }
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
         SettingsDialog dialog = new SettingsDialog();
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        System.out.println("ACTION: " + e.getSource().toString());
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        System.out.println("CHANGE: " + e.getSource().toString());
     }
 }
