@@ -13,6 +13,10 @@ public class SettingsDialog extends JDialog {
     private JSlider memorySlider;
     private JCheckBox separateErrorTabCheckBox;
     private JLabel memoryLabel;
+    private JCheckBox automaticRestartCheckBox;
+    private JComboBox<Integer> restartIntervalComboBox;
+    private JLabel intervalLabel;
+    private JSlider restartIntervalSlider;
     private boolean directChange = true;
 
     public SettingsDialog() {
@@ -29,20 +33,20 @@ public class SettingsDialog extends JDialog {
             - auto-restart on interval
             - custom memory allocation
             - split error pane */
-        for (double i = 0.5; i <= 16; i+=0.5) {
-            memoryComboBox.addItem(i);
-        }
+        for (double i = 0.5; i <= 16; i+=0.5) memoryComboBox.addItem(i);
+        for (int i = 1; i <= 24; i++) restartIntervalComboBox.addItem(i);
 
-        memorySlider.addChangeListener(e -> {
-            directChange = false;
-            memoryComboBox.setSelectedIndex(memorySlider.getValue() - 1);
-            directChange = true;
-        });
+        memorySlider.addChangeListener(e -> updateComboBox(memoryComboBox, (JSlider) e.getSource()));
+        memoryComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), memorySlider));
 
-        memoryComboBox.addActionListener(e -> {
-            if (directChange) {
-                memorySlider.setValue(memoryComboBox.getSelectedIndex() + 1);
-            }
+        restartIntervalSlider.addChangeListener(e -> updateComboBox(restartIntervalComboBox, (JSlider) e.getSource()));
+        restartIntervalComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), restartIntervalSlider));
+
+        automaticRestartCheckBox.addActionListener(e -> {
+            boolean isSelected = automaticRestartCheckBox.isSelected();
+            intervalLabel.setEnabled(isSelected);
+            restartIntervalComboBox.setEnabled(isSelected);
+            restartIntervalSlider.setEnabled(isSelected);
         });
     }
 
@@ -52,6 +56,18 @@ public class SettingsDialog extends JDialog {
 
     private void onCancel() {
         dispose();
+    }
+
+    private void updateSlider(JComboBox<?> comboBox, JSlider slider) {
+        if (directChange) {
+            slider.setValue(comboBox.getSelectedIndex() + 1);
+        }
+    }
+
+    private void updateComboBox(JComboBox<?> comboBox, JSlider slider) {
+        directChange = false;
+        comboBox.setSelectedIndex(slider.getValue() - 1);
+        directChange = true;
     }
 
     public static void main(String[] args) {
