@@ -1,20 +1,22 @@
 package com.hunterltd.ServerWrapper.GUI.Dialogs;
 
+import com.hunterltd.ServerWrapper.Utilities.UserSettings;
+
 import javax.swing.*;
 
 public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
     private JButton buttonSave;
     private JButton buttonCancel;
-    private JPanel buttonPanel;
+        private JPanel buttonPanel;
     private JPanel contentPanel;
     private JTabbedPane settingsTabs;
     private JComboBox<Double> memoryComboBox;
     private JSlider memorySlider;
     private JCheckBox separateErrorTabCheckBox;
-    private JLabel memoryLabel;
     private JCheckBox automaticRestartCheckBox;
     private JComboBox<Integer> restartIntervalComboBox;
+    private JLabel memoryLabel;
     private JLabel intervalLabel;
     private JSlider restartIntervalSlider;
     private boolean directChange = true;
@@ -42,15 +44,22 @@ public class SettingsDialog extends JDialog {
         restartIntervalSlider.addChangeListener(e -> updateComboBox(restartIntervalComboBox, (JSlider) e.getSource()));
         restartIntervalComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), restartIntervalSlider));
 
-        automaticRestartCheckBox.addActionListener(e -> {
-            boolean isSelected = automaticRestartCheckBox.isSelected();
-            intervalLabel.setEnabled(isSelected);
-            restartIntervalComboBox.setEnabled(isSelected);
-            restartIntervalSlider.setEnabled(isSelected);
-        });
+        automaticRestartCheckBox.addChangeListener(e -> setPanelEnabled((JCheckBox) e.getSource(),
+                new JComponent[]{intervalLabel, restartIntervalSlider, restartIntervalComboBox}));
+
+        memoryComboBox.setSelectedIndex(((UserSettings.getMemory() * 2) / 1024) - 1);
+        separateErrorTabCheckBox.setSelected(UserSettings.getErrorTab());
+        automaticRestartCheckBox.setSelected(UserSettings.getRestart());
+        restartIntervalComboBox.setSelectedIndex(UserSettings.getInterval() - 1);
     }
 
     private void onSave() {
+        UserSettings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
+        UserSettings.setErrorTab(separateErrorTabCheckBox.isSelected());
+        UserSettings.setRestart(automaticRestartCheckBox.isSelected());
+        UserSettings.setInterval(restartIntervalSlider.getValue());
+
+        UserSettings.save();
         dispose();
     }
 
@@ -61,6 +70,14 @@ public class SettingsDialog extends JDialog {
     private void updateSlider(JComboBox<?> comboBox, JSlider slider) {
         if (directChange) {
             slider.setValue(comboBox.getSelectedIndex() + 1);
+        }
+    }
+
+    private void setPanelEnabled(JCheckBox checkBox, JComponent[] components) {
+        boolean checked = checkBox.isSelected();
+        for (JComponent comp :
+                components) {
+            comp.setEnabled(checked);
         }
     }
 
@@ -79,6 +96,5 @@ public class SettingsDialog extends JDialog {
         SettingsDialog dialog = new SettingsDialog();
         dialog.pack();
         dialog.setVisible(true);
-        System.exit(0);
     }
 }
