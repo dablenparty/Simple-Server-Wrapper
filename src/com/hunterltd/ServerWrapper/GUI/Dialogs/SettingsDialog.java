@@ -8,7 +8,7 @@ public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
     private JButton buttonSave;
     private JButton buttonCancel;
-        private JPanel buttonPanel;
+    private JPanel buttonPanel;
     private JPanel contentPanel;
     private JTabbedPane settingsTabs;
     private JComboBox<Double> memoryComboBox;
@@ -25,6 +25,7 @@ public class SettingsDialog extends JDialog {
         setContentPane(rootPanel);
         setModal(true);
         getRootPane().setDefaultButton(buttonSave);
+        setTitle("Server Settings");
 
         buttonSave.addActionListener(e -> onSave());
         buttonCancel.addActionListener(e -> onCancel());
