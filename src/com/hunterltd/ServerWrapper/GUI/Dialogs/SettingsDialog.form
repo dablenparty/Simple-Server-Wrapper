@@ -92,9 +92,14 @@
                       <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
+                      <majorTickSpacing value="2"/>
                       <maximum value="32"/>
                       <minimum value="1"/>
-                      <minorTickSpacing value="0"/>
+                      <minorTickSpacing value="1"/>
+                      <paintTicks value="true"/>
+                      <paintTrack value="true"/>
+                      <snapToTicks value="true"/>
+                      <toolTipText value="Choose how much memory to allocate to your server (in GB)"/>
                     </properties>
                   </component>
                   <component id="8f66f" class="javax.swing.JCheckBox" binding="separateErrorTabCheckBox" default-binding="true">
@@ -113,6 +118,7 @@
                     </constraints>
                     <properties>
                       <enabled value="true"/>
+                      <toolTipText value="Choose how much memory to allocate to your server (in GB)"/>
                     </properties>
                   </component>
                 </children>
@@ -167,8 +173,12 @@
                     </constraints>
                     <properties>
                       <enabled value="false"/>
+                      <majorTickSpacing value="6"/>
                       <maximum value="24"/>
                       <minimum value="1"/>
+                      <minorTickSpacing value="1"/>
+                      <paintTicks value="true"/>
+                      <snapToTicks value="true"/>
                     </properties>
                   </component>
                 </children>
