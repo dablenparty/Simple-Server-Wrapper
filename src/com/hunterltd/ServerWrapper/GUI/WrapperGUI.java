@@ -4,6 +4,7 @@ import com.hunterltd.ServerWrapper.GUI.Dialogs.InternalErrorDialog;
 import com.hunterltd.ServerWrapper.GUI.Dialogs.SettingsDialog;
 import com.hunterltd.ServerWrapper.Server.MinecraftServer;
 import com.hunterltd.ServerWrapper.Server.StreamGobbler;
+import com.hunterltd.ServerWrapper.Utilities.UserSettings;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -32,17 +33,7 @@ public class WrapperGUI extends JFrame {
     private JTextField serverPathTextField;
     private JPanel errorPanel;
     private MinecraftServer server;
-    private Timer timer;
-
-    private final ActionListener timerListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (!server.isRunning()) {
-                timer.stop();
-                runButton.setText("Run");
-            }
-        }
-    };
+    private Timer aliveTimer, restartTimer;
 
     public WrapperGUI() {
         ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); // Automatic scrolling
@@ -58,22 +49,17 @@ public class WrapperGUI extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        //TODO: add menu bar for settings & other stuff
         MenuBar menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
         MenuItem settingsItem = new MenuItem("Settings");
         fileMenu.add(settingsItem);
         menuBar.add(fileMenu);
-        this.setMenuBar(menuBar);
-        settingsItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SettingsDialog settings = new SettingsDialog();
-                settings.pack();
-                settings.setVisible(true);
-            }
+        settingsItem.addActionListener(e -> {
+            SettingsDialog settings = new SettingsDialog();
+            settings.pack();
+            settings.setVisible(true);
         });
-
+        this.setMenuBar(menuBar);
 
         add(rootPanel);
     }
@@ -94,7 +80,11 @@ public class WrapperGUI extends JFrame {
         consoleTextArea.setText("");
         errorTextArea.setText("");
         try {
-            server = new MinecraftServer(serverFileInfo.getDirectory(), serverFileInfo.getFile(), 4096, 4096).run();
+            server = new MinecraftServer(serverFileInfo.getDirectory(),
+                    serverFileInfo.getFile(),
+                    UserSettings.getMemory(),
+                    UserSettings.getMemory()
+            ).run();
         } catch (IOException e) {
             e.printStackTrace();
             InternalErrorDialog errDialog = new InternalErrorDialog();
@@ -112,8 +102,25 @@ public class WrapperGUI extends JFrame {
         // Pipes the server outputs into the GUI using the pre-defined consumers
         StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
         StreamGobbler.execute(server.getServerProcess().getErrorStream(), addErrorText);
-        timer = new Timer(100, timerListener);
-        timer.start();
+        aliveTimer = new Timer(100, e -> {
+            if (!server.isRunning()) {
+                aliveTimer.stop();
+                runButton.setText("Run");
+                if (restartTimer != null) restartTimer.stop();
+            }
+        });
+
+        // A new action listener is created for each new restartTimer in case the user changes the restart interval
+        // and wants to enact it by simply restarting the server rather than the entire wrapper.
+        // Currently set to 10's of seconds (aka 3 in settings means 30 seconds)
+        restartTimer = UserSettings.getRestart() ? new Timer(UserSettings.getInterval() * 10000, e -> {
+            restartTimer.stop();
+            stopServer();
+            startServer();
+        }) : null;
+
+        aliveTimer.start();
+        restartTimer.start();
         serverPathTextField.setEnabled(false);
         openDialogButton.setEnabled(false);
         commandTextField.setEnabled(true);
@@ -123,16 +130,16 @@ public class WrapperGUI extends JFrame {
 
     private void stopServer() {
         try {
-            serverPathTextField.setEnabled(true);
-            commandTextField.setEnabled(false);
-            openDialogButton.setEnabled(true);
-            sendButton.setEnabled(false);
             server.stop();
-            timer.stop();
-        } catch (IOException ignored) {
-            // this usually happens when the stream is already closed but you try to send the stop command anyways
+        } catch (IOException e) {
+            server.getServerProcess().destroy();
         }
-        runButton.setText("Run");
+        serverPathTextField.setEnabled(true);
+        commandTextField.setEnabled(false);
+        openDialogButton.setEnabled(true);
+        sendButton.setEnabled(false);
+
+        aliveTimer.stop();
     }
 
     private void runButtonAction() {
@@ -148,8 +155,10 @@ public class WrapperGUI extends JFrame {
         FileDialog fd = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
         fd.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
         fd.setVisible(true);
-        serverPathTextField.setText(Paths.get(fd.getDirectory(), fd.getFile()).toString());
-        serverFileInfo = fd;
+        try {
+            serverPathTextField.setText(Paths.get(fd.getDirectory(), fd.getFile()).toString());
+            serverFileInfo = fd;
+        } catch (NullPointerException ignored) {}
     }
 
     public MinecraftServer getServer() {
