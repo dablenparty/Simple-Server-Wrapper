@@ -40,6 +40,12 @@ public class MinecraftServer {
 
     public void stop() throws IOException {
         sendCommand("stop");
+
+        try {
+            serverProcess.getOutputStream().close();
+            serverProcess.getInputStream().close();
+            serverProcess.getErrorStream().close();
+        } catch (IOException ignored){}
     }
 
     public boolean isRunning() {
