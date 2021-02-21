@@ -64,7 +64,11 @@ public class UserSettings {
     }
 
     public static int getMemory() {
-        return ((Long) settingsMap.get("memory")).intValue();
+        try {
+            return ((Long) settingsMap.get("memory")).intValue();
+        } catch (ClassCastException e) {
+            return (int) settingsMap.get("memory");
+        }
     }
 
     public static void setMemory(int value) {
@@ -88,7 +92,13 @@ public class UserSettings {
     }
 
     public static int getInterval() {
-        return ((Long) settingsMap.get("restartInterval")).intValue();
+        // Sometimes it parses as a Long, sometimes it parses as an Integer
+        // I haven't found a pattern to identify which it chooses (yet)
+        try {
+            return ((Long) settingsMap.get("restartInterval")).intValue();
+        } catch (ClassCastException e) {
+            return (int) settingsMap.get("restartInterval");
+        }
     }
 
     public static void setInterval(int value) {
