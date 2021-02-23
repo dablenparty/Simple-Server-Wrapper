@@ -9,8 +9,6 @@ import com.hunterltd.ServerWrapper.Utilities.UserSettings;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -34,14 +32,19 @@ public class WrapperGUI extends JFrame {
     private JPanel errorPanel;
     private MinecraftServer server;
     private Timer aliveTimer, restartTimer;
+    private int[] timeCounter = new int[]{0, 0, 0}; // H:M:S
+    private final String restartCommandTemplate = "me %sis restarting in %d %s!"; // color code, time integer, time unit
+    private final String baseTitle = "Simple Server Wrapper";
 
     public WrapperGUI() {
         ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); // Automatic scrolling
 
+        // Action Listeners
         sendButton.addActionListener(e -> sendCommand(commandTextField.getText()));
         openDialogButton.addActionListener(e -> selectNewFile());
         runButton.addActionListener(e -> runButtonAction());
 
+        // Keyboard Registers
         consolePanel.registerKeyboardAction(e -> {
                 sendCommand(commandTextField.getText());
                 commandTextField.setText("");
@@ -49,6 +52,7 @@ public class WrapperGUI extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        // Menu Bar
         MenuBar menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
         MenuItem settingsItem = new MenuItem("Settings");
@@ -60,6 +64,8 @@ public class WrapperGUI extends JFrame {
             settings.setVisible(true);
         });
         this.setMenuBar(menuBar);
+
+        setTitle(baseTitle);
 
         add(rootPanel);
     }
@@ -106,31 +112,80 @@ public class WrapperGUI extends JFrame {
             if (!server.isRunning()) {
                 aliveTimer.stop();
                 runButton.setText("Run");
+                setTitle(baseTitle);
                 if (restartTimer != null) restartTimer.stop();
             }
         });
 
-        // A new action listener is created for each new restartTimer in case the user changes the restart interval
-        // and wants to enact it by simply restarting the server rather than the entire wrapper.
-        // Currently set to 10's of seconds (aka 3 in settings means 30 seconds)
-        restartTimer = UserSettings.getRestart() ? new Timer(UserSettings.getInterval() * 10000, e -> {
-            restartTimer.stop();
-            stopServer();
-            startServer();
+        // Keeps track of every second in a 3 element array
+        restartTimer = UserSettings.getRestart() ? new Timer(1000, e -> {
+            final int interval = UserSettings.getInterval();
+            int hours = timeCounter[0], minutes = timeCounter[1], seconds = timeCounter[2];
+
+            seconds++;
+
+            if (seconds != 60) {
+                timeCounter[2] = seconds;
+            } else {
+                minutes++;
+                timeCounter[1] = minutes;
+                timeCounter[2] = 0; // resets "seconds" counter
+            }
+
+            if (minutes == 60) {
+                hours++;
+                timeCounter[0] = hours;
+                timeCounter[1] = 0; // resets "minutes" counter
+                sendCommand(String.format(restartCommandTemplate, "§7", interval - hours, "hours")); // gray
+            }
+
+            if (hours == interval) {
+                restartTimer.stop();
+                this.stopServer();
+                this.startServer();
+                timeCounter = new int[]{0, 0, 0};
+            } else if (hours == interval - 1) {
+                // the final hour
+                // 60 is actually the edge case because it doesn't get reset to 0 until the next iteration
+                switch (minutes) {
+                    case 30:
+                    case 45:
+                    case 50:
+                    case 55:
+                        if (seconds == 60) {
+                            sendCommand(String.format(restartCommandTemplate, "§e", 60 - minutes, "minutes")); // yellow
+                        }
+                        break;
+                    case 59:
+                        // the final minute
+                        switch (seconds) {
+                            case 30:
+                            case 50:
+                                sendCommand(String.format(restartCommandTemplate, "§c", 60 - seconds, "seconds")); // red
+                                break;
+                            case 60:
+                                sendCommand(String.format(restartCommandTemplate, "§c", 1, "minute")); // red
+                                break;
+                        }
+                        break;
+                }
+            }
         }) : null;
 
         aliveTimer.start();
-        restartTimer.start();
+        if (restartTimer != null) restartTimer.start();
         serverPathTextField.setEnabled(false);
         openDialogButton.setEnabled(false);
         commandTextField.setEnabled(true);
         sendButton.setEnabled(true);
         runButton.setText("Stop");
+        setTitle(baseTitle + " - " + serverFileInfo.getFile());
     }
 
     private void stopServer() {
         try {
             server.stop();
+            consoleTextArea.setText(consoleTextArea.getText() + "\nServer has been stopped.");
         } catch (IOException e) {
             server.getServerProcess().destroy();
         }
@@ -139,7 +194,10 @@ public class WrapperGUI extends JFrame {
         openDialogButton.setEnabled(true);
         sendButton.setEnabled(false);
 
+        runButton.setText("Run");
+        setTitle(baseTitle);
         aliveTimer.stop();
+        if (restartTimer != null) restartTimer.stop();
     }
 
     private void runButtonAction() {
@@ -158,7 +216,9 @@ public class WrapperGUI extends JFrame {
         try {
             serverPathTextField.setText(Paths.get(fd.getDirectory(), fd.getFile()).toString());
             serverFileInfo = fd;
-        } catch (NullPointerException ignored) {}
+        } catch (NullPointerException ignored) {
+            // Thrown when the user clicks "Cancel" in the dialog. Can be ignored
+        }
     }
 
     public MinecraftServer getServer() {
