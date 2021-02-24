@@ -45,7 +45,7 @@ public class WrapperGUI extends JFrame {
         runButton.addActionListener(e -> runButtonAction());
 
         // Keyboard Registers
-        consolePanel.registerKeyboardAction(e -> {
+        rootPanel.registerKeyboardAction(e -> {
                 sendCommand(commandTextField.getText());
                 commandTextField.setText("");
             },
@@ -81,7 +81,7 @@ public class WrapperGUI extends JFrame {
         }
     }
 
-    private void startServer() {
+    public void startServer() {
         // Essentially flushes the output windows
         consoleTextArea.setText("");
         errorTextArea.setText("");
@@ -182,7 +182,7 @@ public class WrapperGUI extends JFrame {
         setTitle(baseTitle + " - " + serverFileInfo.getFile());
     }
 
-    private void stopServer() {
+    public void stopServer() {
         try {
             server.stop();
             consoleTextArea.setText(consoleTextArea.getText() + "\nServer has been stopped.");
