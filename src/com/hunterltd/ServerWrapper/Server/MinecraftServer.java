@@ -1,8 +1,13 @@
 package com.hunterltd.ServerWrapper.Server;
 
+import com.hunterltd.ServerWrapper.Utilities.UserSettings;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MinecraftServer {
     private Process serverProcess;
@@ -12,12 +17,16 @@ public class MinecraftServer {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
 
-        pB.command("java",
+        List<String> argsList = new ArrayList<>(Arrays.asList("java",
                 String.format("-Xmx%dM", initialHeap),
                 String.format("-Xms%dM", maxHeap),
                 "-jar",
                 Paths.get(serverFolder, serverFilename).toString(),
-                "nogui");
+                "nogui"));
+
+        if (UserSettings.hasExtraArgs()) argsList.addAll(3, UserSettings.getExtraArgs());
+
+        pB.command(argsList.toArray(new String[0]));
     }
 
     public Process getServerProcess() {

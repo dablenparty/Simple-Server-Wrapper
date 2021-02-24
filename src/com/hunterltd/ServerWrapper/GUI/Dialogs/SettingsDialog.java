@@ -13,12 +13,12 @@ public class SettingsDialog extends JDialog {
     private JTabbedPane settingsTabs;
     private JComboBox<Double> memoryComboBox;
     private JSlider memorySlider;
-    private JCheckBox separateErrorTabCheckBox;
     private JCheckBox automaticRestartCheckBox;
     private JComboBox<Integer> restartIntervalComboBox;
     private JLabel memoryLabel;
     private JLabel intervalLabel;
     private JSlider restartIntervalSlider;
+    private JTextField extraArgsTextField;
     private boolean directChange = true;
 
     public SettingsDialog() {
@@ -48,17 +48,33 @@ public class SettingsDialog extends JDialog {
         automaticRestartCheckBox.addChangeListener(e -> setPanelEnabled((JCheckBox) e.getSource(),
                 new JComponent[]{intervalLabel, restartIntervalSlider, restartIntervalComboBox}));
 
+        // Set components based on UserSettings
         memoryComboBox.setSelectedIndex(((UserSettings.getMemory() * 2) / 1024) - 1);
-        separateErrorTabCheckBox.setSelected(UserSettings.getErrorTab());
         automaticRestartCheckBox.setSelected(UserSettings.getRestart());
         restartIntervalComboBox.setSelectedIndex(UserSettings.getInterval() - 1);
+        extraArgsTextField.setText(String.join(" ", UserSettings.getExtraArgs()));
     }
 
     private void onSave() {
         UserSettings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
-        UserSettings.setErrorTab(separateErrorTabCheckBox.isSelected());
-        UserSettings.setRestart(automaticRestartCheckBox.isSelected());
-        UserSettings.setInterval(restartIntervalSlider.getValue());
+        if (automaticRestartCheckBox.isSelected() &&
+                !UserSettings.getRestart()) {
+            int result = JOptionPane.showConfirmDialog(
+                    this,
+                    "The server needs to be restarted to enable the auto-restart feature. Would you like to save anyways?",
+                    "Unsaved changes",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (result == JOptionPane.YES_OPTION) {
+                UserSettings.setRestart(automaticRestartCheckBox.isSelected());
+                UserSettings.setInterval(restartIntervalSlider.getValue());
+            }
+        } else {
+            UserSettings.setRestart(automaticRestartCheckBox.isSelected());
+            UserSettings.setInterval(restartIntervalSlider.getValue());
+        }
+
+        UserSettings.setExtraArgs(extraArgsTextField.getText().split(" "));
 
         UserSettings.save();
         dispose();

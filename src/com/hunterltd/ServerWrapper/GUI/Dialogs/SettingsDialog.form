@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="rootPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="54" width="475" height="297"/>
+      <xy x="48" y="54" width="490" height="297"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -102,16 +102,6 @@
                       <toolTipText value="Choose how much memory to allocate to your server (in GB)"/>
                     </properties>
                   </component>
-                  <component id="8f66f" class="javax.swing.JCheckBox" binding="separateErrorTabCheckBox" default-binding="true">
-                    <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <selected value="true"/>
-                      <text value="Separate Error Tab"/>
-                      <toolTipText value="Outputs errors into a separate tab in the main window"/>
-                    </properties>
-                  </component>
                   <component id="3cead" class="javax.swing.JComboBox" binding="memoryComboBox">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
@@ -121,9 +111,27 @@
                       <toolTipText value="Choose how much memory to allocate to your server (in GB)"/>
                     </properties>
                   </component>
+                  <component id="8a40a" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Extra Arguments"/>
+                    </properties>
+                  </component>
+                  <component id="81775" class="javax.swing.JTextField" binding="extraArgsTextField">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="150" height="-1"/>
+                      </grid>
+                    </constraints>
+                    <properties>
+                      <toolTipText value="Extra arguments to be passed to the server, separated by a space"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
-              <grid id="3837b" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="3837b" layout-manager="GridLayoutManager" row-count="4" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="Auto-Restart"/>
@@ -146,12 +154,12 @@
                   </hspacer>
                   <vspacer id="44436">
                     <constraints>
-                      <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
                   <component id="dc671" class="javax.swing.JLabel" binding="intervalLabel">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
@@ -160,7 +168,7 @@
                   </component>
                   <component id="2dd4a" class="javax.swing.JComboBox" binding="restartIntervalComboBox">
                     <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
@@ -169,7 +177,7 @@
                   </component>
                   <component id="79d1f" class="javax.swing.JSlider" binding="restartIntervalSlider">
                     <constraints>
-                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
@@ -179,6 +187,15 @@
                       <minorTickSpacing value="1"/>
                       <paintTicks value="true"/>
                       <snapToTicks value="true"/>
+                    </properties>
+                  </component>
+                  <component id="2ece" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font style="2"/>
+                      <text value="Note: The server must be restarted before this enables  "/>
                     </properties>
                   </component>
                 </children>

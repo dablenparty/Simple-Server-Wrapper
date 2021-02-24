@@ -1,5 +1,6 @@
 package com.hunterltd.ServerWrapper.Utilities;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,6 +9,8 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("unchecked") // JSONObject does not have type parameters but casts to a Map
 public class UserSettings {
@@ -54,7 +57,7 @@ public class UserSettings {
     private static void populateDefaults() throws FileNotFoundException {
         // Tab 1
         settingsMap.put("memory", 1024);
-        settingsMap.put("errorTab", true);
+        settingsMap.put("extraArgs", new JSONArray());
 
         //Tab 2
         settingsMap.put("autoRestart", false);
@@ -75,20 +78,27 @@ public class UserSettings {
         settingsMap.replace("memory", value);
     }
 
-    public static boolean getErrorTab() {
-        return (boolean) settingsMap.get("errorTab");
-    }
-
-    public static void setErrorTab(boolean value) {
-        settingsMap.replace("errorTab", value);
-    }
-
     public static boolean getRestart() {
         return (boolean) settingsMap.get("autoRestart");
     }
 
     public static void setRestart(boolean value) {
         settingsMap.replace("autoRestart", value);
+    }
+
+    public static List<String> getExtraArgs() {
+        return (List<String>) settingsMap.get("extraArgs");
+    }
+
+    public static void setExtraArgs(String[] newArgs) {
+        JSONArray args = new JSONArray();
+        args.addAll(Arrays.asList(newArgs));
+        settingsMap.replace("extraArgs",  args);
+    }
+
+    public static boolean hasExtraArgs() {
+        List<String> list = ((List<String>) settingsMap.get("extraArgs"));
+        return list.size() > 0 && !list.get(0).equalsIgnoreCase("");
     }
 
     public static int getInterval() {
@@ -125,19 +135,7 @@ public class UserSettings {
 
     }
 
-    public static JSONObject getSettingsMap() {
-        return settingsMap;
-    }
-
     public static boolean isFirstLaunch() {
         return firstLaunch;
-    }
-
-    public static String getSavePath() {
-        return settingsMap.get("savePath").toString();
-    }
-
-    public static String getMoveTo() {
-        return settingsMap.get("moveTo").toString();
     }
 }
