@@ -145,6 +145,7 @@
                     </constraints>
                     <properties>
                       <text value="Automatic Restart"/>
+                      <toolTipText value="Enable/disable automatic restarting"/>
                     </properties>
                   </component>
                   <hspacer id="a5404">
@@ -187,6 +188,7 @@
                       <minorTickSpacing value="1"/>
                       <paintTicks value="true"/>
                       <snapToTicks value="true"/>
+                      <toolTipText value="Hours between each restart. For example, 24 is once a day"/>
                     </properties>
                   </component>
                   <component id="2ece" class="javax.swing.JLabel">
