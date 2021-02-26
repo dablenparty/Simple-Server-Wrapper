@@ -35,12 +35,6 @@ public class SettingsDialog extends JDialog {
         buttonSave.addActionListener(e -> onSave());
         buttonCancel.addActionListener(e -> onCancel());
 
-        /* TODO:
-            - default server
-            - automatic server detection
-            - auto-restart on interval
-            - custom memory allocation
-            - split error pane */
         for (double i = 0.5; i <= 16; i+=0.5) memoryComboBox.addItem(i);
         for (int i = 1; i <= 24; i++) restartIntervalComboBox.addItem(i);
 
