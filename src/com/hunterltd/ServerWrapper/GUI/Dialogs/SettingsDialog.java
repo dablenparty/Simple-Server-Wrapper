@@ -1,10 +1,15 @@
 package com.hunterltd.ServerWrapper.GUI.Dialogs;
 
+import com.hunterltd.ServerWrapper.GUI.WrapperGUI;
+import com.hunterltd.ServerWrapper.Server.MinecraftServer;
 import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 
 public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
@@ -25,18 +30,21 @@ public class SettingsDialog extends JDialog {
     private boolean directChange = true;
     private final Settings settings;
 
-    public SettingsDialog(Settings settingsObj, String filename) {
-        settings = settingsObj;
+    public SettingsDialog(MinecraftServer server) {
+        settings = server.getServerSettings();
         setContentPane(rootPanel);
         setModal(true);
         getRootPane().setDefaultButton(buttonSave);
-        setTitle("Server Settings - " + filename);
+        setTitle("Server Settings - " + server.getServerPath().getFileName());
 
         buttonSave.addActionListener(e -> onSave());
         buttonCancel.addActionListener(e -> onCancel());
 
         for (double i = 0.5; i <= 16; i+=0.5) memoryComboBox.addItem(i);
         for (int i = 1; i <= 24; i++) restartIntervalComboBox.addItem(i);
+
+        final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "txt";
+        batchFileButton.addActionListener(e -> server.generateBatch(ext));
 
         memorySlider.addChangeListener(e -> updateComboBox(memoryComboBox, (JSlider) e.getSource()));
         memoryComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), memorySlider));
@@ -107,16 +115,5 @@ public class SettingsDialog extends JDialog {
         directChange = false;
         comboBox.setSelectedIndex(slider.getValue() - 1);
         directChange = true;
-    }
-
-    public static void main(String[] args) throws IOException {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
-        SettingsDialog dialog = new SettingsDialog(new Settings("test"), "testfile.jar");
-        dialog.pack();
-        dialog.setVisible(true);
     }
 }
