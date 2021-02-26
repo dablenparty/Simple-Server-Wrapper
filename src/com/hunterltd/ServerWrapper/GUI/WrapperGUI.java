@@ -92,10 +92,7 @@ public class WrapperGUI extends JFrame {
         consoleTextArea.setText("");
         errorTextArea.setText("");
         try {
-            server = new MinecraftServer(serverFileInfo.getDirectory(),
-                    serverFileInfo.getFile(),
-                    serverSettings
-            ).run();
+            server.run();
         } catch (IOException e) {
             e.printStackTrace();
             InternalErrorDialog errDialog = new InternalErrorDialog();
@@ -210,22 +207,24 @@ public class WrapperGUI extends JFrame {
     }
 
     private void selectNewFile() {
-        FileDialog fd = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
-        fd.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
-        fd.setVisible(true);
+        serverFileInfo = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
+        serverFileInfo.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
+        serverFileInfo.setVisible(true);
         MenuItem settingsItem = this.getMenuBar().getMenu(0).getItem(0);
         settingsItem.removeActionListener(settingsOpen);
         settingsOpen = e -> {
-            SettingsDialog settingsDialog = new SettingsDialog(serverSettings, fd.getFile());
+            SettingsDialog settingsDialog = new SettingsDialog(server);
             settingsDialog.pack();
             settingsDialog.setVisible(true);
         };
         try {
-            serverPathTextField.setText(Paths.get(fd.getDirectory(), fd.getFile()).toString());
-            serverFileInfo = fd;
-            serverSettings = new Settings(Paths.get(fd.getDirectory(), "ssw", "wrapperSettings.json"));
+            serverPathTextField.setText(Paths.get(serverFileInfo.getDirectory(), serverFileInfo.getFile()).toString());
+            serverSettings = new Settings(Paths.get(serverFileInfo.getDirectory(), "ssw", "wrapperSettings.json"));
             settingsItem.removeActionListener(settingsWarn);
             settingsItem.addActionListener(settingsOpen);
+            server = new MinecraftServer(serverFileInfo.getDirectory(),
+                    serverFileInfo.getFile(),
+                    serverSettings);
         } catch (NullPointerException ignored) {
             // Thrown when the user clicks "Cancel" in the dialog. Can be ignored
         } catch (IOException e) {
