@@ -17,12 +17,6 @@ public class MinecraftServer {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
 
-        try {
-            settings = new Settings(Paths.get(serverFolder, "wrapper", "wrapperSettings.json"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         List<String> argsList = new ArrayList<>(Arrays.asList("java",
                 String.format("-Xmx%dM", settings.getMemory()),
                 String.format("-Xms%dM", settings.getMemory()),
