@@ -22,7 +22,7 @@ public class SettingsDialog extends JDialog {
     private JSlider restartIntervalSlider;
     private JTextField extraArgsTextField;
     private boolean directChange = true;
-    private Settings settings;
+    private final Settings settings;
 
     public SettingsDialog(Settings settingsObj, String filename) {
         settings = settingsObj;
@@ -83,7 +83,8 @@ public class SettingsDialog extends JDialog {
         try {
             settings.writeData();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            InfoDialog errorDialog = new InfoDialog("Settings not found",
+                    "The settings file could not be found. Ensure that it has not been moved or deleted");
         }
         dispose();
     }

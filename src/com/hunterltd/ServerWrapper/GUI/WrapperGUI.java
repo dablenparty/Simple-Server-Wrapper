@@ -223,13 +223,15 @@ public class WrapperGUI extends JFrame {
         try {
             serverPathTextField.setText(Paths.get(fd.getDirectory(), fd.getFile()).toString());
             serverFileInfo = fd;
-            serverSettings = new Settings(Paths.get(fd.getDirectory(), "wrapper", "wrapperSettings.json"));
+            serverSettings = new Settings(Paths.get(fd.getDirectory(), "ssw", "wrapperSettings.json"));
             settingsItem.removeActionListener(settingsWarn);
             settingsItem.addActionListener(settingsOpen);
         } catch (NullPointerException ignored) {
             // Thrown when the user clicks "Cancel" in the dialog. Can be ignored
         } catch (IOException e) {
-            e.printStackTrace();
+            InternalErrorDialog errorDialog = new InternalErrorDialog();
+            errorDialog.pack();
+            errorDialog.setVisible(true);
         }
     }
 
