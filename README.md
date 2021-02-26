@@ -34,6 +34,10 @@ Simple Server Wrapper
 
 * Batch file (launch.bat) generation
 
+* Realtime player data (either through mod or server)
+
+* Automatically close/reopen server when nobody is on
+
 * "Hub" of sorts for adding/removing/managing servers (*I want everything else done before I even start this*)
 
 * I'm sure I'll think of more
