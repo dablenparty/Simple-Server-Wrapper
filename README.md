@@ -18,6 +18,8 @@ Simple Server Wrapper
 
 ### Current
 
+Features currently included in SSW
+
 * Support for any version or type of Minecraft server (Vanilla, Spigot, Forge, etc.)
 
 * Per-server settings
@@ -28,19 +30,23 @@ Simple Server Wrapper
 
 * Extra server arguments (memory allocation is coded in already)
 
+* Batch file (launch.bat) generation (text file on macOSX/Linux)
+
 ### Future
 
-* Mod/plugin list for supported server types
+These are features I want to add but either haven't gotten to them yet or don't have the capabilities right now
 
-* Batch file (launch.bat) generation
+* [ ] Mod/plugin list for supported server types
 
-* Realtime player data (either through mod or server)
+* [x] ~~Batch file (launch.bat) generation~~
 
-* Automatically close/reopen server when nobody is on
+* [ ] Realtime player data (either through mod or server)
 
-* "Hub" of sorts for adding/removing/managing servers (*I want everything else done before I even start this*)
+* [ ] Automatically close/reopen a server when nobody is on
 
-* I'm sure I'll think of more
+* [ ] "Hub" of sorts for adding/removing/managing servers (*I want everything else done before I even start this*)
+
+I'm sure I'll think of more
 
 ---
 
