@@ -21,6 +21,7 @@ public class SettingsDialog extends JDialog {
     private JLabel intervalLabel;
     private JSlider restartIntervalSlider;
     private JTextField extraArgsTextField;
+    private JButton batchFileButton;
     private boolean directChange = true;
     private final Settings settings;
 
@@ -65,7 +66,8 @@ public class SettingsDialog extends JDialog {
                 !settings.getRestart()) {
             int result = JOptionPane.showConfirmDialog(
                     this,
-                    "The server needs to be restarted to enable the auto-restart feature. Would you like to save anyways?",
+                    "If a server is running, it will need to be restarted for these changes to take effect. " +
+                            "Would you still like to save now?",
                     "Unsaved changes",
                     JOptionPane.YES_NO_OPTION
             );
