@@ -1,14 +1,16 @@
 package com.hunterltd.ServerWrapper.GUI;
 
+import com.hunterltd.ServerWrapper.GUI.Dialogs.InfoDialog;
 import com.hunterltd.ServerWrapper.GUI.Dialogs.InternalErrorDialog;
 import com.hunterltd.ServerWrapper.GUI.Dialogs.SettingsDialog;
 import com.hunterltd.ServerWrapper.Server.MinecraftServer;
 import com.hunterltd.ServerWrapper.Server.StreamGobbler;
-import com.hunterltd.ServerWrapper.Utilities.UserSettings;
+import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -35,6 +37,14 @@ public class WrapperGUI extends JFrame {
     private int[] timeCounter = new int[]{0, 0, 0}; // H:M:S
     private final String restartCommandTemplate = "me %sis restarting in %d %s!"; // color code, time integer, time unit
     private final String baseTitle = "Simple Server Wrapper";
+    private final ActionListener settingsWarn = e -> {
+        InfoDialog dialog = new InfoDialog("No server selected",
+                "A server must be selected to change its settings!");
+        dialog.pack();
+        dialog.setVisible(true);
+    };
+    private ActionListener settingsOpen;
+    private Settings serverSettings;
 
     public WrapperGUI() {
         ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); // Automatic scrolling
@@ -55,18 +65,14 @@ public class WrapperGUI extends JFrame {
         // Menu Bar
         MenuBar menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
-        MenuItem settingsItem = new MenuItem("Settings");
+        MenuItem settingsItem = new MenuItem("Server Settings");
         fileMenu.add(settingsItem);
         menuBar.add(fileMenu);
-        settingsItem.addActionListener(e -> {
-            SettingsDialog settings = new SettingsDialog();
-            settings.pack();
-            settings.setVisible(true);
-        });
+        settingsItem.addActionListener(settingsWarn);
+
         this.setMenuBar(menuBar);
 
         setTitle(baseTitle);
-
         add(rootPanel);
     }
 
@@ -88,8 +94,7 @@ public class WrapperGUI extends JFrame {
         try {
             server = new MinecraftServer(serverFileInfo.getDirectory(),
                     serverFileInfo.getFile(),
-                    UserSettings.getMemory(),
-                    UserSettings.getMemory()
+                    serverSettings
             ).run();
         } catch (IOException e) {
             e.printStackTrace();
@@ -118,8 +123,8 @@ public class WrapperGUI extends JFrame {
         });
 
         // Keeps track of every second in a 3 element array
-        restartTimer = UserSettings.getRestart() ? new Timer(1000, e -> {
-            final int interval = UserSettings.getInterval();
+        restartTimer = serverSettings.getRestart() ? new Timer(1000, e -> {
+            final int interval = serverSettings.getInterval();
             int hours = timeCounter[0], minutes = timeCounter[1], seconds = timeCounter[2];
 
             seconds++;
@@ -193,11 +198,6 @@ public class WrapperGUI extends JFrame {
         commandTextField.setEnabled(false);
         openDialogButton.setEnabled(true);
         sendButton.setEnabled(false);
-
-        runButton.setText("Run");
-        setTitle(baseTitle);
-        aliveTimer.stop();
-        if (restartTimer != null) restartTimer.stop();
     }
 
     private void runButtonAction() {
@@ -213,11 +213,23 @@ public class WrapperGUI extends JFrame {
         FileDialog fd = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
         fd.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
         fd.setVisible(true);
+        MenuItem settingsItem = this.getMenuBar().getMenu(0).getItem(0);
+        settingsItem.removeActionListener(settingsOpen);
+        settingsOpen = e -> {
+            SettingsDialog settingsDialog = new SettingsDialog(serverSettings, fd.getFile());
+            settingsDialog.pack();
+            settingsDialog.setVisible(true);
+        };
         try {
             serverPathTextField.setText(Paths.get(fd.getDirectory(), fd.getFile()).toString());
             serverFileInfo = fd;
+            serverSettings = new Settings(Paths.get(fd.getDirectory(), "wrapper", "wrapperSettings.json"));
+            settingsItem.removeActionListener(settingsWarn);
+            settingsItem.addActionListener(settingsOpen);
         } catch (NullPointerException ignored) {
             // Thrown when the user clicks "Cancel" in the dialog. Can be ignored
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

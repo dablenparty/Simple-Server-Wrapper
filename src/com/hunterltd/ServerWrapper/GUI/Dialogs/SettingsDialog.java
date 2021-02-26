@@ -1,8 +1,10 @@
 package com.hunterltd.ServerWrapper.GUI.Dialogs;
 
-import com.hunterltd.ServerWrapper.Utilities.UserSettings;
+import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import javax.swing.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
@@ -20,12 +22,14 @@ public class SettingsDialog extends JDialog {
     private JSlider restartIntervalSlider;
     private JTextField extraArgsTextField;
     private boolean directChange = true;
+    private Settings settings;
 
-    public SettingsDialog() {
+    public SettingsDialog(Settings settingsObj, String filename) {
+        settings = settingsObj;
         setContentPane(rootPanel);
         setModal(true);
         getRootPane().setDefaultButton(buttonSave);
-        setTitle("Server Settings");
+        setTitle("Server Settings - " + filename);
 
         buttonSave.addActionListener(e -> onSave());
         buttonCancel.addActionListener(e -> onCancel());
@@ -49,16 +53,16 @@ public class SettingsDialog extends JDialog {
                 new JComponent[]{intervalLabel, restartIntervalSlider, restartIntervalComboBox}));
 
         // Set components based on UserSettings
-        memoryComboBox.setSelectedIndex(((UserSettings.getMemory() * 2) / 1024) - 1);
-        automaticRestartCheckBox.setSelected(UserSettings.getRestart());
-        restartIntervalComboBox.setSelectedIndex(UserSettings.getInterval() - 1);
-        extraArgsTextField.setText(String.join(" ", UserSettings.getExtraArgs()));
+        memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024) - 1);
+        automaticRestartCheckBox.setSelected(settings.getRestart());
+        restartIntervalComboBox.setSelectedIndex(settings.getInterval() - 1);
+        extraArgsTextField.setText(String.join(" ", settings.getExtraArgs()));
     }
 
     private void onSave() {
-        UserSettings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
+        settings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
         if (automaticRestartCheckBox.isSelected() &&
-                !UserSettings.getRestart()) {
+                !settings.getRestart()) {
             int result = JOptionPane.showConfirmDialog(
                     this,
                     "The server needs to be restarted to enable the auto-restart feature. Would you like to save anyways?",
@@ -66,17 +70,21 @@ public class SettingsDialog extends JDialog {
                     JOptionPane.YES_NO_OPTION
             );
             if (result == JOptionPane.YES_OPTION) {
-                UserSettings.setRestart(automaticRestartCheckBox.isSelected());
-                UserSettings.setInterval(restartIntervalSlider.getValue());
+                settings.setRestart(automaticRestartCheckBox.isSelected());
+                settings.setInterval(restartIntervalSlider.getValue());
             }
         } else {
-            UserSettings.setRestart(automaticRestartCheckBox.isSelected());
-            UserSettings.setInterval(restartIntervalSlider.getValue());
+            settings.setRestart(automaticRestartCheckBox.isSelected());
+            settings.setInterval(restartIntervalSlider.getValue());
         }
 
-        UserSettings.setExtraArgs(extraArgsTextField.getText().split(" "));
+        settings.setExtraArgs(extraArgsTextField.getText().split(" "));
 
-        UserSettings.save();
+        try {
+            settings.writeData();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         dispose();
     }
 
@@ -104,13 +112,13 @@ public class SettingsDialog extends JDialog {
         directChange = true;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        SettingsDialog dialog = new SettingsDialog();
+        SettingsDialog dialog = new SettingsDialog(new Settings("test"), "testfile.jar");
         dialog.pack();
         dialog.setVisible(true);
     }

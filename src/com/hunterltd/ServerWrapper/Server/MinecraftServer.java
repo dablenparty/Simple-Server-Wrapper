@@ -1,6 +1,6 @@
 package com.hunterltd.ServerWrapper.Server;
 
-import com.hunterltd.ServerWrapper.Utilities.UserSettings;
+import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -13,18 +13,24 @@ public class MinecraftServer {
     private Process serverProcess;
     private final ProcessBuilder pB;
 
-    public MinecraftServer(String serverFolder, String serverFilename, int initialHeap, int maxHeap) {
+    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
 
+        try {
+            settings = new Settings(Paths.get(serverFolder, "wrapper", "wrapperSettings.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         List<String> argsList = new ArrayList<>(Arrays.asList("java",
-                String.format("-Xmx%dM", initialHeap),
-                String.format("-Xms%dM", maxHeap),
+                String.format("-Xmx%dM", settings.getMemory()),
+                String.format("-Xms%dM", settings.getMemory()),
                 "-jar",
                 Paths.get(serverFolder, serverFilename).toString(),
                 "nogui"));
 
-        if (UserSettings.hasExtraArgs()) argsList.addAll(3, UserSettings.getExtraArgs());
+        if (settings.hasExtraArgs()) argsList.addAll(3, settings.getExtraArgs());
 
         pB.command(argsList.toArray(new String[0]));
     }
