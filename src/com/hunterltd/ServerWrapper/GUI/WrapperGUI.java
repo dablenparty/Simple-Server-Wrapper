@@ -199,7 +199,7 @@ public class WrapperGUI extends JFrame {
 
     private void runButtonAction() {
         // Server is null on initial startup
-        if (server == null || !server.isRunning()) {
+        if (server.getServerProcess() == null || !server.isRunning()) {
             startServer();
         } else {
             stopServer();
@@ -226,7 +226,7 @@ public class WrapperGUI extends JFrame {
                     serverFileInfo.getFile(),
                     serverSettings);
         } catch (NullPointerException ignored) {
-            // Thrown when the user clicks "Cancel" in the dialog. Can be ignored
+            ignored.printStackTrace();
         } catch (IOException e) {
             InternalErrorDialog errorDialog = new InternalErrorDialog();
             errorDialog.pack();
