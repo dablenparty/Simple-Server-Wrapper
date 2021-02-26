@@ -23,7 +23,10 @@ public class Main {
                 public void windowClosing(WindowEvent e) {
                     JFrame frame = (JFrame) e.getSource();
 
-                    if (wrapperGUI.getServer() != null && wrapperGUI.getServer().isRunning()) {
+                    if (wrapperGUI.getServer() != null &&
+                            wrapperGUI.getServer().getServerProcess() != null &&
+                            wrapperGUI.getServer().isRunning())
+                    {
                         int result = JOptionPane.showConfirmDialog(
                                 frame,
                                 "Are you sure you want to exit the server wrapper? This will stop the server.",
