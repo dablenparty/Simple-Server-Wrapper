@@ -1,15 +1,10 @@
 package com.hunterltd.ServerWrapper.GUI.Dialogs;
 
-import com.hunterltd.ServerWrapper.GUI.WrapperGUI;
 import com.hunterltd.ServerWrapper.Server.MinecraftServer;
 import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import javax.swing.*;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Paths;
 
 public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
