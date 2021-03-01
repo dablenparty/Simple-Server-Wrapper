@@ -17,7 +17,7 @@ public class MinecraftServer {
     private Process serverProcess;
     private final ProcessBuilder pB;
     private final Settings serverSettings;
-    private final String[] serverArgs;
+    private List<String> serverArgs;
     private final Path serverPath;
 
     public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
@@ -26,16 +26,8 @@ public class MinecraftServer {
         serverSettings = settings;
         serverPath = Paths.get(serverFolder, serverFilename);
 
-        List<String> argsList = new ArrayList<>(Arrays.asList("java",
-                String.format("-Xmx%dM", serverSettings.getMemory()),
-                String.format("-Xms%dM", serverSettings.getMemory()),
-                "-jar",
-                serverPath.toString(),
-                "nogui"));
+        updateExtraArgs();
 
-        if (serverSettings.hasExtraArgs()) argsList.addAll(3, settings.getExtraArgs());
-
-        serverArgs = argsList.toArray(new String[0]);
         pB.command(serverArgs);
     }
 
@@ -73,6 +65,7 @@ public class MinecraftServer {
     }
 
     public void generateBatch(String ext) {
+        updateExtraArgs();
         String command = String.join(" ", serverArgs);
         File launchBatch = Paths.get(String.valueOf(serverPath.getParent()), String.format("launch.%s", ext)).toFile();
 
@@ -98,6 +91,11 @@ public class MinecraftServer {
             InternalErrorDialog errorDialog = new InternalErrorDialog();
             errorDialog.pack();
             errorDialog.setVisible(true);
+        } finally {
+            InfoDialog dialog = new InfoDialog("File created",
+                    String.format("\"%s\" was successfully created in the server folder", launchBatch.getName()));
+            dialog.pack();
+            dialog.setVisible(true);
         }
     }
 
@@ -111,5 +109,16 @@ public class MinecraftServer {
 
     public Path getServerPath() {
         return serverPath;
+    }
+
+    public void updateExtraArgs() {
+        serverArgs = new ArrayList<>(Arrays.asList("java",
+                String.format("-Xmx%dM", serverSettings.getMemory()),
+                String.format("-Xms%dM", serverSettings.getMemory()),
+                "-jar",
+                serverPath.toString(),
+                "nogui"));
+
+        if (serverSettings.hasExtraArgs()) serverArgs.addAll(3, serverSettings.getExtraArgs());
     }
 }
