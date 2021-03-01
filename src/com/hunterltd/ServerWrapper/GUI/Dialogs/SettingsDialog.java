@@ -89,8 +89,9 @@ public class SettingsDialog extends JDialog {
         } catch (FileNotFoundException e) {
             InfoDialog errorDialog = new InfoDialog("Settings not found",
                     "The settings file could not be found. Ensure that it has not been moved or deleted");
+            errorDialog.pack();
+            errorDialog.setVisible(true);
         }
-        dispose();
     }
 
     private void onCancel() {
