@@ -113,6 +113,10 @@ public class WrapperGUI extends JFrame {
         aliveTimer = new Timer(100, e -> {
             if (!server.isRunning()) {
                 aliveTimer.stop();
+                serverPathTextField.setEnabled(true);
+                commandTextField.setEnabled(false);
+                openDialogButton.setEnabled(true);
+                sendButton.setEnabled(false);
                 runButton.setText("Run");
                 setTitle(baseTitle);
                 if (restartTimer != null) restartTimer.stop();
@@ -191,10 +195,6 @@ public class WrapperGUI extends JFrame {
         } catch (IOException e) {
             server.getServerProcess().destroy();
         }
-        serverPathTextField.setEnabled(true);
-        commandTextField.setEnabled(false);
-        openDialogButton.setEnabled(true);
-        sendButton.setEnabled(false);
     }
 
     private void runButtonAction() {
