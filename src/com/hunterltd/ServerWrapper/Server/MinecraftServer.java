@@ -22,7 +22,7 @@ public class MinecraftServer {
     private final Path serverPath;
     private final ServerProperties properties;
 
-    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
+    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) throws FileNotFoundException {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
         serverSettings = settings;
@@ -30,14 +30,14 @@ public class MinecraftServer {
 
         properties = new ServerProperties(Paths.get(serverFolder, "server.properties").toFile());
 
-        List<String> argsList = new ArrayList<>(Arrays.asList("java",
+        serverArgs = new ArrayList<>(Arrays.asList("java",
                 String.format("-Xmx%dM", serverSettings.getMemory()),
                 String.format("-Xms%dM", serverSettings.getMemory()),
                 "-jar",
                 serverPath.toString(),
                 "nogui"));
 
-        if (serverSettings.hasExtraArgs()) argsList.addAll(3, settings.getExtraArgs());
+        if (serverSettings.hasExtraArgs()) serverArgs.addAll(3, settings.getExtraArgs());
         updateExtraArgs();
 
         pB.command(serverArgs);
