@@ -11,8 +11,9 @@ public class ServerProperties extends HashMap implements Map {
     private final File propsFile;
     private final List<String> comments = new ArrayList<>();
 
-    public ServerProperties(File propertiesFile) {
+    public ServerProperties(File propertiesFile) throws FileNotFoundException {
         propsFile = propertiesFile;
+        read();
     }
 
     public void read() throws FileNotFoundException {
