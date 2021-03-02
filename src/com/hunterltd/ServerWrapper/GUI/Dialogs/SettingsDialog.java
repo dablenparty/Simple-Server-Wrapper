@@ -1,15 +1,10 @@
 package com.hunterltd.ServerWrapper.GUI.Dialogs;
 
-import com.hunterltd.ServerWrapper.GUI.WrapperGUI;
 import com.hunterltd.ServerWrapper.Server.MinecraftServer;
 import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import javax.swing.*;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Paths;
 
 public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
@@ -89,8 +84,9 @@ public class SettingsDialog extends JDialog {
         } catch (FileNotFoundException e) {
             InfoDialog errorDialog = new InfoDialog("Settings not found",
                     "The settings file could not be found. Ensure that it has not been moved or deleted");
+            errorDialog.pack();
+            errorDialog.setVisible(true);
         }
-        dispose();
     }
 
     private void onCancel() {
