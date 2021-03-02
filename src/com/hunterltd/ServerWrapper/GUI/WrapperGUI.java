@@ -25,13 +25,11 @@ public class WrapperGUI extends JFrame {
     private JPanel consolePanel;
     private JPanel rootPanel;
     private JScrollPane consoleScrollPane;
-    private JScrollPane errorScrollPane;
     private JTabbedPane tabbedPane;
     private JTextArea consoleTextArea;
     private JTextArea errorTextArea;
     private JTextField commandTextField;
     private JTextField serverPathTextField;
-    private JPanel errorPanel;
     private MinecraftServer server;
     private Timer aliveTimer, restartTimer;
     private int[] timeCounter = new int[]{0, 0, 0}; // H:M:S
@@ -105,11 +103,10 @@ public class WrapperGUI extends JFrame {
         }
 
         Consumer<String> addConsoleText = text -> consoleTextArea.setText(consoleTextArea.getText() + "\n" + text);
-        Consumer<String> addErrorText = text -> errorTextArea.setText(errorTextArea.getText() + "\n" + text);
 
         // Pipes the server outputs into the GUI using the pre-defined consumers
         StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
-        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addErrorText);
+        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText);
         aliveTimer = new Timer(100, e -> {
             if (!server.isRunning()) {
                 aliveTimer.stop();
