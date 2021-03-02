@@ -2,6 +2,7 @@ package com.hunterltd.ServerWrapper.Server;
 
 import com.hunterltd.ServerWrapper.GUI.Dialogs.InfoDialog;
 import com.hunterltd.ServerWrapper.GUI.Dialogs.InternalErrorDialog;
+import com.hunterltd.ServerWrapper.Server.Properties.ServerProperties;
 import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import javax.swing.*;
@@ -19,12 +20,15 @@ public class MinecraftServer {
     private final Settings serverSettings;
     private final String[] serverArgs;
     private final Path serverPath;
+    private final ServerProperties properties;
 
     public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
         serverSettings = settings;
         serverPath = Paths.get(serverFolder, serverFilename);
+
+        properties = new ServerProperties(Paths.get(serverFolder, "server.properties").toFile());
 
         List<String> argsList = new ArrayList<>(Arrays.asList("java",
                 String.format("-Xmx%dM", serverSettings.getMemory()),
@@ -111,5 +115,9 @@ public class MinecraftServer {
 
     public Path getServerPath() {
         return serverPath;
+    }
+
+    public ServerProperties getProperties() {
+        return properties;
     }
 }
