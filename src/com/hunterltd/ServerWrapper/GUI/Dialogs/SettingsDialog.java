@@ -1,6 +1,7 @@
 package com.hunterltd.ServerWrapper.GUI.Dialogs;
 
 import com.hunterltd.ServerWrapper.Server.MinecraftServer;
+import com.hunterltd.ServerWrapper.Server.Properties.PropertiesTableModel;
 import com.hunterltd.ServerWrapper.Utilities.Settings;
 
 import javax.swing.*;
@@ -22,6 +23,8 @@ public class SettingsDialog extends JDialog {
     private JSlider restartIntervalSlider;
     private JTextField extraArgsTextField;
     private JButton batchFileButton;
+    private JScrollPane propsScrollPane;
+    private JTable propsTable;
     private boolean directChange = true;
     private final Settings settings;
 
@@ -55,6 +58,7 @@ public class SettingsDialog extends JDialog {
         automaticRestartCheckBox.setSelected(settings.getRestart());
         restartIntervalComboBox.setSelectedIndex(settings.getInterval() - 1);
         extraArgsTextField.setText(String.join(" ", settings.getExtraArgs()));
+        propsTable.setModel(new PropertiesTableModel(server.getProperties()));
     }
 
     private void onSave() {
