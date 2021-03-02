@@ -125,6 +125,8 @@ public class MinecraftServer {
 
     public ServerProperties getProperties() {
         return properties;
+    }
+
     public void updateExtraArgs() {
         serverArgs = new ArrayList<>(Arrays.asList("java",
                 String.format("-Xmx%dM", serverSettings.getMemory()),
