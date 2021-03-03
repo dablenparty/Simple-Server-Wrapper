@@ -34,11 +34,11 @@
             <version>1.1.1</version>
         </dependency>
         <dependency>
-            <groupId>com.dablenparty.UserData</groupId>
-            <artifactId>UserData</artifactId>
-            <version>1.0</version>
+            <groupId>com.dablenparty.jsondata</groupId>
+            <artifactId>JSONData</artifactId>
+            <version>1.1</version>
             <scope>system</scope>
-            <systemPath>${basedir}/local-dependencies/UserData.jar</systemPath>
+            <systemPath>${basedir}/local-dependencies/JSONData.jar</systemPath>
         </dependency>
     </dependencies>
 
