@@ -4,6 +4,13 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import net.lingala.zip4j.ZipFile;
+import org.apache.commons.io.FilenameUtils;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 
 public class CurseAddon {
     public static void main(String[] args) {
@@ -16,5 +23,14 @@ public class CurseAddon {
         System.out.println("headers: " + response.getHeaders());
         System.out.println("body:" + response.readEntity(String.class));
         System.out.println("Done!");
+
+        FileDialog fd = new FileDialog((Dialog) null, "Choose ZIP", FileDialog.LOAD);
+        fd.setVisible(true);
+        try {
+            ZipFile zip = new ZipFile(String.valueOf(Paths.get(fd.getDirectory(), fd.getFile())));
+            zip.extractAll(String.valueOf(Paths.get(fd.getDirectory(), FilenameUtils.getBaseName(fd.getFile()))));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
