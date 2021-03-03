@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.Server;
+package com.hunterltd.ssw.server;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

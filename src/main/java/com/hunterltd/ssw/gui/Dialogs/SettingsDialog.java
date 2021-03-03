@@ -1,8 +1,8 @@
-package com.hunterltd.ssw.GUI.Dialogs;
+package com.hunterltd.ssw.gui.Dialogs;
 
-import com.hunterltd.ssw.Server.MinecraftServer;
-import com.hunterltd.ssw.Server.Properties.PropertiesTableModel;
-import com.hunterltd.ssw.Utilities.Settings;
+import com.hunterltd.ssw.server.MinecraftServer;
+import com.hunterltd.ssw.server.properties.PropertiesTableModel;
+import com.hunterltd.ssw.utilities.Settings;
 
 import javax.swing.*;
 import java.io.FileNotFoundException;

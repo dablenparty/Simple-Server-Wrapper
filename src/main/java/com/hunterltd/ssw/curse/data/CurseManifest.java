@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.Curse.data;
+package com.hunterltd.ssw.curse.data;
 
 import com.dablenparty.jsondata.UserDataObject;
 import org.json.simple.JSONObject;

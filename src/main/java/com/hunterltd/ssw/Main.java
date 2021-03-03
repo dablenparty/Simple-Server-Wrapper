@@ -1,6 +1,6 @@
 package com.hunterltd.ssw;
 
-import com.hunterltd.ssw.GUI.WrapperGUI;
+import com.hunterltd.ssw.gui.WrapperGUI;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;

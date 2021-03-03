@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.Server.Properties;
+package com.hunterltd.ssw.server.properties;
 
 import javax.swing.table.AbstractTableModel;
 

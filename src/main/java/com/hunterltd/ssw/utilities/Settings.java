@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.Utilities;
+package com.hunterltd.ssw.utilities;
 
 import com.dablenparty.jsondata.UserDataObject;
 import org.json.simple.JSONArray;

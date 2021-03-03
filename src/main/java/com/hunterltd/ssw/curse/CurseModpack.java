@@ -1,6 +1,6 @@
-package com.hunterltd.ssw.Curse;
+package com.hunterltd.ssw.curse;
 
-import com.hunterltd.ssw.Curse.data.CurseManifest;
+import com.hunterltd.ssw.curse.data.CurseManifest;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FilenameUtils;

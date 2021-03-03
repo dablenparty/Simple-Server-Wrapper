@@ -1,11 +1,11 @@
-package com.hunterltd.ssw.GUI;
+package com.hunterltd.ssw.gui;
 
-import com.hunterltd.ssw.GUI.Dialogs.InfoDialog;
-import com.hunterltd.ssw.GUI.Dialogs.InternalErrorDialog;
-import com.hunterltd.ssw.GUI.Dialogs.SettingsDialog;
-import com.hunterltd.ssw.Server.MinecraftServer;
-import com.hunterltd.ssw.Server.StreamGobbler;
-import com.hunterltd.ssw.Utilities.Settings;
+import com.hunterltd.ssw.gui.Dialogs.InfoDialog;
+import com.hunterltd.ssw.gui.Dialogs.InternalErrorDialog;
+import com.hunterltd.ssw.gui.Dialogs.SettingsDialog;
+import com.hunterltd.ssw.server.MinecraftServer;
+import com.hunterltd.ssw.server.StreamGobbler;
+import com.hunterltd.ssw.utilities.Settings;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;

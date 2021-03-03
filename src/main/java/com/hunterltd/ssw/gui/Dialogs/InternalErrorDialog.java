@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.GUI.Dialogs;
+package com.hunterltd.ssw.gui.Dialogs;
 
 public class InternalErrorDialog extends InfoDialog {
     public InternalErrorDialog() {

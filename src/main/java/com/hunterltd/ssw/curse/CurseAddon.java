@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.Curse;
+package com.hunterltd.ssw.curse;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
