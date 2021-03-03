@@ -10,15 +10,23 @@ import java.io.IOException;
 public class Manifest extends JSONObject {
     private final File manifestFile;
 
-    public Manifest(File manifestFile) throws IOException, ParseException {
+    public Manifest(File manifestFile) {
         this.manifestFile = manifestFile;
+    }
+
+    public String getType() {
+        return (String) this.get("manifestType");
+    }
+
+    public String getName() {
+        return (String) this.get("name");
     }
 
     public void load() throws IOException, ParseException {
         UserDataObject.readData(manifestFile, this);
     }
 
-    public File getManifestFile() {
+    public File getFile() {
         return manifestFile;
     }
 }
