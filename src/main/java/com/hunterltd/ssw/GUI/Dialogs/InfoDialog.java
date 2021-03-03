@@ -1,4 +1,4 @@
-package com.hunterltd.ServerWrapper.GUI.Dialogs;
+package com.hunterltd.ssw.GUI.Dialogs;
 
 import javax.swing.*;
 import java.awt.event.*;

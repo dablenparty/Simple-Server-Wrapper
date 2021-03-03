@@ -1,9 +1,9 @@
-package com.hunterltd.ServerWrapper.Server;
+package com.hunterltd.ssw.Server;
 
-import com.hunterltd.ServerWrapper.GUI.Dialogs.InfoDialog;
-import com.hunterltd.ServerWrapper.GUI.Dialogs.InternalErrorDialog;
-import com.hunterltd.ServerWrapper.Server.Properties.ServerProperties;
-import com.hunterltd.ServerWrapper.Utilities.Settings;
+import com.hunterltd.ssw.GUI.Dialogs.InfoDialog;
+import com.hunterltd.ssw.GUI.Dialogs.InternalErrorDialog;
+import com.hunterltd.ssw.Server.Properties.ServerProperties;
+import com.hunterltd.ssw.Utilities.Settings;
 
 import javax.swing.*;
 import java.io.*;

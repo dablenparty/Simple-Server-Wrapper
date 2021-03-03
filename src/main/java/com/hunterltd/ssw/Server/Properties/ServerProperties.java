@@ -1,4 +1,4 @@
-package com.hunterltd.ServerWrapper.Server.Properties;
+package com.hunterltd.ssw.Server.Properties;
 
 import java.io.*;
 import java.util.ArrayList;

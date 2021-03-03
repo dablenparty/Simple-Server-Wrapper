@@ -1,7 +1,6 @@
-package com.hunterltd.ServerWrapper.Server.Properties;
+package com.hunterltd.ssw.Server.Properties;
 
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 
 public class PropertiesTableModel extends AbstractTableModel {
     private final ServerProperties properties;
