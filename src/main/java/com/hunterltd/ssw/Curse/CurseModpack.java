@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.Curse;
 
+import com.hunterltd.ssw.Curse.data.CurseManifest;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FilenameUtils;
@@ -10,10 +11,12 @@ import java.nio.file.Paths;
 
 public class CurseModpack extends ZipFile {
     private final Path extractPath;
+    private final CurseManifest manifest;
 
     public CurseModpack(File zipFile) {
         super(zipFile);
         extractPath = Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(zipFile.getName()));
+        manifest = new CurseManifest(Paths.get(String.valueOf(extractPath), "manifest.json").toFile());
     }
 
     public void extractAll() throws ZipException {
@@ -26,10 +29,6 @@ public class CurseModpack extends ZipFile {
 
     public Path getExtractPath() {
         return extractPath;
-    }
-
-    private void readCurseData() {
-        //read manifest.json
     }
 
     public static void main(String[] args) {
