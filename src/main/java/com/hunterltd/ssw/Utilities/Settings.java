@@ -1,6 +1,6 @@
 package com.hunterltd.ssw.Utilities;
 
-import com.dablenparty.UserData.UserDataObject;
+import com.dablenparty.jsondata.UserDataObject;
 import org.json.simple.JSONArray;
 
 import java.io.IOException;
