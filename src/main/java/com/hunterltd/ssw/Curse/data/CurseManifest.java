@@ -7,10 +7,10 @@ import org.json.simple.parser.ParseException;
 import java.io.File;
 import java.io.IOException;
 
-public class Manifest extends JSONObject {
+public class CurseManifest extends JSONObject {
     private final File manifestFile;
 
-    public Manifest(File manifestFile) {
+    public CurseManifest(File manifestFile) {
         this.manifestFile = manifestFile;
     }
 
