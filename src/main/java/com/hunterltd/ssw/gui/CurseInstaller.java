@@ -82,10 +82,6 @@ public class CurseInstaller extends JFrame {
                     Client client = ClientBuilder.newClient();
                     int filesLength = files.length;
                     for (int i = 0; i < filesLength; i++) {
-                        if (isCancelled()) {
-                            // Checks if the cancel button was clicked
-                            return null;
-                        }
                         CurseManifestFileEntry manifestEntry = files[i];
                         Response response = client.target(
                                 String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
@@ -103,6 +99,10 @@ public class CurseInstaller extends JFrame {
                             e.printStackTrace();
                         } finally {
                             setProgress((int) Math.round((i / (double) filesLength) * 100));
+                        }
+                        if (isCancelled()) {
+                            // Checks if the cancel button was clicked
+                            return null;
                         }
                     }
                     firePropertyChange("status", "Installing mods...", "Copying overrides...");
@@ -142,7 +142,7 @@ public class CurseInstaller extends JFrame {
                         "Cancel pack installation",
                         JOptionPane.YES_NO_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
-                    System.out.println(worker.cancel(true));
+                    worker.cancel(true);
                 }
             });
             worker.execute();
