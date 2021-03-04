@@ -18,6 +18,11 @@ public class CurseAddon extends JSONObject {
         return (boolean) this.get("isAvailable");
     }
 
+    @Override
+    public String toString() {
+        return (String) this.get("displayName");
+    }
+
     public void download(String destFolder) throws IOException {
         // Spaces don't produce a MalformedURLException, although they will cause IOExceptions because although they're
         // not technically invalid characters, a browser cannot interpret them. Instead, they use the "%20" character
