@@ -27,8 +27,10 @@ public class CurseInstaller extends JFrame {
     private JTextField serverPathTextField;
     private JButton serverPathButton;
     private JButton installButton;
+    private JButton cancelButton;
     private CurseModpack curseModpack;
     private File serverPath;
+    private SwingWorker<Void, Void> worker;
 
     public CurseInstaller() {
         newFileButton.addActionListener(e -> {
@@ -64,102 +66,95 @@ public class CurseInstaller extends JFrame {
                     components) {
                 comp.setEnabled(false);
             }
+            cancelButton.setEnabled(true);
+            installProgressBar.setValue(0);
+            installProgressBar.setString("");
+
+            worker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws IOException, ParseException {
+                    firePropertyChange("status", "", "Extracting...");
+                    curseModpack.extractAll();
+
+                    firePropertyChange("status", "Extracting...", "Getting files...");
+                    CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
+
+                    Client client = ClientBuilder.newClient();
+                    int filesLength = files.length;
+                    for (int i = 0; i < filesLength; i++) {
+                        if (isCancelled()) {
+                            // Checks if the cancel button was clicked
+                            return null;
+                        }
+                        CurseManifestFileEntry manifestEntry = files[i];
+                        Response response = client.target(
+                                String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
+                                        manifestEntry.getProjectID(),
+                                        manifestEntry.getFileID())
+                        ).request(MediaType.APPLICATION_JSON).get();
+                        try {
+                            CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
+//                    installProgressBar.setString(String.format("Mod %d of %d: %s", i + 1, filesLength, addon.toString()));
+                            firePropertyChange("status",
+                                    "Getting files...",
+                                    String.format("Mod %d of %d: %s", i + 1, filesLength, addon.toString()));
+                            addon.download(serverPath.toString());
+                        } catch (ParseException | IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            setProgress((int) Math.round((i / (double) filesLength) * 100));
+                        }
+                    }
+                    firePropertyChange("status", "Installing mods...", "Copying overrides...");
+                    File overrides = Paths.get(curseModpack.getExtractPath(), "overrides", "mods").toFile();
+                    try {
+                        FileUtils.copyDirectory(overrides, Paths.get(serverPath.toString(), "mods").toFile());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    installProgressBar.setString("Done!");
+                    installProgressBar.setValue(100);
+                    JComponent[] components = {newFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
+                    for (JComponent comp :
+                            components) {
+                        comp.setEnabled(true);
+                    }
+                    cancelButton.setEnabled(false);
+                }
+            };
             worker.addPropertyChangeListener(evt -> {
                 if (evt.getPropertyName().equals("progress")) {
                     int progress = (Integer) evt.getNewValue();
                     installProgressBar.setValue(progress);
-                    installProgressBar.setString(String.format("Downloading mods: %d", progress) + "%");
+
+                } else if (evt.getPropertyName().equals("status")) {
+                    installProgressBar.setString((String) evt.getNewValue());
+                }
+            });
+            cancelButton.addActionListener(evt -> {
+                int result = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to cancel?",
+                        "Cancel pack installation",
+                        JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    System.out.println(worker.cancel(true));
                 }
             });
             worker.execute();
-            for (JComponent comp :
-                    components) {
-                comp.setEnabled(true);
-            }
         });
 
         setTitle("CurseForge Modpack Installer");
         add(rootPanel);
     }
 
-    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-        @Override
-        protected Void doInBackground() throws IOException, ParseException {
-            curseModpack.extractAll();
-            CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
-
-            Client client = ClientBuilder.newClient();
-            int filesLength = files.length;
-            for (int i = 0; i < filesLength; i++) {
-                CurseManifestFileEntry manifestEntry = files[i];
-                Response response = client.target(
-                        String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
-                                manifestEntry.getProjectID(),
-                                manifestEntry.getFileID())
-                ).request(MediaType.APPLICATION_JSON).get();
-                try {
-                    CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
-//                    installProgressBar.setString(String.format("Mod %d of %d: %s", i + 1, filesLength, addon.toString()));
-                    addon.download(serverPath.toString());
-                } catch (ParseException | IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    setProgress((int) Math.round((i / (double) filesLength) * 100));
-                }
-            }
-            File overrides = Paths.get(curseModpack.getExtractPath(), "overrides", "mods").toFile();
-            try {
-                FileUtils.copyDirectory(overrides, Paths.get(serverPath.toString(), "mods").toFile());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void done() {
-            installProgressBar.setString("Done!");
-            installProgressBar.setValue(100);
-        }
-    };
-
-//    public boolean install(String folder) throws IOException, ParseException {
-//        boolean error = false;
-//        installProgressBar.setString("Extracting...");
-//        curseModpack.extractAll();
-//        installProgressBar.setString("Extracted");
-//        Client client = ClientBuilder.newClient();
-//        CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
-//        int filesLength = files.length;
-//        installProgressBar.setMaximum(filesLength);
-//        for (int i = 0; i < filesLength; i++) {
-//            CurseManifestFileEntry manifestEntry = files[i];
-//            Response response = client.target(
-//                    String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
-//                            manifestEntry.getProjectID(),
-//                            manifestEntry.getFileID())
-//            ).request(MediaType.APPLICATION_JSON).get();
-//            try {
-//                CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
-//                installProgressBar.setString(String.format("Mod %d of %d: %s", i + 1, filesLength, addon.toString()));
-//                addon.download(folder);
-//            } catch (ParseException | IOException e) {
-//                e.printStackTrace();
-//                error = true;
-//            } finally {
-//                installProgressBar.setValue(i + 1);
-//            }
-//        }
-//        File overrides = Paths.get(curseModpack.getExtractPath(), "overrides", "mods").toFile();
-//        try {
-//            FileUtils.copyDirectory(overrides, Paths.get(folder, "mods").toFile());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            error = true;
-//        }
-//
-//        return error;
-//    }
+    public SwingWorker<Void, Void> getWorker() {
+        return worker;
+    }
 
     public static void main(String[] args) {
         CurseInstaller installer = new CurseInstaller();
