@@ -16,11 +16,6 @@
           <text value="Modpack Zip Path:"/>
         </properties>
       </component>
-      <vspacer id="83195">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </vspacer>
       <component id="93705" class="javax.swing.JTextField" binding="zipPathTextField">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
@@ -31,7 +26,7 @@
           <editable value="false"/>
         </properties>
       </component>
-      <component id="63766" class="javax.swing.JButton" binding="button1" default-binding="true">
+      <component id="63766" class="javax.swing.JButton" binding="newFileButton">
         <constraints>
           <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -61,6 +56,32 @@
           <indeterminate value="false"/>
           <string value="&lt;operation&gt;"/>
           <stringPainted value="true"/>
+        </properties>
+      </component>
+      <component id="1ea9f" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Server Path:"/>
+        </properties>
+      </component>
+      <component id="fbe5f" class="javax.swing.JTextField" binding="serverPathTextField">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <editable value="false"/>
+        </properties>
+      </component>
+      <component id="63846" class="javax.swing.JButton" binding="serverPathButton">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="..."/>
         </properties>
       </component>
     </children>
