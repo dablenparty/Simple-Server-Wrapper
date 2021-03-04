@@ -20,15 +20,16 @@ public class MinecraftServer {
     private final Settings serverSettings;
     private List<String> serverArgs;
     private final Path serverPath;
-    private final ServerProperties properties;
+    private ServerProperties properties = null;
+    private boolean propsExists;
 
-    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) throws FileNotFoundException {
+    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
         serverSettings = settings;
         serverPath = Paths.get(serverFolder, serverFilename);
 
-        properties = new ServerProperties(Paths.get(serverFolder, "server.properties").toFile());
+        propsExists = updateProperties();
 
         serverArgs = new ArrayList<>(Arrays.asList("java",
                 String.format("-Xmx%dM", serverSettings.getMemory()),
@@ -127,6 +128,15 @@ public class MinecraftServer {
         return properties;
     }
 
+    public boolean updateProperties() {
+        try {
+            properties = new ServerProperties(Paths.get(String.valueOf(serverPath.getParent()), "server.properties").toFile());
+            return true;
+        } catch (FileNotFoundException e) {
+            return false;
+        }
+    }
+
     public void updateExtraArgs() {
         serverArgs = new ArrayList<>(Arrays.asList("java",
                 String.format("-Xmx%dM", serverSettings.getMemory()),
@@ -136,5 +146,9 @@ public class MinecraftServer {
                 "nogui"));
 
         if (serverSettings.hasExtraArgs()) serverArgs.addAll(3, serverSettings.getExtraArgs());
+    }
+
+    public boolean propertiesExists() {
+        return propsExists;
     }
 }

@@ -108,6 +108,7 @@ public class WrapperGUI extends JFrame {
     public void startServer() {
         // Essentially flushes the output windows
         consoleTextArea.setText("");
+        server.updateProperties();
         try {
             server.run();
         } catch (IOException e) {
