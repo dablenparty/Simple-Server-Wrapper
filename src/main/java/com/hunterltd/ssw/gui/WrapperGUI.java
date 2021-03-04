@@ -81,6 +81,7 @@ public class WrapperGUI extends JFrame {
                     if (worker != null) {
                         worker.cancel(true);
                     }
+                    installer.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
                 }
             });
             installer.pack();
