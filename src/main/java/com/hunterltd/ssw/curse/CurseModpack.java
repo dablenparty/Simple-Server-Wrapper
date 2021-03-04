@@ -43,27 +43,35 @@ public class CurseModpack extends ZipFile {
         return manifest;
     }
 
-    public static void main(String[] args) throws ParseException {
-        CurseModpack pack = new CurseModpack(Paths.get(System.getProperty("user.home"), "Downloads", "Minecraft Enhanced-v1.3.zip").toFile());
+    public boolean install(String folder) {
+        boolean error = false;
+        Client client = ClientBuilder.newClient();
+        for (CurseManifestFileEntry manifestEntry :
+                this.manifest.getFiles()) {
+            Response response = client.target(
+                    String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
+                            manifestEntry.getProjectID(),
+                            manifestEntry.getFileID())
+            ).request(MediaType.APPLICATION_JSON).get();
+            try {
+                CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
+                addon.download(folder);
+            } catch (ParseException | IOException e) {
+                e.printStackTrace();
+                error = true;
+            }
+        }
+        return error;
+    }
+
+    public static void main(String[] args) {
+        CurseModpack pack = new CurseModpack(Paths.get(System.getProperty("user.home"), "Downloads", "Minecraft Enhanced-v1.6.zip").toFile());
         try {
             pack.extractAll();
         } catch (ParseException | IOException e) {
             e.printStackTrace();
         }
-        Client client = ClientBuilder.newClient();
-        for (CurseManifestFileEntry addon :
-                pack.getManifest().getFiles()) {
-            Response response = client.target(
-                    String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
-                            addon.getProjectID(),
-                            addon.getFileID()))
-                    .request(MediaType.APPLICATION_JSON).get();
-            CurseAddon test = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
-            try {
-                test.download(pack.getExtractPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        String message = pack.install(pack.getExtractPath()) ? "Done!" : "Error(s) occurred, see above";
+        System.out.println(message);
     }
 }
