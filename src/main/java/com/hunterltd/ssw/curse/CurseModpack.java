@@ -7,6 +7,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.lingala.zip4j.ZipFile;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -47,7 +48,7 @@ public class CurseModpack extends ZipFile {
         boolean error = false;
         Client client = ClientBuilder.newClient();
         for (CurseManifestFileEntry manifestEntry :
-                this.manifest.getFiles()) {
+                manifest.getFiles()) {
             Response response = client.target(
                     String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
                             manifestEntry.getProjectID(),
@@ -61,6 +62,14 @@ public class CurseModpack extends ZipFile {
                 error = true;
             }
         }
+        File overrides = Paths.get(extractPath, "overrides", "mods").toFile();
+        try {
+            FileUtils.copyDirectory(overrides, Paths.get(folder, "mods").toFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+            error = true;
+        }
+
         return error;
     }
 
@@ -71,7 +80,7 @@ public class CurseModpack extends ZipFile {
         } catch (ParseException | IOException e) {
             e.printStackTrace();
         }
-        String message = pack.install(pack.getExtractPath()) ? "Done!" : "Error(s) occurred, see above";
+        String message = !pack.install(pack.getExtractPath()) ? "Done!" : "Error(s) occurred, see above";
         System.out.println(message);
     }
 }
