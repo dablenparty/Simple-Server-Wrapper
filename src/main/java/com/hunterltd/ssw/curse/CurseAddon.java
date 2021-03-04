@@ -19,7 +19,9 @@ public class CurseAddon extends JSONObject {
     }
 
     public void download(String destFolder) throws IOException {
-        URL source = new URL(((String) this.get("downloadUrl")).replace(" ", "%20")); // MalformedURLException
+        // Spaces don't produce a MalformedURLException, although they will cause IOExceptions because although they're
+        // not technically invalid characters, a browser cannot interpret them. Instead, they use the "%20" character
+        URL source = new URL(((String) this.get("downloadUrl")).replace(" ", "%20"));
         File dest = new File(String.valueOf(Paths.get(destFolder, "DOWN", (String) this.get("fileName"))));
 
         FileUtils.copyURLToFile(source, dest, 10000, 10000);
