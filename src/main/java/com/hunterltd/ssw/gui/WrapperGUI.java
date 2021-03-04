@@ -29,7 +29,6 @@ public class WrapperGUI extends JFrame {
     private JScrollPane consoleScrollPane;
     private JTabbedPane tabbedPane;
     private JTextArea consoleTextArea;
-    private JTextArea errorTextArea;
     private JTextField commandTextField;
     private JTextField serverPathTextField;
     private MinecraftServer server;
@@ -109,7 +108,6 @@ public class WrapperGUI extends JFrame {
     public void startServer() {
         // Essentially flushes the output windows
         consoleTextArea.setText("");
-        errorTextArea.setText("");
         try {
             server.run();
         } catch (IOException e) {
@@ -244,7 +242,6 @@ public class WrapperGUI extends JFrame {
                     serverFileInfo.getFile(),
                     serverSettings);
         } catch (NullPointerException ignored) {
-            ignored.printStackTrace();
         } catch (IOException e) {
             InternalErrorDialog errorDialog = new InternalErrorDialog();
             errorDialog.pack();
