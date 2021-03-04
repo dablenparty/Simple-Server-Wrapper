@@ -14,16 +14,15 @@ import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class CurseModpack extends ZipFile {
-    private final Path extractPath;
+    private final String extractPath;
     private final CurseManifest manifest;
 
     public CurseModpack(File zipFile) {
         super(zipFile);
-        extractPath = Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(zipFile.getName()));
+        extractPath = String.valueOf(Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(zipFile.getName())));
         manifest = new CurseManifest(Paths.get(String.valueOf(extractPath), "manifest.json").toFile());
     }
 
@@ -33,10 +32,10 @@ public class CurseModpack extends ZipFile {
     }
 
     public boolean isExtracted() {
-        return extractPath.toFile().exists();
+        return new File(extractPath).exists();
     }
 
-    public Path getExtractPath() {
+    public String getExtractPath() {
         return extractPath;
     }
 
@@ -54,10 +53,17 @@ public class CurseModpack extends ZipFile {
         Client client = ClientBuilder.newClient();
         for (CurseManifestFileEntry addon :
                 pack.getManifest().getFiles()) {
-            Response response = client.target("https://addons-ecs.forgesvc.net/api/v2/addon/" + addon.getProjectID())
+            Response response = client.target(
+                    String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
+                            addon.getProjectID(),
+                            addon.getFileID()))
                     .request(MediaType.APPLICATION_JSON).get();
-            CurseManifestFileEntry test = new CurseManifestFileEntry((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
-            System.out.println(test);
+            CurseAddon test = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
+            try {
+                test.download(pack.getExtractPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
