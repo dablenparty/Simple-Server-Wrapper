@@ -12,6 +12,8 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
@@ -63,10 +65,28 @@ public class WrapperGUI extends JFrame {
         // Menu Bar
         MenuBar menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
-        MenuItem settingsItem = new MenuItem("Server Settings");
+        MenuItem settingsItem = new MenuItem("Server Settings"),
+                curseInstallItem = new MenuItem("Install CurseForge Modpack");
         fileMenu.add(settingsItem);
+        fileMenu.add(curseInstallItem);
         menuBar.add(fileMenu);
         settingsItem.addActionListener(settingsWarn);
+        curseInstallItem.addActionListener(e -> {
+            CurseInstaller installer = new CurseInstaller();
+            installer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+            installer.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    SwingWorker<Void, Void> worker = installer.getWorker();
+                    if (worker != null) {
+                        worker.cancel(true);
+                    }
+                }
+            });
+            installer.pack();
+            installer.setVisible(true);
+        });
+
 
         this.setMenuBar(menuBar);
 
