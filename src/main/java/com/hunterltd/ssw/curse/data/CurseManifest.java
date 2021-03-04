@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.curse.data;
 
 import com.dablenparty.jsondata.UserDataObject;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
@@ -28,5 +29,14 @@ public class CurseManifest extends JSONObject {
 
     public File getFile() {
         return manifestFile;
+    }
+
+    public CurseManifestFileEntry[] getFiles() {
+        JSONArray jsonArr = (JSONArray) this.get("files");
+        CurseManifestFileEntry[] addons = new CurseManifestFileEntry[jsonArr.size()];
+        for (int i = 0; i < jsonArr.size(); i++) {
+            addons[i] = new CurseManifestFileEntry((JSONObject) jsonArr.get(i));
+        }
+        return addons;
     }
 }
