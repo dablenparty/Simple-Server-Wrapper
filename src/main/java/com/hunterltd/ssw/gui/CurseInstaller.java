@@ -74,7 +74,18 @@ public class CurseInstaller extends JFrame {
                 @Override
                 protected Void doInBackground() throws IOException, ParseException {
                     firePropertyChange("status", "", "Extracting...");
-                    curseModpack.extractAll();
+                    if (curseModpack.isExtracted()) {
+                        int result = JOptionPane.showConfirmDialog(null,
+                                String.format("%s has already been extracted. Would you like to extract again?",
+                                        curseModpack.getManifest().getName()),
+                                "ZIP already extracted",
+                                JOptionPane.YES_NO_OPTION);
+                        if (result == JOptionPane.YES_OPTION) {
+                            curseModpack.extractAll();
+                        }
+                    } else {
+                        curseModpack.extractAll();
+                    }
 
                     firePropertyChange("status", "Extracting...", "Getting files...");
                     CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
@@ -90,7 +101,6 @@ public class CurseInstaller extends JFrame {
                         ).request(MediaType.APPLICATION_JSON).get();
                         try {
                             CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
-//                    installProgressBar.setString(String.format("Mod %d of %d: %s", i + 1, filesLength, addon.toString()));
                             firePropertyChange("status",
                                     "Getting files...",
                                     String.format("Mod %d of %d: %s", i + 1, filesLength, addon.toString()));
@@ -112,6 +122,7 @@ public class CurseInstaller extends JFrame {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    if (!new File(curseModpack.getExtractPath()).delete()) System.out.println("An error occurred removing the folder");
                     return null;
                 }
 
@@ -127,6 +138,7 @@ public class CurseInstaller extends JFrame {
                     cancelButton.setEnabled(false);
                 }
             };
+
             worker.addPropertyChangeListener(evt -> {
                 if (evt.getPropertyName().equals("progress")) {
                     int progress = (Integer) evt.getNewValue();
