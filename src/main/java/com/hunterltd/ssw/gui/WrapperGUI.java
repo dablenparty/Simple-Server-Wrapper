@@ -1,8 +1,8 @@
 package com.hunterltd.ssw.gui;
 
-import com.hunterltd.ssw.gui.Dialogs.InfoDialog;
-import com.hunterltd.ssw.gui.Dialogs.InternalErrorDialog;
-import com.hunterltd.ssw.gui.Dialogs.SettingsDialog;
+import com.hunterltd.ssw.gui.dialogs.InfoDialog;
+import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
+import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.server.StreamGobbler;
 import com.hunterltd.ssw.utilities.Settings;

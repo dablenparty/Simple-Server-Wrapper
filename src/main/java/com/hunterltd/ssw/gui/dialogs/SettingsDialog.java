@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.gui.Dialogs;
+package com.hunterltd.ssw.gui.dialogs;
 
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.server.properties.PropertiesTableModel;

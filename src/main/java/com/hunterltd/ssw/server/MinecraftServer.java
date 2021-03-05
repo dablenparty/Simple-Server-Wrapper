@@ -1,7 +1,7 @@
 package com.hunterltd.ssw.server;
 
-import com.hunterltd.ssw.gui.Dialogs.InfoDialog;
-import com.hunterltd.ssw.gui.Dialogs.InternalErrorDialog;
+import com.hunterltd.ssw.gui.dialogs.InfoDialog;
+import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
 import com.hunterltd.ssw.utilities.Settings;
 
