@@ -77,7 +77,7 @@ public class CurseInstaller extends JFrame {
                     if (curseModpack.isExtracted()) {
                         int result = JOptionPane.showConfirmDialog(null,
                                 String.format("%s has already been extracted. Would you like to extract again?",
-                                        curseModpack.getManifest().getName()),
+                                        Paths.get(curseModpack.getExtractPath()).getParent()),
                                 "ZIP already extracted",
                                 JOptionPane.YES_NO_OPTION);
                         if (result == JOptionPane.YES_OPTION) {
