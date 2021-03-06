@@ -131,8 +131,10 @@ public class MinecraftServer {
     public boolean updateProperties() {
         try {
             properties = new ServerProperties(Paths.get(String.valueOf(serverPath.getParent()), "server.properties").toFile());
+            propsExists = true;
             return true;
         } catch (FileNotFoundException e) {
+            propsExists = false;
             return false;
         }
     }
