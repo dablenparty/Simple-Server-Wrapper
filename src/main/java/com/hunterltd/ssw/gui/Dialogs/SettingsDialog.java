@@ -58,7 +58,7 @@ public class SettingsDialog extends JDialog {
         automaticRestartCheckBox.setSelected(settings.getRestart());
         restartIntervalComboBox.setSelectedIndex(settings.getInterval() - 1);
         extraArgsTextField.setText(String.join(" ", settings.getExtraArgs()));
-        if (server.propertiesExists()) {
+        if (server.propertiesExists() || server.updateProperties()) {
             propsTable.setModel(new PropertiesTableModel(server.getProperties()));
         } else {
             settingsTabs.removeTabAt(2); // remove properties tab
