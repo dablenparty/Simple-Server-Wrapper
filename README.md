@@ -32,6 +32,8 @@ Features currently included in SSW
 
 * Batch file (launch.bat) generation (text file on macOSX/Linux)
 
+* CurseForge Modpack installation into an existing server
+
 ### Future
 
 These are features I want to add but either haven't gotten to them yet or don't have the capabilities right now
@@ -71,4 +73,9 @@ closing itself. **There are rare cases I have found where this does not work as 
 accounted for, and the server process is destroyed by the wrapper. **If that still doesn't work, the problem is likely
 with your server or PC, not this application.** Use Task Manager to close the server process.
 
+### Unknown Internal Errors/Forge errors
 
+In my experience, these are heavily correlated. It is *almost always* caused by a bad Java version. Both Forge servers
+and this wrapper are made on **Java 8** and should be run with such. If you don't know what version you have, run the
+command `java -version` in a terminal, and ensure the version number begins with `1.8`. So far, this has solved the
+issue every single time.
