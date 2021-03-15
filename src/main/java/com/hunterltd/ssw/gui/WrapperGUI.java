@@ -36,9 +36,9 @@ public class WrapperGUI extends JFrame {
     private int[] timeCounter = new int[]{0, 0, 0}; // H:M:S
     private final String restartCommandTemplate = "me %sis restarting in %d %s!"; // color code, time integer, time unit
     private final String baseTitle = "Simple Server Wrapper";
-    private final ActionListener settingsWarn = e -> {
+    private final ActionListener noServerSelected = e -> {
         InfoDialog dialog = new InfoDialog("No server selected",
-                "A server must be selected to change its settings!");
+                "A server must be selected to do this!");
         dialog.pack();
         dialog.setVisible(true);
     };
@@ -66,11 +66,14 @@ public class WrapperGUI extends JFrame {
         MenuBar menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
         MenuItem settingsItem = new MenuItem("Server Settings"),
+                openInFolderItem = new MenuItem("Open in folder"),
                 curseInstallItem = new MenuItem("Install CurseForge Modpack");
         fileMenu.add(settingsItem);
+        fileMenu.add(openInFolderItem);
         fileMenu.add(curseInstallItem);
         menuBar.add(fileMenu);
-        settingsItem.addActionListener(settingsWarn);
+        settingsItem.addActionListener(noServerSelected);
+        openInFolderItem.addActionListener(noServerSelected);
         curseInstallItem.addActionListener(e -> {
             CurseInstaller installer = new CurseInstaller();
             installer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -207,7 +210,7 @@ public class WrapperGUI extends JFrame {
         try {
             serverPathTextField.setText(Paths.get(serverFileInfo.getDirectory(), serverFileInfo.getFile()).toString());
             serverSettings = new Settings(Paths.get(serverFileInfo.getDirectory(), "ssw", "wrapperSettings.json"));
-            settingsItem.removeActionListener(settingsWarn);
+            settingsItem.removeActionListener(noServerSelected);
             settingsItem.addActionListener(settingsOpen);
             server = new MinecraftServer(serverFileInfo.getDirectory(),
                     serverFileInfo.getFile(),
