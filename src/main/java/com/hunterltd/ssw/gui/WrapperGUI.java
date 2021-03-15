@@ -6,6 +6,7 @@ import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.server.StreamGobbler;
 import com.hunterltd.ssw.utilities.Settings;
+import com.hunterltd.ssw.utilities.SmartScroller;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -42,12 +43,11 @@ public class WrapperGUI extends JFrame {
         dialog.pack();
         dialog.setVisible(true);
     };
-    private ActionListener settingsOpen;
+    private ActionListener settingsOpen, openInFolder;
     private Settings serverSettings;
-    private SwingWorker<Void, Void> serverWorker;
 
     public WrapperGUI() {
-        ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); // Automatic scrolling
+        new SmartScroller(consoleScrollPane);
 
         // Action Listeners
         sendButton.addActionListener(e -> sendCommand(commandTextField.getText()));
@@ -110,81 +110,36 @@ public class WrapperGUI extends JFrame {
     }
 
     public void startServer() {
-
-        serverWorker = new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() {
-                // Essentially flushes the output windows
-                consoleTextArea.setText("");
-                server.updateProperties();
-                try {
-                    server.run();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    InternalErrorDialog errDialog = new InternalErrorDialog();
-                    errDialog.pack();
-                    errDialog.setVisible(true);
-                    if (server != null && server.isRunning()) {
-                        server.getServerProcess().destroy();
-                    }
-                    return null;
-                }
-
-                Consumer<String> addConsoleText = text -> firePropertyChange("newLine", "", text);
-
-                // Pipes the server outputs into the GUI using the pre-defined consumers
-                StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
-                StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText);
-
-                firePropertyChange("start", false, true);
-                return null;
+        consoleTextArea.setText("");
+        // Essentially flushes the output windows
+        server.updateProperties();
+        try {
+            server.run();
+        } catch (IOException e) {
+            e.printStackTrace();
+            InternalErrorDialog errDialog = new InternalErrorDialog();
+            errDialog.pack();
+            errDialog.setVisible(true);
+            if (server != null && server.isRunning()) {
+                server.getServerProcess().destroy();
             }
+            return;
+        }
+
+        Consumer<String> addConsoleText = text -> {
+            consoleTextArea.append('\n' + text);
+            System.out.println(text);
         };
 
-        serverWorker.addPropertyChangeListener(evt -> {
-            switch (evt.getPropertyName()) {
-                case "newLine":
-                    consoleTextArea.setText(consoleTextArea.getText() + '\n' + evt.getNewValue());
-                    break;
-                case "start":
-                    boolean start = (boolean) evt.getNewValue();
-                    if (server.isRunning()) {
-                        aliveTimer.start();
-                        if (restartTimer != null) restartTimer.start();
-                    }
-                    serverPathTextField.setEnabled(!start);
-                    openDialogButton.setEnabled(!start);
-                    commandTextField.setEnabled(start);
-                    sendButton.setEnabled(start);
-                    String runText, title;
-                    if (start) {
-                        runText = "Stop";
-                        title = baseTitle + " - " + serverFileInfo.getFile();
-                    } else {
-                        runText = "Run";
-                        title = baseTitle;
+        // Pipes the server outputs into the GUI using the pre-defined consumers
+        StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
+        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText);
 
-                        try {
-                            server.stop();
-                            consoleTextArea.setText(consoleTextArea.getText() + "\nServer has been stopped.");
-                        } catch (IOException e) {
-                            server.getServerProcess().destroy();
-                            InfoDialog dialog = new InfoDialog("Force stop server",
-                                    "An internal IO error occurred, and the server had to be forcibly shut down");
-                            dialog.pack();
-                            dialog.setVisible(true);
-                        }
-                    }
-                    runButton.setText(runText);
-                    setTitle(title);
-                    break;
-            }
-        });
-        serverWorker.execute();
+        sendServerStatus(true);
     }
 
     public void stopServer() {
-        serverWorker.firePropertyChange("start", true, false);
+        sendServerStatus(false);
     }
 
     private void runButtonAction() {
@@ -196,12 +151,47 @@ public class WrapperGUI extends JFrame {
         }
     }
 
+    private void sendServerStatus(boolean start) {
+        if (server.isRunning()) {
+            aliveTimer.start();
+            if (restartTimer != null) restartTimer.start();
+        }
+        serverPathTextField.setEnabled(!start);
+        openDialogButton.setEnabled(!start);
+        commandTextField.setEnabled(start);
+        sendButton.setEnabled(start);
+        String runText, title;
+        if (start) {
+            runText = "Stop";
+            title = baseTitle + " - " + serverFileInfo.getFile();
+        } else {
+            runText = "Run";
+            title = baseTitle;
+
+            try {
+                server.stop();
+                consoleTextArea.append("\nServer has been stopped.");
+            } catch (IOException e) {
+                server.getServerProcess().destroy();
+                InfoDialog dialog = new InfoDialog("Force stop server",
+                        "An internal IO error occurred, and the server had to be forcibly shut down");
+                dialog.pack();
+                dialog.setVisible(true);
+            }
+        }
+        runButton.setText(runText);
+        setTitle(title);
+
+    }
+
     private void selectNewFile() {
         serverFileInfo = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
         serverFileInfo.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
         serverFileInfo.setVisible(true);
-        MenuItem settingsItem = this.getMenuBar().getMenu(0).getItem(0);
+        MenuItem settingsItem = this.getMenuBar().getMenu(0).getItem(0),
+                openInFolderItem = this.getMenuBar().getMenu(0).getItem(1);
         settingsItem.removeActionListener(settingsOpen);
+        openInFolderItem.removeActionListener(openInFolder);
         settingsOpen = e -> {
             SettingsDialog settingsDialog = new SettingsDialog(server);
             settingsDialog.pack();
@@ -215,6 +205,17 @@ public class WrapperGUI extends JFrame {
             server = new MinecraftServer(serverFileInfo.getDirectory(),
                     serverFileInfo.getFile(),
                     serverSettings);
+            openInFolderItem.removeActionListener(noServerSelected);
+            openInFolder = e -> {
+                try {
+                    Desktop.getDesktop().open(server.getServerPath().toFile());
+                } catch (IOException ioException) {
+                    InternalErrorDialog errorDialog = new InternalErrorDialog();
+                    errorDialog.pack();
+                    errorDialog.setVisible(true);
+                }
+            };
+            openInFolderItem.addActionListener(openInFolder);
         } catch (NullPointerException ignored) {
         } catch (IOException e) {
             InternalErrorDialog errorDialog = new InternalErrorDialog();
@@ -289,7 +290,6 @@ public class WrapperGUI extends JFrame {
                 }
             }
         }) : null;
-
     }
 
     public MinecraftServer getServer() {
