@@ -51,6 +51,7 @@ public class CurseInstaller extends JFrame {
                 zipPathTextField.setText(fileChooser.getSelectedFile().toString());
             }
         });
+
         serverPathButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -60,6 +61,17 @@ public class CurseInstaller extends JFrame {
                 serverPathTextField.setText(serverPath.toString());
             }
         });
+
+        cancelButton.addActionListener(evt -> {
+            int result = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to cancel?",
+                    "Cancel pack installation",
+                    JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                worker.cancel(true);
+            }
+        });
+
         installButton.addActionListener(e -> {
             JComponent[] components = {newFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
             for (JComponent comp :
@@ -77,11 +89,13 @@ public class CurseInstaller extends JFrame {
                     if (curseModpack.isExtracted()) {
                         int result = JOptionPane.showConfirmDialog(null,
                                 String.format("%s has already been extracted. Would you like to extract again?",
-                                        curseModpack.getManifest().getName()),
+                                        Paths.get(curseModpack.getExtractPath()).getParent()),
                                 "ZIP already extracted",
                                 JOptionPane.YES_NO_OPTION);
                         if (result == JOptionPane.YES_OPTION) {
                             curseModpack.extractAll();
+                        } else {
+                            curseModpack.getManifest().load();
                         }
                     } else {
                         curseModpack.extractAll();
@@ -116,11 +130,21 @@ public class CurseInstaller extends JFrame {
                         }
                     }
                     firePropertyChange("status", "Installing mods...", "Copying overrides...");
-                    File overrides = Paths.get(curseModpack.getExtractPath(), "overrides", "mods").toFile();
-                    try {
-                        FileUtils.copyDirectory(overrides, Paths.get(serverPath.toString(), "mods").toFile());
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    File overrideFolder = Paths.get(curseModpack.getExtractPath(), "overrides").toFile();
+                    File[] overrides = overrideFolder.listFiles();
+                    if (overrides != null) {
+                        for (File file :
+                                overrides) {
+                            try {
+                                if (file.isDirectory()) {
+                                    FileUtils.copyDirectory(file, Paths.get(serverPath.toString(), file.getName()).toFile());
+                                } else {
+                                    FileUtils.copyFileToDirectory(file, serverPath);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                     if (!new File(curseModpack.getExtractPath()).delete()) System.out.println("An error occurred removing the folder");
                     return null;
@@ -148,15 +172,7 @@ public class CurseInstaller extends JFrame {
                     installProgressBar.setString((String) evt.getNewValue());
                 }
             });
-            cancelButton.addActionListener(evt -> {
-                int result = JOptionPane.showConfirmDialog(this,
-                        "Are you sure you want to cancel?",
-                        "Cancel pack installation",
-                        JOptionPane.YES_NO_OPTION);
-                if (result == JOptionPane.YES_OPTION) {
-                    worker.cancel(true);
-                }
-            });
+
             worker.execute();
         });
 

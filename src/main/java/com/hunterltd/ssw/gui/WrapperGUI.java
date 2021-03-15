@@ -44,6 +44,7 @@ public class WrapperGUI extends JFrame {
     };
     private ActionListener settingsOpen;
     private Settings serverSettings;
+    private SwingWorker<Void, Void> serverWorker;
 
     public WrapperGUI() {
         ((DefaultCaret) consoleTextArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); // Automatic scrolling
@@ -106,27 +107,118 @@ public class WrapperGUI extends JFrame {
     }
 
     public void startServer() {
-        // Essentially flushes the output windows
-        consoleTextArea.setText("");
-        server.updateProperties();
-        try {
-            server.run();
-        } catch (IOException e) {
-            e.printStackTrace();
-            InternalErrorDialog errDialog = new InternalErrorDialog();
-            errDialog.pack();
-            errDialog.setVisible(true);
-            if (server != null && server.isRunning()) {
-                server.getServerProcess().destroy();
+
+        serverWorker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                // Essentially flushes the output windows
+                consoleTextArea.setText("");
+                server.updateProperties();
+                try {
+                    server.run();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    InternalErrorDialog errDialog = new InternalErrorDialog();
+                    errDialog.pack();
+                    errDialog.setVisible(true);
+                    if (server != null && server.isRunning()) {
+                        server.getServerProcess().destroy();
+                    }
+                    return null;
+                }
+
+                Consumer<String> addConsoleText = text -> firePropertyChange("newLine", "", text);
+
+                // Pipes the server outputs into the GUI using the pre-defined consumers
+                StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
+                StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText);
+
+                firePropertyChange("start", false, true);
+                return null;
             }
-            return;
+        };
+
+        serverWorker.addPropertyChangeListener(evt -> {
+            switch (evt.getPropertyName()) {
+                case "newLine":
+                    consoleTextArea.setText(consoleTextArea.getText() + '\n' + evt.getNewValue());
+                    break;
+                case "start":
+                    boolean start = (boolean) evt.getNewValue();
+                    if (server.isRunning()) {
+                        aliveTimer.start();
+                        if (restartTimer != null) restartTimer.start();
+                    }
+                    serverPathTextField.setEnabled(!start);
+                    openDialogButton.setEnabled(!start);
+                    commandTextField.setEnabled(start);
+                    sendButton.setEnabled(start);
+                    String runText, title;
+                    if (start) {
+                        runText = "Stop";
+                        title = baseTitle + " - " + serverFileInfo.getFile();
+                    } else {
+                        runText = "Run";
+                        title = baseTitle;
+
+                        try {
+                            server.stop();
+                            consoleTextArea.setText(consoleTextArea.getText() + "\nServer has been stopped.");
+                        } catch (IOException e) {
+                            server.getServerProcess().destroy();
+                            InfoDialog dialog = new InfoDialog("Force stop server",
+                                    "An internal IO error occurred, and the server had to be forcibly shut down");
+                            dialog.pack();
+                            dialog.setVisible(true);
+                        }
+                    }
+                    runButton.setText(runText);
+                    setTitle(title);
+                    break;
+            }
+        });
+        serverWorker.execute();
+    }
+
+    public void stopServer() {
+        serverWorker.firePropertyChange("start", true, false);
+    }
+
+    private void runButtonAction() {
+        // Server is null on initial startup
+        if (server.getServerProcess() == null || !server.isRunning()) {
+            startServer();
+        } else {
+            stopServer();
+        }
+    }
+
+    private void selectNewFile() {
+        serverFileInfo = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
+        serverFileInfo.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
+        serverFileInfo.setVisible(true);
+        MenuItem settingsItem = this.getMenuBar().getMenu(0).getItem(0);
+        settingsItem.removeActionListener(settingsOpen);
+        settingsOpen = e -> {
+            SettingsDialog settingsDialog = new SettingsDialog(server);
+            settingsDialog.pack();
+            settingsDialog.setVisible(true);
+        };
+        try {
+            serverPathTextField.setText(Paths.get(serverFileInfo.getDirectory(), serverFileInfo.getFile()).toString());
+            serverSettings = new Settings(Paths.get(serverFileInfo.getDirectory(), "ssw", "wrapperSettings.json"));
+            settingsItem.removeActionListener(settingsWarn);
+            settingsItem.addActionListener(settingsOpen);
+            server = new MinecraftServer(serverFileInfo.getDirectory(),
+                    serverFileInfo.getFile(),
+                    serverSettings);
+        } catch (NullPointerException ignored) {
+        } catch (IOException e) {
+            InternalErrorDialog errorDialog = new InternalErrorDialog();
+            errorDialog.pack();
+            errorDialog.setVisible(true);
         }
 
-        Consumer<String> addConsoleText = text -> consoleTextArea.setText(consoleTextArea.getText() + "\n" + text);
-
-        // Pipes the server outputs into the GUI using the pre-defined consumers
-        StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
-        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText);
         aliveTimer = new Timer(100, e -> {
             if (!server.isRunning()) {
                 aliveTimer.stop();
@@ -164,8 +256,8 @@ public class WrapperGUI extends JFrame {
 
             if (hours == interval) {
                 restartTimer.stop();
-                this.stopServer();
-                this.startServer();
+                stopServer();
+                startServer();
                 timeCounter = new int[]{0, 0, 0};
             } else if (hours == interval - 1) {
                 // the final hour
@@ -195,59 +287,6 @@ public class WrapperGUI extends JFrame {
             }
         }) : null;
 
-        aliveTimer.start();
-        if (restartTimer != null) restartTimer.start();
-        serverPathTextField.setEnabled(false);
-        openDialogButton.setEnabled(false);
-        commandTextField.setEnabled(true);
-        sendButton.setEnabled(true);
-        runButton.setText("Stop");
-        setTitle(baseTitle + " - " + serverFileInfo.getFile());
-    }
-
-    public void stopServer() {
-        try {
-            server.stop();
-            consoleTextArea.setText(consoleTextArea.getText() + "\nServer has been stopped.");
-        } catch (IOException e) {
-            server.getServerProcess().destroy();
-        }
-    }
-
-    private void runButtonAction() {
-        // Server is null on initial startup
-        if (server.getServerProcess() == null || !server.isRunning()) {
-            startServer();
-        } else {
-            stopServer();
-        }
-    }
-
-    private void selectNewFile() {
-        serverFileInfo = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
-        serverFileInfo.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
-        serverFileInfo.setVisible(true);
-        MenuItem settingsItem = this.getMenuBar().getMenu(0).getItem(0);
-        settingsItem.removeActionListener(settingsOpen);
-        settingsOpen = e -> {
-            SettingsDialog settingsDialog = new SettingsDialog(server);
-            settingsDialog.pack();
-            settingsDialog.setVisible(true);
-        };
-        try {
-            serverPathTextField.setText(Paths.get(serverFileInfo.getDirectory(), serverFileInfo.getFile()).toString());
-            serverSettings = new Settings(Paths.get(serverFileInfo.getDirectory(), "ssw", "wrapperSettings.json"));
-            settingsItem.removeActionListener(settingsWarn);
-            settingsItem.addActionListener(settingsOpen);
-            server = new MinecraftServer(serverFileInfo.getDirectory(),
-                    serverFileInfo.getFile(),
-                    serverSettings);
-        } catch (NullPointerException ignored) {
-        } catch (IOException e) {
-            InternalErrorDialog errorDialog = new InternalErrorDialog();
-            errorDialog.pack();
-            errorDialog.setVisible(true);
-        }
     }
 
     public MinecraftServer getServer() {
