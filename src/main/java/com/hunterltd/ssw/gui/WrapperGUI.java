@@ -222,6 +222,7 @@ public class WrapperGUI extends JFrame {
             if (!server.shouldBeRunning() && server.isRunning()) {
                 aliveTimer.stop();
                 if (restartTimer != null) restartTimer.stop();
+                runButton.setText("Stopping...");
                 SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() {
@@ -230,13 +231,27 @@ public class WrapperGUI extends JFrame {
                         } catch (IOException ioException) {
                             firePropertyChange("error", null, ioException);
                         }
+
+                        // Prevents the method from completing until the server is fully shut down
+                        while (true) if (!server.isRunning()) break;
+
                         return null;
                     }
 
                     @Override
                     protected void done() {
                         super.done();
+                        System.out.println("Done shutting down");
                         consoleTextArea.append("Server has been stopped.\n");
+                        try {
+                            server.getServerProcess().getOutputStream().close();
+                            server.getServerProcess().getInputStream().close();
+                            server.getServerProcess().getErrorStream().close();
+                        } catch (IOException e) {
+                            new InternalErrorDialog(e);
+                        } finally {
+                            sendServerStatus(false);
+                        }
                     }
                 };
                 worker.addPropertyChangeListener(evt -> {
@@ -246,7 +261,6 @@ public class WrapperGUI extends JFrame {
                     }
                 });
                 worker.execute();
-                sendServerStatus(false);
             }
         });
 
