@@ -68,18 +68,6 @@ public class MinecraftServer {
 
     public void stop() throws IOException {
         sendCommand("stop");
-
-        try {
-            serverProcess.getOutputStream().close();
-            serverProcess.getInputStream().close();
-            serverProcess.getErrorStream().close();
-        } catch (IOException ignored){
-            InfoDialog dialog = new InfoDialog("Internal Error",
-                    "An unknown internal error occurred while closing the server. " +
-                            "Check task manager to make sure it was properly closed.");
-            dialog.pack();
-            dialog.setVisible(true);
-        }
     }
 
     public void generateBatch(String ext) {
