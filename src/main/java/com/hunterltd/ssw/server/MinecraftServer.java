@@ -22,6 +22,7 @@ public class MinecraftServer {
     private final Path serverPath;
     private ServerProperties properties = null;
     private boolean propsExists;
+    private boolean shouldBeRunning;
 
     public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
         pB = new ProcessBuilder();
@@ -110,6 +111,14 @@ public class MinecraftServer {
             dialog.pack();
             dialog.setVisible(true);
         }
+    }
+
+    public boolean shouldBeRunning() {
+        return shouldBeRunning;
+    }
+
+    public void setShouldBeRunning(boolean shouldBeRunning) {
+        this.shouldBeRunning = shouldBeRunning;
     }
 
     public boolean isRunning() {
