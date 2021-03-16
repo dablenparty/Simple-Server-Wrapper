@@ -126,7 +126,6 @@ public class WrapperGUI extends JFrame {
         }
 
         Consumer<String> addConsoleText = text -> consoleTextArea.append(text + '\n');
-
         // Pipes the server outputs into the GUI using the pre-defined consumers
         StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
         StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText);
@@ -135,6 +134,11 @@ public class WrapperGUI extends JFrame {
     }
 
     public void stopServer() {
+        stopServer(false);
+    }
+
+    public void stopServer(boolean restart) {
+        server.setShouldRestart(restart);
         server.setShouldBeRunning(false);
     }
 
@@ -150,6 +154,107 @@ public class WrapperGUI extends JFrame {
     private void sendServerStatus(boolean start) {
         server.setShouldBeRunning(start);
         if (server.isRunning() && server.shouldBeRunning()) {
+            aliveTimer = new Timer(100, e -> {
+                if (!server.shouldBeRunning() && server.isRunning()) {
+                    aliveTimer.stop();
+                    if (restartTimer != null) restartTimer.stop();
+                    runButton.setText("Stopping...");
+                    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() {
+                            try {
+                                server.stop();
+                            } catch (IOException ioException) {
+                                firePropertyChange("error", null, ioException);
+                            }
+
+                            // Prevents the method from completing until the server is fully shut down
+                            while (true) if (!server.isRunning()) break;
+
+                            return null;
+                        }
+
+                        @Override
+                        protected void done() {
+                            super.done();
+                            String time = new SimpleDateFormat("HH:mm:ss").format(System.currentTimeMillis());
+                            consoleTextArea.append(String.format("[%s] [SSW thread] Server has been stopped.\n", time));
+                            try {
+                                server.getServerProcess().getOutputStream().close();
+                                server.getServerProcess().getInputStream().close();
+                                server.getServerProcess().getErrorStream().close();
+                            } catch (IOException e) {
+                                new InternalErrorDialog(e);
+                            } finally {
+                                if (server.shouldRestart()) startServer();
+                                else sendServerStatus(false);
+                            }
+                        }
+                    };
+                    worker.addPropertyChangeListener(evt -> {
+                        if (evt.getPropertyName().equalsIgnoreCase("error")) {
+                            new InternalErrorDialog((Exception) evt.getNewValue());
+                            server.getServerProcess().destroy();
+                        }
+                    });
+                    worker.execute();
+                }
+            });
+
+            // Keeps track of every second in a 3 element array
+            restartTimer = serverSettings.getRestart() ? new Timer(1000, e -> {
+                final int interval = serverSettings.getInterval();
+                int hours = timeCounter[0], minutes = timeCounter[1], seconds = timeCounter[2];
+
+                seconds++;
+
+                if (seconds != 60) {
+                    timeCounter[2] = seconds;
+                } else {
+                    minutes++;
+                    timeCounter[1] = minutes;
+                    timeCounter[2] = 0; // resets "seconds" counter
+                }
+
+                if (minutes == 60) {
+                    hours++;
+                    timeCounter[0] = hours;
+                    timeCounter[1] = 0; // resets "minutes" counter
+                    sendCommand(String.format(restartCommandTemplate, "§7", interval - hours, "hours")); // gray
+                }
+
+                if (hours == interval) {
+                    restartTimer.stop();
+                    stopServer(true);
+                    timeCounter = new int[]{0, 0, 0};
+                } else if (hours == interval - 1) {
+                    // the final hour
+                    // 60 is actually the edge case because it doesn't get reset to 0 until the next iteration
+                    switch (minutes) {
+                        case 30:
+                        case 45:
+                        case 50:
+                        case 55:
+                            if (seconds == 60) {
+                                sendCommand(String.format(restartCommandTemplate, "§e", 60 - minutes, "minutes")); // yellow
+                            }
+                            break;
+                        case 59:
+                            // the final minute
+                            switch (seconds) {
+                                case 30:
+                                case 50:
+                                    sendCommand(String.format(restartCommandTemplate, "§c", 60 - seconds, "seconds")); // red
+                                    break;
+                                case 60:
+                                    sendCommand(String.format(restartCommandTemplate, "§c", 1, "minute")); // red
+                                    break;
+                            }
+                            break;
+                    }
+                }
+            }) : null;
+
             aliveTimer.start();
             if (restartTimer != null) restartTimer.start();
         }
@@ -218,107 +323,6 @@ public class WrapperGUI extends JFrame {
             }
         };
         openInFolderItem.addActionListener(openInFolder);
-
-        aliveTimer = new Timer(100, e -> {
-            if (!server.shouldBeRunning() && server.isRunning()) {
-                aliveTimer.stop();
-                if (restartTimer != null) restartTimer.stop();
-                runButton.setText("Stopping...");
-                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() {
-                        try {
-                            server.stop();
-                        } catch (IOException ioException) {
-                            firePropertyChange("error", null, ioException);
-                        }
-
-                        // Prevents the method from completing until the server is fully shut down
-                        while (true) if (!server.isRunning()) break;
-
-                        return null;
-                    }
-
-                    @Override
-                    protected void done() {
-                        super.done();
-                        String time = new SimpleDateFormat("HH:mm:ss").format(System.currentTimeMillis());
-                        consoleTextArea.append(String.format("[%s] [SSW thread] Server has been stopped.\n", time));
-                        try {
-                            server.getServerProcess().getOutputStream().close();
-                            server.getServerProcess().getInputStream().close();
-                            server.getServerProcess().getErrorStream().close();
-                        } catch (IOException e) {
-                            new InternalErrorDialog(e);
-                        } finally {
-                            sendServerStatus(false);
-                        }
-                    }
-                };
-                worker.addPropertyChangeListener(evt -> {
-                    if (evt.getPropertyName().equalsIgnoreCase("error")) {
-                        new InternalErrorDialog((Exception) evt.getNewValue());
-                        server.getServerProcess().destroy();
-                    }
-                });
-                worker.execute();
-            }
-        });
-
-        // Keeps track of every second in a 3 element array
-        restartTimer = serverSettings.getRestart() ? new Timer(1000, e -> {
-            final int interval = serverSettings.getInterval();
-            int hours = timeCounter[0], minutes = timeCounter[1], seconds = timeCounter[2];
-
-            seconds++;
-
-            if (seconds != 60) {
-                timeCounter[2] = seconds;
-            } else {
-                minutes++;
-                timeCounter[1] = minutes;
-                timeCounter[2] = 0; // resets "seconds" counter
-            }
-
-            if (minutes == 60) {
-                hours++;
-                timeCounter[0] = hours;
-                timeCounter[1] = 0; // resets "minutes" counter
-                sendCommand(String.format(restartCommandTemplate, "§7", interval - hours, "hours")); // gray
-            }
-
-            if (hours == interval) {
-                restartTimer.stop();
-                stopServer();
-                startServer();
-                timeCounter = new int[]{0, 0, 0};
-            } else if (hours == interval - 1) {
-                // the final hour
-                // 60 is actually the edge case because it doesn't get reset to 0 until the next iteration
-                switch (minutes) {
-                    case 30:
-                    case 45:
-                    case 50:
-                    case 55:
-                        if (seconds == 60) {
-                            sendCommand(String.format(restartCommandTemplate, "§e", 60 - minutes, "minutes")); // yellow
-                        }
-                        break;
-                    case 59:
-                        // the final minute
-                        switch (seconds) {
-                            case 30:
-                            case 50:
-                                sendCommand(String.format(restartCommandTemplate, "§c", 60 - seconds, "seconds")); // red
-                                break;
-                            case 60:
-                                sendCommand(String.format(restartCommandTemplate, "§c", 1, "minute")); // red
-                                break;
-                        }
-                        break;
-                }
-            }
-        }) : null;
     }
 
     public MinecraftServer getServer() {
