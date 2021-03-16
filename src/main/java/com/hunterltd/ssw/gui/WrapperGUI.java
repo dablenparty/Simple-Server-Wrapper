@@ -19,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.function.Consumer;
 
 public class WrapperGUI extends JFrame {
@@ -241,8 +242,8 @@ public class WrapperGUI extends JFrame {
                     @Override
                     protected void done() {
                         super.done();
-                        System.out.println("Done shutting down");
-                        consoleTextArea.append("Server has been stopped.\n");
+                        String time = new SimpleDateFormat("HH:mm:ss").format(System.currentTimeMillis());
+                        consoleTextArea.append(String.format("[%s] [SSW thread] Server has been stopped.\n", time));
                         try {
                             server.getServerProcess().getOutputStream().close();
                             server.getServerProcess().getInputStream().close();
