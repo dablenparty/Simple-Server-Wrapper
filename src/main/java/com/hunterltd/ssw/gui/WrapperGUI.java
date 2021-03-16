@@ -126,10 +126,7 @@ public class WrapperGUI extends JFrame {
             return;
         }
 
-        Consumer<String> addConsoleText = text -> {
-            consoleTextArea.append('\n' + text);
-            System.out.println(text);
-        };
+        Consumer<String> addConsoleText = text -> consoleTextArea.append(text + '\n');
 
         // Pipes the server outputs into the GUI using the pre-defined consumers
         StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
@@ -139,7 +136,7 @@ public class WrapperGUI extends JFrame {
     }
 
     public void stopServer() {
-        sendServerStatus(false);
+        server.setShouldBeRunning(false);
     }
 
     private void runButtonAction() {
@@ -152,6 +149,7 @@ public class WrapperGUI extends JFrame {
     }
 
     private void sendServerStatus(boolean start) {
+        server.setShouldBeRunning(start);
         if (server.isRunning()) {
             aliveTimer.start();
             if (restartTimer != null) restartTimer.start();
@@ -168,20 +166,9 @@ public class WrapperGUI extends JFrame {
             runText = "Run";
             title = baseTitle;
 
-            try {
-                server.stop();
-                consoleTextArea.append("\nServer has been stopped.");
-            } catch (IOException e) {
-                server.getServerProcess().destroy();
-                InfoDialog dialog = new InfoDialog("Force stop server",
-                        "An internal IO error occurred, and the server had to be forcibly shut down");
-                dialog.pack();
-                dialog.setVisible(true);
-            }
         }
         runButton.setText(runText);
         setTitle(title);
-
     }
 
     private void selectNewFile() {
@@ -208,7 +195,7 @@ public class WrapperGUI extends JFrame {
             openInFolderItem.removeActionListener(noServerSelected);
             openInFolder = e -> {
                 try {
-                    Desktop.getDesktop().open(server.getServerPath().toFile());
+                    Desktop.getDesktop().open(server.getServerPath().getParent().toFile());
                 } catch (IOException ioException) {
                     InternalErrorDialog errorDialog = new InternalErrorDialog();
                     errorDialog.pack();
@@ -224,15 +211,21 @@ public class WrapperGUI extends JFrame {
         }
 
         aliveTimer = new Timer(100, e -> {
-            if (!server.isRunning()) {
+            if (!server.shouldBeRunning() && server.isRunning()) {
                 aliveTimer.stop();
-                serverPathTextField.setEnabled(true);
-                commandTextField.setEnabled(false);
-                openDialogButton.setEnabled(true);
-                sendButton.setEnabled(false);
-                runButton.setText("Run");
-                setTitle(baseTitle);
                 if (restartTimer != null) restartTimer.stop();
+                try {
+                    server.stop();
+                    consoleTextArea.append("Server has been stopped.\n");
+                } catch (IOException ex) {
+                    server.getServerProcess().destroy();
+                    InfoDialog dialog = new InfoDialog("Force stop server",
+                            "An internal IO error occurred, and the server had to be forcibly shut down");
+                    dialog.pack();
+                    dialog.setVisible(true);
+                } finally {
+                    sendServerStatus(false);
+                }
             }
         });
 
