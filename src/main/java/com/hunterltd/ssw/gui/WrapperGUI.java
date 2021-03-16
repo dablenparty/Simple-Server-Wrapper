@@ -9,19 +9,21 @@ import com.hunterltd.ssw.utilities.Settings;
 import com.hunterltd.ssw.utilities.SmartScroller;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 public class WrapperGUI extends JFrame {
     private static final long serialVersionUID = 1L;
-    private FileDialog serverFileInfo;
+    private JFileChooser serverFileInfo;
     private JButton openDialogButton;
     private JButton runButton;
     private JButton sendButton;
@@ -64,16 +66,17 @@ public class WrapperGUI extends JFrame {
 
         // Menu Bar
         MenuBar menuBar = new MenuBar();
-        Menu fileMenu = new Menu("File");
+        Menu fileMenu = new Menu("File"),
+                serverMenu = new Menu("Server");
         MenuItem settingsItem = new MenuItem("Server Settings"),
                 openInFolderItem = new MenuItem("Open in folder"),
                 curseInstallItem = new MenuItem("Install CurseForge Modpack");
-        fileMenu.add(settingsItem);
-        fileMenu.add(openInFolderItem);
         fileMenu.add(curseInstallItem);
+        serverMenu.add(settingsItem);
+        serverMenu.add(openInFolderItem);
         menuBar.add(fileMenu);
-        settingsItem.addActionListener(noServerSelected);
-        openInFolderItem.addActionListener(noServerSelected);
+        menuBar.add(serverMenu);
+        serverMenu.addActionListener(noServerSelected);
         curseInstallItem.addActionListener(e -> {
             CurseInstaller installer = new CurseInstaller();
             installer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -90,7 +93,6 @@ public class WrapperGUI extends JFrame {
             installer.pack();
             installer.setVisible(true);
         });
-
 
         this.setMenuBar(menuBar);
 
@@ -146,7 +148,7 @@ public class WrapperGUI extends JFrame {
 
     private void sendServerStatus(boolean start) {
         server.setShouldBeRunning(start);
-        if (server.isRunning()) {
+        if (server.isRunning() && server.shouldBeRunning()) {
             aliveTimer.start();
             if (restartTimer != null) restartTimer.start();
         }
@@ -157,7 +159,7 @@ public class WrapperGUI extends JFrame {
         String runText, title;
         if (start) {
             runText = "Stop";
-            title = baseTitle + " - " + serverFileInfo.getFile();
+            title = baseTitle + " - " + serverFileInfo.getSelectedFile();
         } else {
             runText = "Run";
             title = baseTitle;
@@ -168,54 +170,83 @@ public class WrapperGUI extends JFrame {
     }
 
     private void selectNewFile() {
-        serverFileInfo = new FileDialog(this, "Select your server.jar", FileDialog.LOAD);
-        serverFileInfo.setFilenameFilter((dir, name) -> name.endsWith(".jar"));
+        serverFileInfo = new JFileChooser();
+        serverFileInfo.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.getName().toLowerCase().endsWith(".jar") || f.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Java Archive (*.jar)";
+            }
+        });
+        if (serverFileInfo.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
         serverFileInfo.setVisible(true);
-        MenuItem settingsItem = this.getMenuBar().getMenu(0).getItem(0),
-                openInFolderItem = this.getMenuBar().getMenu(0).getItem(1);
+        MenuItem settingsItem = this.getMenuBar().getMenu(1).getItem(0),
+                openInFolderItem = this.getMenuBar().getMenu(1).getItem(1);
         settingsItem.removeActionListener(settingsOpen);
         openInFolderItem.removeActionListener(openInFolder);
+
         settingsOpen = e -> {
             SettingsDialog settingsDialog = new SettingsDialog(server);
             settingsDialog.pack();
             settingsDialog.setVisible(true);
         };
         try {
-            serverPathTextField.setText(Paths.get(serverFileInfo.getDirectory(), serverFileInfo.getFile()).toString());
-            serverSettings = new Settings(Paths.get(serverFileInfo.getDirectory(), "ssw", "wrapperSettings.json"));
-            settingsItem.removeActionListener(noServerSelected);
-            settingsItem.addActionListener(settingsOpen);
-            server = new MinecraftServer(serverFileInfo.getDirectory(),
-                    serverFileInfo.getFile(),
-                    serverSettings);
-            openInFolderItem.removeActionListener(noServerSelected);
-            openInFolder = e -> {
-                try {
-                    // Opens the enclosing folder in File Explorer, Finder, etc.
-                    Desktop.getDesktop().open(server.getServerPath().getParent().toFile());
-                } catch (IOException ioException) {
-                    new InternalErrorDialog(ioException);
-                }
-            };
-            openInFolderItem.addActionListener(openInFolder);
-        } catch (NullPointerException ignored) {
+            serverSettings = new Settings(Paths.get(serverFileInfo.getSelectedFile().getParent(),
+                    "ssw",
+                    "wrapperSettings.json"));
         } catch (IOException e) {
+            e.printStackTrace();
             new InternalErrorDialog(e);
         }
+        settingsItem.addActionListener(settingsOpen);
+
+        serverPathTextField.setText(serverFileInfo.getSelectedFile().toString());
+        this.getMenuBar().getMenu(1).removeActionListener(noServerSelected);
+        server = new MinecraftServer(serverFileInfo.getSelectedFile(),
+                serverSettings);
+        openInFolder = e -> {
+            try {
+                // Opens the enclosing folder in File Explorer, Finder, etc.
+                Desktop.getDesktop().open(server.getServerPath().getParent().toFile());
+            } catch (IOException ioException) {
+                new InternalErrorDialog(ioException);
+            }
+        };
+        openInFolderItem.addActionListener(openInFolder);
 
         aliveTimer = new Timer(100, e -> {
             if (!server.shouldBeRunning() && server.isRunning()) {
                 aliveTimer.stop();
                 if (restartTimer != null) restartTimer.stop();
-                try {
-                    server.stop();
-                    consoleTextArea.append("Server has been stopped.\n");
-                } catch (IOException ex) {
-                    server.getServerProcess().destroy();
-                    new InternalErrorDialog(ex);
-                } finally {
-                    sendServerStatus(false);
-                }
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() {
+                        try {
+                            server.stop();
+                        } catch (IOException ioException) {
+                            firePropertyChange("error", null, ioException);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        super.done();
+                        consoleTextArea.append("Server has been stopped.\n");
+                    }
+                };
+                worker.addPropertyChangeListener(evt -> {
+                    if (evt.getPropertyName().equalsIgnoreCase("error")) {
+                        new InternalErrorDialog((Exception) evt.getNewValue());
+                        server.getServerProcess().destroy();
+                    }
+                });
+                worker.execute();
+                sendServerStatus(false);
             }
         });
 
