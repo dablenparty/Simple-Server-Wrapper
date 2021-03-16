@@ -24,6 +24,10 @@ public class MinecraftServer {
     private boolean propsExists;
     private boolean shouldBeRunning;
 
+    public MinecraftServer(File serverFile, Settings serverSettings) {
+        this(serverFile.getParent(), serverFile.getName(), serverSettings);
+    }
+
     public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
