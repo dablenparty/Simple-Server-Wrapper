@@ -23,6 +23,7 @@ public class MinecraftServer {
     private ServerProperties properties = null;
     private boolean propsExists;
     private boolean shouldBeRunning;
+    private boolean shouldRestart = false;
 
     public MinecraftServer(File serverFile, Settings serverSettings) {
         this(serverFile.getParent(), serverFile.getName(), serverSettings);
@@ -151,5 +152,13 @@ public class MinecraftServer {
 
     public boolean propertiesExists() {
         return propsExists;
+    }
+
+    public boolean shouldRestart() {
+        return shouldRestart;
+    }
+
+    public void setShouldRestart(boolean shouldRestart) {
+        this.shouldRestart = shouldRestart;
     }
 }
