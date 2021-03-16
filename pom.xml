@@ -6,7 +6,7 @@
 
     <groupId>com.hunterltd.ssw</groupId>
     <artifactId>Simple-Server-Wrapper</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
     <dependencies>
         <dependency>
             <groupId>net.lingala.zip4j</groupId>
