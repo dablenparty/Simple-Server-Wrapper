@@ -55,7 +55,7 @@
           </grid>
         </constraints>
         <properties>
-          <editable value="true"/>
+          <editable value="false"/>
           <text value=""/>
           <toolTipText value="File path to the server"/>
         </properties>
