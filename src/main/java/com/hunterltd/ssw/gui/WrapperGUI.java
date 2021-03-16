@@ -212,10 +212,7 @@ public class WrapperGUI extends JFrame {
                     consoleTextArea.append("Server has been stopped.\n");
                 } catch (IOException ex) {
                     server.getServerProcess().destroy();
-                    InfoDialog dialog = new InfoDialog("Force stop server",
-                            "An internal IO error occurred, and the server had to be forcibly shut down");
-                    dialog.pack();
-                    dialog.setVisible(true);
+                    new InternalErrorDialog(ex);
                 } finally {
                     sendServerStatus(false);
                 }
