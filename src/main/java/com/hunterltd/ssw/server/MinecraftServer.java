@@ -102,9 +102,7 @@ public class MinecraftServer {
             writer.flush();
             writer.close();
         } catch (IOException e) {
-            InternalErrorDialog errorDialog = new InternalErrorDialog();
-            errorDialog.pack();
-            errorDialog.setVisible(true);
+            new InternalErrorDialog(e);
         } finally {
             InfoDialog dialog = new InfoDialog("File created",
                     String.format("\"%s\" was successfully created in the server folder", launchBatch.getName()));

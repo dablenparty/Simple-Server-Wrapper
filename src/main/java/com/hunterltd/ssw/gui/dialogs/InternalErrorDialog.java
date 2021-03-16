@@ -1,7 +1,9 @@
 package com.hunterltd.ssw.gui.dialogs;
 
 public class InternalErrorDialog extends InfoDialog {
-    public InternalErrorDialog() {
-        super("Internal Error", "An unknown internal error occurred.");
+    public InternalErrorDialog(Exception exception) {
+        super("Internal Error", "An internal error occurred: " + exception.getLocalizedMessage());
+        this.pack();
+        this.setVisible(true);
     }
 }

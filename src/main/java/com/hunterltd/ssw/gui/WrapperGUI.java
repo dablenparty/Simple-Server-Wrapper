@@ -103,9 +103,7 @@ public class WrapperGUI extends JFrame {
             server.sendCommand(cmd);
         } catch (IOException ioException) {
             ioException.printStackTrace();
-            InternalErrorDialog errDialog = new InternalErrorDialog();
-            errDialog.pack();
-            errDialog.setVisible(true);
+            new InternalErrorDialog(ioException);
         }
     }
 
@@ -117,9 +115,7 @@ public class WrapperGUI extends JFrame {
             server.run();
         } catch (IOException e) {
             e.printStackTrace();
-            InternalErrorDialog errDialog = new InternalErrorDialog();
-            errDialog.pack();
-            errDialog.setVisible(true);
+            new InternalErrorDialog(e);
             if (server != null && server.isRunning()) {
                 server.getServerProcess().destroy();
             }
@@ -195,19 +191,16 @@ public class WrapperGUI extends JFrame {
             openInFolderItem.removeActionListener(noServerSelected);
             openInFolder = e -> {
                 try {
+                    // Opens the enclosing folder in File Explorer, Finder, etc.
                     Desktop.getDesktop().open(server.getServerPath().getParent().toFile());
                 } catch (IOException ioException) {
-                    InternalErrorDialog errorDialog = new InternalErrorDialog();
-                    errorDialog.pack();
-                    errorDialog.setVisible(true);
+                    new InternalErrorDialog(ioException);
                 }
             };
             openInFolderItem.addActionListener(openInFolder);
         } catch (NullPointerException ignored) {
         } catch (IOException e) {
-            InternalErrorDialog errorDialog = new InternalErrorDialog();
-            errorDialog.pack();
-            errorDialog.setVisible(true);
+            new InternalErrorDialog(e);
         }
 
         aliveTimer = new Timer(100, e -> {
