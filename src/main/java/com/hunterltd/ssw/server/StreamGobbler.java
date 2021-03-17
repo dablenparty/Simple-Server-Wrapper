@@ -1,6 +1,9 @@
 package com.hunterltd.ssw.server;
 
+import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.Executors;
@@ -17,7 +20,12 @@ public class StreamGobbler implements Runnable {
 
     @Override
     public void run() {
-        new BufferedReader(new InputStreamReader(inputStream)).lines().forEach(consumer);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            reader.lines().forEach(consumer);
+        } catch (IOException e) {
+            e.printStackTrace();
+            new InternalErrorDialog(e);
+        }
     }
 
     public static void execute(InputStream inputStream, Consumer<String> consumer) {

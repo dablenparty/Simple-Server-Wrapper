@@ -76,7 +76,7 @@ public class MinecraftServer {
         String command = String.join(" ", serverArgs);
         File launchBatch = Paths.get(String.valueOf(serverPath.getParent()), String.format("launch.%s", ext)).toFile();
 
-        try {
+        try (PrintWriter writer = new PrintWriter(launchBatch)) {
             if (!launchBatch.createNewFile()) {
                 int result = JOptionPane.showConfirmDialog(null,
                         "The launch file already exists! Would you like to overwrite it?",
@@ -87,13 +87,12 @@ public class MinecraftServer {
                     return;
                 }
             }
-            PrintWriter writer = new PrintWriter(launchBatch);
+
             if (ext.equals("bat")) {
                 command += "\npause";
             }
             writer.write(command);
             writer.flush();
-            writer.close();
         } catch (IOException e) {
             new InternalErrorDialog(e);
         } finally {
@@ -135,6 +134,10 @@ public class MinecraftServer {
             return true;
         } catch (FileNotFoundException e) {
             propsExists = false;
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            new InternalErrorDialog(e);
             return false;
         }
     }
