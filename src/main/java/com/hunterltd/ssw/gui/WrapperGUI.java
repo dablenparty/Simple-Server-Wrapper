@@ -50,7 +50,7 @@ public class WrapperGUI extends JFrame {
     private Settings serverSettings;
 
     public WrapperGUI() {
-        new SmartScroller(consoleScrollPane);
+        add(rootPanel);
 
         // Action Listeners
         sendButton.addActionListener(e -> sendCommand(commandTextField.getText()));
@@ -97,8 +97,8 @@ public class WrapperGUI extends JFrame {
 
         this.setMenuBar(menuBar);
 
+        new SmartScroller(consoleScrollPane);
         setTitle(baseTitle);
-        add(rootPanel);
     }
 
     private void sendCommand(String cmd) {

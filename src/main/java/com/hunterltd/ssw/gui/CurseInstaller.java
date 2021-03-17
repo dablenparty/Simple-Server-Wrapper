@@ -33,6 +33,8 @@ public class CurseInstaller extends JFrame {
     private SwingWorker<Void, Void> worker;
 
     public CurseInstaller() {
+        add(rootPanel);
+
         newFileButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new FileFilter() {
@@ -177,7 +179,6 @@ public class CurseInstaller extends JFrame {
         });
 
         setTitle("CurseForge Modpack Installer");
-        add(rootPanel);
     }
 
     public SwingWorker<Void, Void> getWorker() {

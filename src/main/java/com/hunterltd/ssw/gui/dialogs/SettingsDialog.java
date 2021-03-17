@@ -29,6 +29,8 @@ public class SettingsDialog extends JDialog {
     private final Settings settings;
 
     public SettingsDialog(MinecraftServer server) {
+        add(rootPanel);
+
         settings = server.getServerSettings();
         setContentPane(rootPanel);
         setModal(true);
