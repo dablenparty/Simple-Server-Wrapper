@@ -19,12 +19,16 @@ public class SettingsDialog extends JDialog {
     private JCheckBox automaticRestartCheckBox;
     private JComboBox<Integer> restartIntervalComboBox;
     private JLabel memoryLabel;
-    private JLabel intervalLabel;
+    private JLabel restartIntervalLabel;
     private JSlider restartIntervalSlider;
     private JTextField extraArgsTextField;
     private JButton batchFileButton;
     private JScrollPane propsScrollPane;
     private JTable propsTable;
+    private JCheckBox automaticShutdownCheckBox;
+    private JComboBox<Integer> shutdownIntervalComboBox;
+    private JLabel shutdownIntervalLabel;
+    private JSlider shutdownIntervalSlider;
     private boolean directChange = true;
     private final Settings settings;
 
@@ -42,6 +46,7 @@ public class SettingsDialog extends JDialog {
 
         for (double i = 0.5; i <= 16; i+=0.5) memoryComboBox.addItem(i);
         for (int i = 1; i <= 24; i++) restartIntervalComboBox.addItem(i);
+        for (int i = 5; i <= 60; i+=5) shutdownIntervalComboBox.addItem(i);
 
         final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "txt";
         batchFileButton.addActionListener(e -> server.generateBatch(ext));
@@ -52,13 +57,20 @@ public class SettingsDialog extends JDialog {
         restartIntervalSlider.addChangeListener(e -> updateComboBox(restartIntervalComboBox, (JSlider) e.getSource()));
         restartIntervalComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), restartIntervalSlider));
 
+        shutdownIntervalSlider.addChangeListener(e -> updateComboBox(shutdownIntervalComboBox, (JSlider) e.getSource()));
+        shutdownIntervalComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), shutdownIntervalSlider));
+
         automaticRestartCheckBox.addChangeListener(e -> setPanelEnabled((JCheckBox) e.getSource(),
-                new JComponent[]{intervalLabel, restartIntervalSlider, restartIntervalComboBox}));
+                new JComponent[]{restartIntervalLabel, restartIntervalSlider, restartIntervalComboBox}));
+        automaticShutdownCheckBox.addChangeListener(e -> setPanelEnabled((JCheckBox) e.getSource(),
+                new JComponent[]{shutdownIntervalLabel, shutdownIntervalSlider, shutdownIntervalComboBox}));
 
         // Set components based on UserSettings
         memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024) - 1);
         automaticRestartCheckBox.setSelected(settings.getRestart());
-        restartIntervalComboBox.setSelectedIndex(settings.getInterval() - 1);
+        restartIntervalComboBox.setSelectedIndex(settings.getRestartInterval() - 1);
+        automaticShutdownCheckBox.setSelected(settings.getShutdown());
+        shutdownIntervalComboBox.setSelectedIndex(settings.getShutdownInterval() / 5);
         extraArgsTextField.setText(String.join(" ", settings.getExtraArgs()));
         if (server.propertiesExists() || server.updateProperties()) {
             propsTable.setModel(new PropertiesTableModel(server.getProperties()));
@@ -80,11 +92,11 @@ public class SettingsDialog extends JDialog {
             );
             if (result == JOptionPane.YES_OPTION) {
                 settings.setRestart(automaticRestartCheckBox.isSelected());
-                settings.setInterval(restartIntervalSlider.getValue());
+                settings.setRestartInterval(restartIntervalSlider.getValue());
             }
         } else {
             settings.setRestart(automaticRestartCheckBox.isSelected());
-            settings.setInterval(restartIntervalSlider.getValue());
+            settings.setRestartInterval(restartIntervalSlider.getValue());
         }
 
         settings.setExtraArgs(extraArgsTextField.getText().split(" "));
@@ -119,7 +131,7 @@ public class SettingsDialog extends JDialog {
 
     private void updateComboBox(JComboBox<?> comboBox, JSlider slider) {
         directChange = false;
-        comboBox.setSelectedIndex(slider.getValue() - 1);
+        comboBox.setSelectedIndex(slider.getValue());
         directChange = true;
     }
 }
