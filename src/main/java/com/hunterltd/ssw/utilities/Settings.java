@@ -26,7 +26,9 @@ public class Settings extends UserDataObject {
 
         //Tab 2
         this.put("autoRestart", false);
-        this.put("restartInterval", 1);
+        this.put("restartInterval", 1); // hours
+        this.put("autoShutdown", false);
+        this.put("shutdownInterval", 30); // minutes, defaults to 1 minecraft day
     }
 
     public int getMemory() {
@@ -49,6 +51,14 @@ public class Settings extends UserDataObject {
         this.replace("autoRestart", value);
     }
 
+    public boolean getShutdown() {
+        return (boolean) this.get("autoShutdown");
+    }
+
+    public void setShutdown(boolean value) {
+        this.replace("autoShutdown", value);
+    }
+
     public List<String> getExtraArgs() {
         return (List<String>) this.get("extraArgs");
     }
@@ -64,7 +74,7 @@ public class Settings extends UserDataObject {
         return list.size() > 0 && !list.get(0).equalsIgnoreCase("");
     }
 
-    public int getInterval() {
+    public int getRestartInterval() {
         // Sometimes it parses as a Long, sometimes it parses as an Integer
         // I haven't found a pattern to identify which it chooses (yet)
         try {
@@ -74,7 +84,19 @@ public class Settings extends UserDataObject {
         }
     }
 
-    public void setInterval(int value) {
+    public void setRestartInterval(int value) {
         this.replace("restartInterval", value);
+    }
+
+    public int getShutdownInterval() {
+        try {
+            return ((Long) this.get("shutdownInterval")).intValue();
+        } catch (ClassCastException e) {
+            return (int) this.get("shutdownInterval");
+        }
+    }
+
+    public void setShutdownInterval(int value) {
+        this.replace("shutdownInterval", value);
     }
 }
