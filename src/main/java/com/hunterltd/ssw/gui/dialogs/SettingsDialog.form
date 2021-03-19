@@ -93,8 +93,8 @@
                     </constraints>
                     <properties>
                       <majorTickSpacing value="2"/>
-                      <maximum value="32"/>
-                      <minimum value="1"/>
+                      <maximum value="31"/>
+                      <minimum value="0"/>
                       <minorTickSpacing value="1"/>
                       <paintTicks value="true"/>
                       <paintTrack value="true"/>
@@ -167,7 +167,7 @@
                       <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
-                  <component id="dc671" class="javax.swing.JLabel" binding="intervalLabel">
+                  <component id="dc671" class="javax.swing.JLabel" binding="restartIntervalLabel">
                     <constraints>
                       <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -192,8 +192,8 @@
                     <properties>
                       <enabled value="false"/>
                       <majorTickSpacing value="6"/>
-                      <maximum value="24"/>
-                      <minimum value="1"/>
+                      <maximum value="23"/>
+                      <minimum value="0"/>
                       <minorTickSpacing value="1"/>
                       <paintTicks value="true"/>
                       <snapToTicks value="true"/>
@@ -214,7 +214,7 @@
                       <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </hspacer>
-                  <component id="4e64e" class="javax.swing.JLabel">
+                  <component id="4e64e" class="javax.swing.JLabel" binding="shutdownIntervalLabel">
                     <constraints>
                       <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
@@ -241,22 +241,22 @@
                       <enabled value="false"/>
                     </properties>
                   </component>
-                  <component id="d8597" class="javax.swing.JSlider">
+                  <component id="d8597" class="javax.swing.JSlider" binding="shutdownIntervalSlider">
                     <constraints>
                       <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
-                      <majorTickSpacing value="15"/>
-                      <maximum value="60"/>
-                      <minimum value="5"/>
-                      <minorTickSpacing value="5"/>
+                      <majorTickSpacing value="4"/>
+                      <maximum value="11"/>
+                      <minimum value="0"/>
+                      <minorTickSpacing value="1"/>
                       <paintLabels value="false"/>
                       <paintTicks value="true"/>
                       <paintTrack value="true"/>
-                      <snapToTicks value="false"/>
+                      <snapToTicks value="true"/>
                       <toolTipText value="Minutes before the server automatically closes when no players are online"/>
-                      <value value="10"/>
+                      <value value="11"/>
                     </properties>
                   </component>
                 </children>
