@@ -66,11 +66,11 @@ public class SettingsDialog extends JDialog {
                 new JComponent[]{shutdownIntervalLabel, shutdownIntervalSlider, shutdownIntervalComboBox}));
 
         // Set components based on UserSettings
-        memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024));
+        memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024) - 1);
         automaticRestartCheckBox.setSelected(settings.getRestart());
-        restartIntervalComboBox.setSelectedIndex(settings.getRestartInterval());
+        restartIntervalComboBox.setSelectedIndex(settings.getRestartInterval() - 1);
         automaticShutdownCheckBox.setSelected(settings.getShutdown());
-        shutdownIntervalComboBox.setSelectedIndex(settings.getShutdownInterval() / 5);
+        shutdownIntervalComboBox.setSelectedIndex((settings.getShutdownInterval() / 5) - 1);
         extraArgsTextField.setText(String.join(" ", settings.getExtraArgs()));
         if (server.propertiesExists() || server.updateProperties()) {
             propsTable.setModel(new PropertiesTableModel(server.getProperties()));
@@ -121,7 +121,7 @@ public class SettingsDialog extends JDialog {
 
     private void updateSlider(JComboBox<?> comboBox, JSlider slider) {
         if (directChange) {
-            slider.setValue(comboBox.getSelectedIndex());
+            slider.setValue(comboBox.getSelectedIndex() + 1);
         }
     }
 
