@@ -303,6 +303,9 @@ public class WrapperGUI extends JFrame {
                 }
             });
 
+            // this should be moved off of the EDT, but ScheduledExecutorService does not work (the queue continues to
+            // be invoked despite the thread being interrupted). Maybe just do a while loop in a worker thread that
+            // checks a boolean to tell if it should ping or not...
             playerCountListenerTimer = new Timer(2000, e -> {
                 ServerListPing pinger = new ServerListPing();
                 try {
