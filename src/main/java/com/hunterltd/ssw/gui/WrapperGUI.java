@@ -6,6 +6,7 @@ import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
 import com.hunterltd.ssw.server.ConnectionListener;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.server.StreamGobbler;
+import com.hunterltd.ssw.utilities.ServerListPing;
 import com.hunterltd.ssw.utilities.Settings;
 import com.hunterltd.ssw.utilities.SmartScroller;
 
@@ -18,6 +19,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.InetSocketAddress;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.function.Consumer;
@@ -36,7 +39,7 @@ public class WrapperGUI extends JFrame {
     private JTextField commandTextField;
     private JTextField serverPathTextField;
     private MinecraftServer server;
-    private Timer aliveTimer, restartTimer, connectionListenerTimer;
+    private Timer aliveTimer, restartTimer, connectionListenerTimer, shutdownTimer, playerCountListenerTimer;
     private int[] restartCounter = new int[]{0, 0, 0}, // H:M:S
             shutdownCounter = new int[]{0, 0}; // M:S
     private final String restartCommandTemplate = "me %sis restarting in %d %s!"; // color code, time integer, time unit
@@ -161,9 +164,13 @@ public class WrapperGUI extends JFrame {
         server.setShouldBeRunning(start);
         if (server.isRunning() && server.shouldBeRunning()) {
             aliveTimer = new Timer(100, e -> {
-                if (!server.shouldBeRunning() && server.isRunning()) {
+                if ((!server.shouldBeRunning() && server.isRunning()) || !server.isRunning()) {
                     aliveTimer.stop();
                     if (restartTimer != null) restartTimer.stop();
+                    if (playerCountListenerTimer != null && shutdownTimer != null) {
+                        playerCountListenerTimer.stop();
+                        shutdownTimer.stop();
+                    }
                     runButton.setText("Stopping...");
                     SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                         @Override
@@ -273,6 +280,49 @@ public class WrapperGUI extends JFrame {
             runText = "Stop";
             title = baseTitle + " - " + serverFileInfo.getSelectedFile();
 //            ConnectionListener.stop(); // this should be stopped before the sever is launched to avoid binding issues
+
+            // This is very similar to the restart timer in structure
+            shutdownTimer = new Timer(1000, e -> {
+                final int interval = serverSettings.getShutdownInterval();
+                int minutes = shutdownCounter[0], seconds = shutdownCounter[1];
+
+                seconds++;
+
+                if (seconds != 60) {
+                    shutdownCounter[1] = seconds;
+                } else {
+                    minutes++;
+                    shutdownCounter[0] = minutes;
+                    shutdownCounter[1] = 0; // resets seconds
+                }
+
+                if (minutes == interval) {
+                    shutdownTimer.stop();
+                    stopServer();
+                    shutdownCounter = new int[]{0, 0};
+                }
+            });
+
+            playerCountListenerTimer = new Timer(2000, e -> {
+                ServerListPing pinger = new ServerListPing();
+                try {
+                    pinger.setAddress(new InetSocketAddress(25565));
+                    ServerListPing.StatusResponse response = pinger.fetchData();
+                    if (response.getPlayers().getOnline() != 0) {
+                        if (shutdownTimer != null && shutdownTimer.isRunning()) {
+                            shutdownTimer.stop();
+                            shutdownCounter = new int[]{0, 0};
+                        }
+                        return; // do nothing if players are online
+                    }
+                } catch (IOException | NullPointerException exception) {
+                    exception.printStackTrace();
+                    return;
+                }
+                if (!shutdownTimer.isRunning()) shutdownTimer.start();
+            });
+
+            playerCountListenerTimer.start();
         } else {
             runText = "Run";
             title = baseTitle;
@@ -281,6 +331,7 @@ public class WrapperGUI extends JFrame {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             connectionListenerTimer = new Timer(1000, e -> {
                 if (!ConnectionListener.isConnectionAttempted()) {
                     return;
