@@ -93,8 +93,8 @@
                     </constraints>
                     <properties>
                       <majorTickSpacing value="2"/>
-                      <maximum value="31"/>
-                      <minimum value="0"/>
+                      <maximum value="32"/>
+                      <minimum value="1"/>
                       <minorTickSpacing value="1"/>
                       <paintTicks value="true"/>
                       <paintTrack value="true"/>
@@ -192,8 +192,8 @@
                     <properties>
                       <enabled value="false"/>
                       <majorTickSpacing value="6"/>
-                      <maximum value="23"/>
-                      <minimum value="0"/>
+                      <maximum value="24"/>
+                      <minimum value="1"/>
                       <minorTickSpacing value="1"/>
                       <paintTicks value="true"/>
                       <snapToTicks value="true"/>
@@ -248,8 +248,8 @@
                     <properties>
                       <enabled value="false"/>
                       <majorTickSpacing value="4"/>
-                      <maximum value="11"/>
-                      <minimum value="0"/>
+                      <maximum value="12"/>
+                      <minimum value="1"/>
                       <minorTickSpacing value="1"/>
                       <paintLabels value="false"/>
                       <paintTicks value="true"/>

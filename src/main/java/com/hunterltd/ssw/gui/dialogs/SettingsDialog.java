@@ -66,9 +66,9 @@ public class SettingsDialog extends JDialog {
                 new JComponent[]{shutdownIntervalLabel, shutdownIntervalSlider, shutdownIntervalComboBox}));
 
         // Set components based on UserSettings
-        memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024) - 1);
+        memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024));
         automaticRestartCheckBox.setSelected(settings.getRestart());
-        restartIntervalComboBox.setSelectedIndex(settings.getRestartInterval() - 1);
+        restartIntervalComboBox.setSelectedIndex(settings.getRestartInterval());
         automaticShutdownCheckBox.setSelected(settings.getShutdown());
         shutdownIntervalComboBox.setSelectedIndex(settings.getShutdownInterval() / 5);
         extraArgsTextField.setText(String.join(" ", settings.getExtraArgs()));
@@ -81,8 +81,8 @@ public class SettingsDialog extends JDialog {
 
     private void onSave() {
         settings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
-        if (automaticRestartCheckBox.isSelected() &&
-                !settings.getRestart()) {
+        if ((automaticRestartCheckBox.isSelected() && !settings.getRestart())
+                || (automaticShutdownCheckBox.isSelected() && !settings.getShutdown())) {
             int result = JOptionPane.showConfirmDialog(
                     this,
                     "If a server is running, it will need to be restarted for these changes to take effect. " +
@@ -93,10 +93,14 @@ public class SettingsDialog extends JDialog {
             if (result == JOptionPane.YES_OPTION) {
                 settings.setRestart(automaticRestartCheckBox.isSelected());
                 settings.setRestartInterval(restartIntervalSlider.getValue());
+                settings.setShutdown(automaticShutdownCheckBox.isSelected());
+                settings.setShutdownInterval(shutdownIntervalSlider.getValue());
             }
         } else {
             settings.setRestart(automaticRestartCheckBox.isSelected());
             settings.setRestartInterval(restartIntervalSlider.getValue());
+            settings.setShutdown(automaticShutdownCheckBox.isSelected());
+            settings.setShutdownInterval(shutdownIntervalSlider.getValue() * 5);
         }
 
         settings.setExtraArgs(extraArgsTextField.getText().split(" "));
@@ -117,7 +121,7 @@ public class SettingsDialog extends JDialog {
 
     private void updateSlider(JComboBox<?> comboBox, JSlider slider) {
         if (directChange) {
-            slider.setValue(comboBox.getSelectedIndex() + 1);
+            slider.setValue(comboBox.getSelectedIndex());
         }
     }
 
@@ -131,7 +135,7 @@ public class SettingsDialog extends JDialog {
 
     private void updateComboBox(JComboBox<?> comboBox, JSlider slider) {
         directChange = false;
-        comboBox.setSelectedIndex(slider.getValue());
+        comboBox.setSelectedIndex(slider.getValue() - 1);
         directChange = true;
     }
 }
