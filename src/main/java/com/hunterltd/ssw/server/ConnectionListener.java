@@ -19,7 +19,7 @@ public class ConnectionListener {
             @Override
             public void completed(AsynchronousSocketChannel result, Void attachment) {
                 listener.accept(null, this);
-                System.out.println("Someone attempted to connect to the server. Launching it...");
+                System.out.println("Connection accepted");
                 connectionAttempted = true;
                 if (result.isOpen()) {
                     try {
