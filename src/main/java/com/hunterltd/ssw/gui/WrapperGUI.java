@@ -19,8 +19,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.ConnectException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.function.Consumer;
@@ -52,6 +53,8 @@ public class WrapperGUI extends JFrame {
     };
     private ActionListener settingsOpen, openInFolder;
     private Settings serverSettings;
+    private SwingWorker<Void, Void> serverPingWorker;
+    private boolean serverShuttingDown = false;
 
     public WrapperGUI() {
         add(rootPanel);
@@ -147,6 +150,7 @@ public class WrapperGUI extends JFrame {
     }
 
     public void stopServer(boolean restart) {
+        serverShuttingDown = true;
         server.setShouldRestart(restart);
         server.setShouldBeRunning(false);
     }
@@ -201,6 +205,7 @@ public class WrapperGUI extends JFrame {
                             } finally {
                                 if (server.shouldRestart()) startServer();
                                 else sendServerStatus(false);
+                                serverShuttingDown = false;
                             }
                         }
                     };
@@ -306,32 +311,41 @@ public class WrapperGUI extends JFrame {
             // this should be moved off of the EDT, but ScheduledExecutorService does not work (the queue continues to
             // be invoked despite the thread being interrupted). Maybe just do a while loop in a worker thread that
             // checks a boolean to tell if it should ping or not...
-            playerCountListenerTimer = new Timer(2000, e -> {
-                ServerListPing pinger = new ServerListPing();
-                try {
-                    pinger.setAddress(new InetSocketAddress(25565));
-                    ServerListPing.StatusResponse response = pinger.fetchData();
-                    if (response.getPlayers().getOnline() != 0) {
-                        if (shutdownTimer != null && shutdownTimer.isRunning()) {
-                            shutdownTimer.stop();
-                            shutdownCounter = new int[]{0, 0};
-                        }
-                        return; // do nothing if players are online
-                    }
-                } catch (IOException | NullPointerException exception) {
-                    exception.printStackTrace();
-                    return;
-                }
-                if (!shutdownTimer.isRunning()) shutdownTimer.start();
-            });
-
-            playerCountListenerTimer.start();
+//            playerCountListenerTimer = new Timer(2000, e -> {
+//                ServerListPing pinger = new ServerListPing();
+//                try {
+//                    pinger.setAddress(new InetSocketAddress(25565));
+//                    ServerListPing.StatusResponse response = pinger.fetchData();
+//                    if (response.getPlayers().getOnline() != 0) {
+//                        if (shutdownTimer != null && shutdownTimer.isRunning()) {
+//                            shutdownTimer.stop();
+//                            shutdownCounter = new int[]{0, 0};
+//                        }
+//                        return; // do nothing if players are online
+//                    }
+//                } catch (IOException | NullPointerException exception) {
+//                    exception.printStackTrace();
+//                    return;
+//                }
+//                if (!shutdownTimer.isRunning()) shutdownTimer.start();
+//            });
+//
+//            playerCountListenerTimer.start();
+            serverPingWorker.execute();
         } else {
             runText = "Run";
             title = baseTitle;
             try {
                 ConnectionListener.start(25565);
             } catch (IOException e) {
+                if (e instanceof BindException) {
+                    InfoDialog dialog = new InfoDialog("Bind Exception",
+                            "A bind exception occurred when starting the port listener. This usually means that " +
+                                    "there's already a server running. Check task manager for a java process using a " +
+                                    "lot of memory");
+                    dialog.pack();
+                    dialog.setVisible(true);
+                }
                 e.printStackTrace();
             }
 
@@ -339,7 +353,8 @@ public class WrapperGUI extends JFrame {
                 if (!ConnectionListener.isConnectionAttempted()) {
                     return;
                 }
-                if (serverSettings.getShutdown() && !server.isRunning()) {
+                // SocketException
+                if (serverSettings.getShutdown() && !server.isRunning() && !serverShuttingDown) {
                     connectionListenerTimer.stop();
                     startServer();
                 }
@@ -351,6 +366,10 @@ public class WrapperGUI extends JFrame {
     }
 
     private void selectNewFile() {
+        try {
+            serverPingWorker.cancel(true);
+        } catch (NullPointerException ignored) {
+        }
         serverFileInfo = new JFileChooser();
         serverFileInfo.setFileFilter(new FileFilter() {
             @Override
@@ -398,6 +417,41 @@ public class WrapperGUI extends JFrame {
             }
         };
         openInFolderItem.addActionListener(openInFolder);
+
+        serverPingWorker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws InterruptedException {
+                ServerListPing pinger = new ServerListPing();
+                pinger.setAddress(new InetSocketAddress(25565));
+                do {
+                    try {
+                        // putting this in the try block lets me still sleep the thread from the if statement without
+                        // calling sleep again
+                        if (!server.isRunning() || serverShuttingDown) continue;
+
+                        ServerListPing.StatusResponse response = pinger.fetchData();
+                        if (response.getPlayers().getOnline() != 0) {
+                            if (shutdownTimer != null && shutdownTimer.isRunning()) {
+                                shutdownTimer.stop();
+                                shutdownCounter = new int[]{0, 0};
+                            }
+                            continue; // do nothing if players are online
+                        }
+                    } catch (IOException | NullPointerException exception) {
+                        exception.printStackTrace();
+                        continue;
+                    } finally {
+                        Thread.sleep(2000);
+                    }
+                    if (!shutdownTimer.isRunning()) shutdownTimer.start();
+                } while (true);
+            }
+
+            @Override
+            protected void done() {
+                System.out.println("Pinger is done pinging");
+            }
+        };
     }
 
     public MinecraftServer getServer() {
