@@ -325,7 +325,7 @@ public class WrapperGUI extends JFrame {
                                     firePropertyChange("playersOnline", 0, response.getPlayers().getOnline());
                                 }
                             } catch (IOException | NullPointerException exception) {
-                                exception.printStackTrace();
+//                                exception.printStackTrace();
                             } finally {
                                 Thread.sleep(2000);
                             }
