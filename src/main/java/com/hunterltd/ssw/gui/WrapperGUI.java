@@ -3,6 +3,7 @@ package com.hunterltd.ssw.gui;
 import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
+import com.hunterltd.ssw.server.ConnectionListener;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.server.StreamGobbler;
 import com.hunterltd.ssw.utilities.Settings;
@@ -10,7 +11,6 @@ import com.hunterltd.ssw.utilities.SmartScroller;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -36,8 +36,9 @@ public class WrapperGUI extends JFrame {
     private JTextField commandTextField;
     private JTextField serverPathTextField;
     private MinecraftServer server;
-    private Timer aliveTimer, restartTimer;
-    private int[] timeCounter = new int[]{0, 0, 0}; // H:M:S
+    private Timer aliveTimer, restartTimer, connectionListenerTimer;
+    private int[] restartCounter = new int[]{0, 0, 0}, // H:M:S
+            shutdownCounter = new int[]{0, 0}; // M:S
     private final String restartCommandTemplate = "me %sis restarting in %d %s!"; // color code, time integer, time unit
     private final String baseTitle = "Simple Server Wrapper";
     private final ActionListener noServerSelected = e -> {
@@ -111,6 +112,11 @@ public class WrapperGUI extends JFrame {
     }
 
     public void startServer() {
+        try {
+            // the listener will be null if it hasn't been created before
+            ConnectionListener.stop();
+        } catch (NullPointerException ignored) {
+        }
         consoleTextArea.setText("");
         // Essentially flushes the output windows
         server.updateProperties();
@@ -203,30 +209,30 @@ public class WrapperGUI extends JFrame {
 
             // Keeps track of every second in a 3 element array
             restartTimer = serverSettings.getRestart() ? new Timer(1000, e -> {
-                final int interval = serverSettings.getInterval();
-                int hours = timeCounter[0], minutes = timeCounter[1], seconds = timeCounter[2];
+                final int interval = serverSettings.getRestartInterval();
+                int hours = restartCounter[0], minutes = restartCounter[1], seconds = restartCounter[2];
 
                 seconds++;
 
                 if (seconds != 60) {
-                    timeCounter[2] = seconds;
+                    restartCounter[2] = seconds;
                 } else {
                     minutes++;
-                    timeCounter[1] = minutes;
-                    timeCounter[2] = 0; // resets "seconds" counter
+                    restartCounter[1] = minutes;
+                    restartCounter[2] = 0; // resets "seconds" counter
                 }
 
                 if (minutes == 60) {
                     hours++;
-                    timeCounter[0] = hours;
-                    timeCounter[1] = 0; // resets "minutes" counter
+                    restartCounter[0] = hours;
+                    restartCounter[1] = 0; // resets "minutes" counter
                     sendCommand(String.format(restartCommandTemplate, "§7", interval - hours, "hours")); // gray
                 }
 
                 if (hours == interval) {
                     restartTimer.stop();
                     stopServer(true);
-                    timeCounter = new int[]{0, 0, 0};
+                    restartCounter = new int[]{0, 0, 0};
                 } else if (hours == interval - 1) {
                     // the final hour
                     // 60 is actually the edge case because it doesn't get reset to 0 until the next iteration
@@ -266,10 +272,25 @@ public class WrapperGUI extends JFrame {
         if (start) {
             runText = "Stop";
             title = baseTitle + " - " + serverFileInfo.getSelectedFile();
+//            ConnectionListener.stop(); // this should be stopped before the sever is launched to avoid binding issues
         } else {
             runText = "Run";
             title = baseTitle;
-
+            try {
+                ConnectionListener.start(25565);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            connectionListenerTimer = new Timer(1000, e -> {
+                if (!ConnectionListener.isConnectionAttempted()) {
+                    return;
+                }
+                if (serverSettings.getShutdown() && !server.isRunning()) {
+                    connectionListenerTimer.stop();
+                    startServer();
+                }
+            });
+            connectionListenerTimer.start();
         }
         runButton.setText(runText);
         setTitle(title);
