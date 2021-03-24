@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.function.Consumer;
