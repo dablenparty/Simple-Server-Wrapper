@@ -4,10 +4,9 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ServerProperties extends HashMap implements Map {
+public class ServerProperties extends HashMap {
     private final File propsFile;
     private final List<String> comments = new ArrayList<>();
 
