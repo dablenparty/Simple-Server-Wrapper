@@ -101,19 +101,23 @@ public class ServerListPing {
         int id = readVarInt(dataInputStream); //packet id
 
         if (id == -1) {
+            socket.close();
             throw new IOException("Premature end of stream.");
         }
 
         if (id != 0x00) { //we want a status response
+            socket.close();
             throw new IOException("Invalid packetID");
         }
         int length = readVarInt(dataInputStream); //length of json string
 
         if (length == -1) {
+            socket.close();
             throw new IOException("Premature end of stream.");
         }
 
         if (length == 0) {
+            socket.close();
             throw new IOException("Invalid string length.");
         }
 
@@ -130,10 +134,12 @@ public class ServerListPing {
         readVarInt(dataInputStream);
         id = readVarInt(dataInputStream);
         if (id == -1) {
+            socket.close();
             throw new IOException("Premature end of stream.");
         }
 
         if (id != 0x01) {
+            socket.close();
             throw new IOException("Invalid packetID");
         }
         long pingtime = dataInputStream.readLong(); //read response
