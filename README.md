@@ -26,6 +26,8 @@ Features currently included in SSW
 
 * Automatic restarting
 
+* Automatically close/reopen a server when nobody is on (this is a little finicky, not sure why yet)
+
 * Custom memory slider
 
 * Extra server arguments (memory allocation is coded in already)
@@ -46,7 +48,7 @@ These are features I want to add but either haven't gotten to them yet or don't 
 
 * [ ] Realtime player data (either through mod or server)
 
-* [ ] Automatically close/reopen a server when nobody is on
+* [x] ~~Automatically close/reopen a server when nobody is on~~
 
 * [ ] "Hub" of sorts for adding/removing/managing servers (*I want everything else done before I even start this*)
 
