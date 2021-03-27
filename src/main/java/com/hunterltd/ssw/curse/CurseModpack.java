@@ -28,7 +28,7 @@ public class CurseModpack extends ZipFile {
     }
 
     public void extractAll() throws IOException, ParseException {
-        this.extractAll(String.valueOf(extractPath));
+        this.extractAll(extractPath);
         manifest.load();
     }
 
