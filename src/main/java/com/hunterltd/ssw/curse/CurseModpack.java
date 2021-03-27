@@ -45,10 +45,13 @@ public class CurseModpack extends ZipFile {
     }
 
     public boolean install(String folder) {
+        // this will return a boolean if an error occurs because one file having an error shouldn't block all files from
+        // downloading/installing
         boolean error = false;
         Client client = ClientBuilder.newClient();
         for (CurseManifestFileEntry manifestEntry :
                 manifest.getFiles()) {
+            // for every mod found in the manifest, makes a call to the Curse API to get the download link
             Response response = client.target(
                     String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
                             manifestEntry.getProjectID(),
@@ -62,6 +65,8 @@ public class CurseModpack extends ZipFile {
                 error = true;
             }
         }
+
+        // copies over the override files from the Curse modpack
         File overrides = Paths.get(extractPath, "overrides", "mods").toFile();
         try {
             FileUtils.copyDirectory(overrides, Paths.get(folder, "mods").toFile());
