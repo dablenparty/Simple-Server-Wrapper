@@ -50,6 +50,7 @@ public class MinecraftServer {
         pB.command(serverArgs);
 
         commandHistory = new ArrayList<>();
+        commandHistory.add("");
     }
 
     public Process getServerProcess() {
@@ -63,7 +64,7 @@ public class MinecraftServer {
         OutputStream out = serverProcess.getOutputStream();
         out.write(cmd.getBytes(StandardCharsets.UTF_8));
         out.flush();
-        commandHistory.add(cmd);
+        commandHistory.add(cmd.trim());
     }
 
     public void run() throws IOException {
