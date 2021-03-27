@@ -18,10 +18,6 @@ public class CurseManifestFileEntry extends JSONObject {
         this.putAll(obj);
     }
 
-    public boolean isRequired() {
-        return (boolean) this.get("required");
-    }
-
     public int getProjectID() {
         try {
             return (int) this.get("projectID");
