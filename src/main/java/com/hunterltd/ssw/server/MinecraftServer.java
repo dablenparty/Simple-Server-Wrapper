@@ -18,7 +18,7 @@ public class MinecraftServer {
     private Process serverProcess;
     private final ProcessBuilder pB;
     private final Settings serverSettings;
-    private List<String> serverArgs;
+    private List<String> serverArgs, commandHistory;
     private final Path serverPath;
     private ServerProperties properties = null;
     private boolean propsExists;
@@ -48,6 +48,8 @@ public class MinecraftServer {
         updateExtraArgs();
 
         pB.command(serverArgs);
+
+        commandHistory = new ArrayList<>();
     }
 
     public Process getServerProcess() {
@@ -61,6 +63,7 @@ public class MinecraftServer {
         OutputStream out = serverProcess.getOutputStream();
         out.write(cmd.getBytes(StandardCharsets.UTF_8));
         out.flush();
+        commandHistory.add(cmd);
     }
 
     public void run() throws IOException {
@@ -163,5 +166,13 @@ public class MinecraftServer {
 
     public void setShouldRestart(boolean shouldRestart) {
         this.shouldRestart = shouldRestart;
+    }
+
+    public String getCommandFromHistory(int idx) {
+        return commandHistory.get(idx);
+    }
+
+    public int getHistorySize() {
+        return commandHistory.size();
     }
 }
