@@ -54,6 +54,7 @@ public class WrapperGUI extends JFrame {
     private Settings serverSettings;
     private SwingWorker<Void, Void> serverPingWorker;
     private boolean serverShuttingDown = false;
+    private int historyLocation = 0;
 
     public WrapperGUI() {
         add(rootPanel);
@@ -65,10 +66,39 @@ public class WrapperGUI extends JFrame {
 
         // Keyboard Registers
         rootPanel.registerKeyboardAction(e -> {
+                historyLocation = 0;
                 sendCommand(commandTextField.getText());
                 commandTextField.setText("");
             },
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        // When switching directions, the button needs to be pressed twice. Maybe add a tracker for last key press?
+        // Or maybe a different way of incrementing
+        // (try mimicking a for loop)
+        commandTextField.registerKeyboardAction(e -> {
+            if (server != null && server.getHistorySize() > 0) {
+                if (historyLocation < server.getHistorySize() && historyLocation >= 0) {
+                    commandTextField.setText(server.getCommandFromHistory(server.getHistorySize() - 1 - historyLocation++));
+//                    historyLocation++;
+                } else {
+//                    historyLocation--;
+                    commandTextField.setText(server.getCommandFromHistory(server.getHistorySize() - 1 - --historyLocation));
+                }
+            }
+        },
+                KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        commandTextField.registerKeyboardAction(e -> {
+                    if (server != null && server.getHistorySize() > 0) {
+                        if (historyLocation < server.getHistorySize() && historyLocation > 0) {
+//                            historyLocation--;
+                            commandTextField.setText(server.getCommandFromHistory(server.getHistorySize() - 1 - --historyLocation));
+                        }
+                    }
+                },
+                KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         // Menu Bar
