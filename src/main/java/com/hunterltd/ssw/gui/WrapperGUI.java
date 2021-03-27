@@ -73,17 +73,12 @@ public class WrapperGUI extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        // When switching directions, the button needs to be pressed twice. Maybe add a tracker for last key press?
-        // Or maybe a different way of incrementing
-        // (try mimicking a for loop)
         commandTextField.registerKeyboardAction(e -> {
-            if (server != null && server.getHistorySize() > 0) {
-                if (historyLocation < server.getHistorySize() && historyLocation >= 0) {
-                    commandTextField.setText(server.getCommandFromHistory(server.getHistorySize() - 1 - historyLocation++));
-//                    historyLocation++;
-                } else {
-//                    historyLocation--;
-                    commandTextField.setText(server.getCommandFromHistory(server.getHistorySize() - 1 - --historyLocation));
+            if (server != null && server.getHistorySize() > 1) {
+                if (historyLocation < server.getHistorySize() - 1 && historyLocation >= 0) {
+                    historyLocation += 1;
+                    commandTextField.setText(
+                            server.getCommandFromHistory(server.getHistorySize() - historyLocation));
                 }
             }
         },
@@ -92,9 +87,10 @@ public class WrapperGUI extends JFrame {
 
         commandTextField.registerKeyboardAction(e -> {
                     if (server != null && server.getHistorySize() > 0) {
-                        if (historyLocation < server.getHistorySize() && historyLocation > 0) {
-//                            historyLocation--;
-                            commandTextField.setText(server.getCommandFromHistory(server.getHistorySize() - 1 - --historyLocation));
+                        if (historyLocation < server.getHistorySize() && historyLocation > 1) {
+                            historyLocation -= 1;
+                            commandTextField.setText(
+                                    server.getCommandFromHistory(server.getHistorySize() - historyLocation));
                         }
                     }
                 },
