@@ -44,13 +44,16 @@ public class SettingsDialog extends JDialog {
         buttonSave.addActionListener(e -> onSave());
         buttonCancel.addActionListener(e -> onCancel());
 
+        // Fill combo boxes with the proper values
         for (double i = 0.5; i <= 16; i+=0.5) memoryComboBox.addItem(i);
         for (int i = 1; i <= 24; i++) restartIntervalComboBox.addItem(i);
         for (int i = 5; i <= 60; i+=5) shutdownIntervalComboBox.addItem(i);
 
+        // If the system is on windows, save the batch generation as a batch script. Otherwise a regular text file
         final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "txt";
         batchFileButton.addActionListener(e -> server.generateBatch(ext));
 
+        // Links slider changes to their corresponding combo boxes
         memorySlider.addChangeListener(e -> updateComboBox(memoryComboBox, (JSlider) e.getSource()));
         memoryComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), memorySlider));
 
@@ -60,12 +63,13 @@ public class SettingsDialog extends JDialog {
         shutdownIntervalSlider.addChangeListener(e -> updateComboBox(shutdownIntervalComboBox, (JSlider) e.getSource()));
         shutdownIntervalComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), shutdownIntervalSlider));
 
+        // Links check boxes and their related elements to turn on/off based on the checkbox value
         automaticRestartCheckBox.addChangeListener(e -> setPanelEnabled((JCheckBox) e.getSource(),
                 new JComponent[]{restartIntervalLabel, restartIntervalSlider, restartIntervalComboBox}));
         automaticShutdownCheckBox.addChangeListener(e -> setPanelEnabled((JCheckBox) e.getSource(),
                 new JComponent[]{shutdownIntervalLabel, shutdownIntervalSlider, shutdownIntervalComboBox}));
 
-        // Set components based on UserSettings
+        // Set component values based on UserSettings.
         memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024) - 1);
         automaticRestartCheckBox.setSelected(settings.getRestart());
         restartIntervalComboBox.setSelectedIndex(settings.getRestartInterval() - 1);
@@ -75,7 +79,7 @@ public class SettingsDialog extends JDialog {
         if (server.propertiesExists() || server.updateProperties()) {
             propsTable.setModel(new PropertiesTableModel(server.getProperties()));
         } else {
-            settingsTabs.removeTabAt(2); // remove properties tab
+            settingsTabs.removeTabAt(2); // remove properties tab if no properties file is found
         }
     }
 
@@ -83,6 +87,8 @@ public class SettingsDialog extends JDialog {
         settings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
         if ((automaticRestartCheckBox.isSelected() && !settings.getRestart())
                 || (automaticShutdownCheckBox.isSelected() && !settings.getShutdown())) {
+            // If the auto-shutdown or auto-restart features are enabled after being disabled, warns the server has to
+            // be restarted before those changes take effect
             int result = JOptionPane.showConfirmDialog(
                     this,
                     "If a server is running, it will need to be restarted for these changes to take effect. " +
