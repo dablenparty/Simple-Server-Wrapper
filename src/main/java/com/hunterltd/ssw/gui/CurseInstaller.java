@@ -45,7 +45,7 @@ public class CurseInstaller extends JFrame {
 
                 @Override
                 public String getDescription() {
-                    return "ZIP Archive";
+                    return "ZIP Archive (*.zip)";
                 }
             });
             if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -84,6 +84,7 @@ public class CurseInstaller extends JFrame {
             installProgressBar.setValue(0);
             installProgressBar.setString("");
 
+            // Delegates the downloading/installing of mod files to a separate worker thread to avoid blocking the EDT
             worker = new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws IOException, ParseException {
@@ -109,6 +110,8 @@ public class CurseInstaller extends JFrame {
                     Client client = ClientBuilder.newClient();
                     int filesLength = files.length;
                     for (int i = 0; i < filesLength; i++) {
+                        // Mimics the CurseModpack's download method, but restructured to fire property changes along
+                        // the way to update the EDT
                         CurseManifestFileEntry manifestEntry = files[i];
                         Response response = client.target(
                                 String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",

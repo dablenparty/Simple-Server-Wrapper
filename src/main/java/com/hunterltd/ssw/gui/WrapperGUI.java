@@ -65,6 +65,7 @@ public class WrapperGUI extends JFrame {
         runButton.addActionListener(e -> runButtonAction());
 
         // Keyboard Registers
+        // Pressing Enter sends the typed command
         rootPanel.registerKeyboardAction(e -> {
                 historyLocation = 0;
                 sendCommand(commandTextField.getText());
@@ -73,6 +74,7 @@ public class WrapperGUI extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        // Up and down arrows cycle through the command history
         commandTextField.registerKeyboardAction(e -> {
             if (server != null && server.getHistorySize() > 1) {
                 if (historyLocation < server.getHistorySize() - 1 && historyLocation >= 0) {
@@ -104,6 +106,7 @@ public class WrapperGUI extends JFrame {
         MenuItem settingsItem = new MenuItem("Server Settings"),
                 openInFolderItem = new MenuItem("Open in folder"),
                 curseInstallItem = new MenuItem("Install CurseForge Modpack");
+        // Adds the modpack installer, settings, and open in folder items
         fileMenu.add(curseInstallItem);
         serverMenu.add(settingsItem);
         serverMenu.add(openInFolderItem);
