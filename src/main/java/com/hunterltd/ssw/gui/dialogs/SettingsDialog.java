@@ -29,6 +29,9 @@ public class SettingsDialog extends JDialog {
     private JComboBox<Integer> shutdownIntervalComboBox;
     private JLabel shutdownIntervalLabel;
     private JSlider shutdownIntervalSlider;
+    private JPanel propsPanel;
+    private JTextField motdTextField;
+    private JComboBox difficultyComboBox;
     private boolean directChange = true;
     private final Settings settings;
 
