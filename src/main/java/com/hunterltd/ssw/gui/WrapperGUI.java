@@ -75,7 +75,7 @@ public class WrapperGUI extends JFrame {
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         // Up and down arrows cycle through the command history
-        commandTextField.registerKeyboardAction(e -> {
+        rootPanel.registerKeyboardAction(e -> {
             if (server != null && server.getHistorySize() > 1) {
                 if (historyLocation < server.getHistorySize() - 1 && historyLocation >= 0) {
                     historyLocation += 1;
@@ -87,7 +87,7 @@ public class WrapperGUI extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        commandTextField.registerKeyboardAction(e -> {
+        rootPanel.registerKeyboardAction(e -> {
                     if (server != null && server.getHistorySize() > 0) {
                         if (historyLocation < server.getHistorySize() && historyLocation > 1) {
                             historyLocation -= 1;
@@ -197,13 +197,12 @@ public class WrapperGUI extends JFrame {
         if (server.isRunning() && server.shouldBeRunning()) {
             aliveTimer = new Timer(100, e -> {
                 if ((!server.shouldBeRunning() && server.isRunning()) || !server.isRunning()) {
+                    runButton.setText("Stopping...");
                     aliveTimer.stop();
                     if (restartTimer != null) restartTimer.stop();
-                    if (playerCountListenerTimer != null && shutdownTimer != null) {
-                        playerCountListenerTimer.stop();
-                        shutdownTimer.stop();
-                    }
-                    runButton.setText("Stopping...");
+                    if (shutdownTimer != null) shutdownTimer.stop();
+                    shutdownCounter = new int[]{0, 0};
+                    if (playerCountListenerTimer != null) playerCountListenerTimer.stop();
                     SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                         @Override
                         protected Void doInBackground() {
@@ -331,9 +330,9 @@ public class WrapperGUI extends JFrame {
                     }
 
                     if (minutes == interval) {
-                        shutdownTimer.stop();
+                        System.out.printf("[%s] No players have joined in a while, closing the server%n",
+                                new SimpleDateFormat("HH:mm:ss").format(System.currentTimeMillis()));
                         stopServer();
-                        shutdownCounter = new int[]{0, 0};
                     }
                 });
 
@@ -349,15 +348,18 @@ public class WrapperGUI extends JFrame {
                                 if (!server.isRunning() || serverShuttingDown) continue;
 
                                 ServerListPing.StatusResponse response = pinger.fetchData();
-                                if (response.getPlayers().getOnline() != 0) {
-                                    firePropertyChange("playersOnline", 0, response.getPlayers().getOnline());
+                                if (server.isRunning() && !serverShuttingDown) {
+                                    if (response.getPlayers().getOnline() != 0) {
+                                        firePropertyChange("playersOnline", 0, response.getPlayers().getOnline());
+                                    } else {
+                                        firePropertyChange("shutdown", false, true);
+                                    }
                                 }
                             } catch (IOException | NullPointerException exception) {
 //                                exception.printStackTrace();
                             } finally {
                                 Thread.sleep(2000);
                             }
-                            firePropertyChange("shutdown", false, true);
                         } while (true);
                     }
 
@@ -374,13 +376,16 @@ public class WrapperGUI extends JFrame {
                                 shutdownTimer.stop();
                                 shutdownCounter = new int[]{0, 0};
                             }
+                            break;
                         case "shutdown":
-                            if (shutdownTimer != null && !shutdownTimer.isRunning()) shutdownTimer.start();
+                            if (shutdownTimer != null && !shutdownTimer.isRunning()) {
+                                shutdownTimer.start();
+                            }
+                            break;
                         default:
                             break;
                     }
                 });
-
 
                 serverPingWorker.execute();
             }
@@ -391,6 +396,8 @@ public class WrapperGUI extends JFrame {
             if (serverSettings.getShutdown()) {
                 try {
                     ConnectionListener.start(25565);
+                    System.out.printf("[%s] Listener successfully started%n",
+                            new SimpleDateFormat("HH:mm:ss").format(System.currentTimeMillis()));
                 } catch (IOException e) {
                     if (e instanceof BindException) {
                         InfoDialog dialog = new InfoDialog("Bind Exception",
