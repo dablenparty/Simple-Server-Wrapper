@@ -32,8 +32,11 @@ public class SettingsDialog extends JDialog {
     private JPanel propsPanel;
     private boolean directChange = true;
     private final Settings settings;
+    private final MinecraftServer server;
 
-    public SettingsDialog(MinecraftServer server) {
+    public SettingsDialog(MinecraftServer minecraftServer) {
+        server = minecraftServer;
+
         add(rootPanel);
 
         settings = server.getServerSettings();
@@ -80,6 +83,7 @@ public class SettingsDialog extends JDialog {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void onSave() {
         settings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
         if ((automaticRestartCheckBox.isSelected() && !settings.getRestart())
@@ -99,10 +103,19 @@ public class SettingsDialog extends JDialog {
         try {
             settings.writeData();
         } catch (FileNotFoundException e) {
-            InfoDialog errorDialog = new InfoDialog("Settings not found",
-                    "The settings file could not be found. Ensure that it has not been moved or deleted");
-            errorDialog.pack();
-            errorDialog.setVisible(true);
+            new InternalErrorDialog(e);
+        }
+
+        // Saves properties from table
+        if (server.propertiesExists()) {
+            for (int i = 0; i < propsTable.getRowCount(); i++)
+                server.getProperties().replace(propsTable.getValueAt(i, 0), propsTable.getValueAt(i, 1));
+
+            try {
+                server.getProperties().write();
+            } catch (FileNotFoundException e) {
+                new InternalErrorDialog(e);
+            }
         }
     }
 
