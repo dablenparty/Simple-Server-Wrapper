@@ -340,7 +340,7 @@ public class WrapperGUI extends JFrame {
                     @Override
                     protected Void doInBackground() throws InterruptedException {
                         ServerListPing pinger = new ServerListPing();
-                        pinger.setAddress(new InetSocketAddress(25565));
+                        pinger.setAddress(new InetSocketAddress(server.getPort()));
                         do {
                             try {
                                 // putting this in the try block lets me still sleep the thread from the if statement without
@@ -395,7 +395,7 @@ public class WrapperGUI extends JFrame {
 
             if (serverSettings.getShutdown()) {
                 try {
-                    ConnectionListener.start(25565);
+                    ConnectionListener.start(server.getPort());
                     System.out.printf("[%s] Listener successfully started%n",
                             new SimpleDateFormat("HH:mm:ss").format(System.currentTimeMillis()));
                 } catch (IOException e) {

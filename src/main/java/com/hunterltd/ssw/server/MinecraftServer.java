@@ -18,10 +18,12 @@ public class MinecraftServer {
     private Process serverProcess;
     private final ProcessBuilder pB;
     private final Settings serverSettings;
-    private List<String> serverArgs, commandHistory;
+    private List<String> serverArgs;
+    private final List<String> commandHistory;
     private final Path serverPath;
     private ServerProperties properties = null;
     private boolean propsExists;
+    private int port = 25565;
     private boolean shouldBeRunning;
     private boolean shouldRestart = false;
 
@@ -68,6 +70,7 @@ public class MinecraftServer {
     }
 
     public void run() throws IOException {
+        propsExists = updateProperties();
         serverProcess = pB.start();
     }
 
@@ -135,6 +138,7 @@ public class MinecraftServer {
         try {
             properties = new ServerProperties(Paths.get(String.valueOf(serverPath.getParent()), "server.properties").toFile());
             propsExists = true;
+            port = (int) properties.get("server-port");
             return true;
         } catch (FileNotFoundException e) {
             propsExists = false;
@@ -175,5 +179,9 @@ public class MinecraftServer {
 
     public int getHistorySize() {
         return commandHistory.size();
+    }
+
+    public int getPort() {
+        return port;
     }
 }
