@@ -5,6 +5,7 @@ import javax.swing.table.AbstractTableModel;
 public class PropertiesTableModel extends AbstractTableModel {
     private final ServerProperties properties;
     private final Object[][] data;
+    private final String[] columnNames = {"Property", "Value"};
 
     public PropertiesTableModel(ServerProperties props) {
         properties = props;
@@ -36,5 +37,15 @@ public class PropertiesTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         data[rowIndex][columnIndex] = aValue;
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex == 1; // Only the second ("value") column is editable
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return columnNames[column];
     }
 }
