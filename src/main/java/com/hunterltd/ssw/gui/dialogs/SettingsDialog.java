@@ -86,25 +86,15 @@ public class SettingsDialog extends JDialog {
         settings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
         if ((automaticRestartCheckBox.isSelected() && !settings.getRestart())
                 || (automaticShutdownCheckBox.isSelected() && !settings.getShutdown())) {
-            int result = JOptionPane.showConfirmDialog(
-                    this,
-                    "If a server is running, it will need to be restarted for these changes to take effect. " +
-                            "Would you still like to save now?",
-                    "Unsaved changes",
-                    JOptionPane.YES_NO_OPTION
-            );
-            if (result == JOptionPane.YES_OPTION) {
-                settings.setRestart(automaticRestartCheckBox.isSelected());
-                settings.setRestartInterval(restartIntervalSlider.getValue());
-                settings.setShutdown(automaticShutdownCheckBox.isSelected());
-                settings.setShutdownInterval(shutdownIntervalSlider.getValue());
-            }
-        } else {
-            settings.setRestart(automaticRestartCheckBox.isSelected());
-            settings.setRestartInterval(restartIntervalSlider.getValue());
-            settings.setShutdown(automaticShutdownCheckBox.isSelected());
-            settings.setShutdownInterval(shutdownIntervalSlider.getValue() * 5);
+            InfoDialog dialog = new InfoDialog("Restart",
+                    "The server must be restarted if it is running in order for these changes to take effect");
+            dialog.pack();
+            dialog.setVisible(true);
         }
+        settings.setRestart(automaticRestartCheckBox.isSelected());
+        settings.setRestartInterval(restartIntervalSlider.getValue());
+        settings.setShutdown(automaticShutdownCheckBox.isSelected());
+        settings.setShutdownInterval(shutdownIntervalSlider.getValue() * 5);
 
         settings.setExtraArgs(extraArgsTextField.getText().split(" "));
 
