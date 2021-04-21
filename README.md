@@ -26,7 +26,7 @@ Features currently included in SSW
 
 * Automatic restarting
 
-* Automatically close/reopen a server when nobody is on (this is a little finicky, not sure why yet)
+* Automatically close/reopen a server when nobody is on/tries to connect
 
 * Custom memory slider
 
@@ -36,11 +36,13 @@ Features currently included in SSW
 
 * CurseForge Modpack installation into an existing server
 
+* Edit server properties
+
 ### Future
 
 These are features I want to add but either haven't gotten to them yet or don't have the capabilities right now
 
-* [ ] Edit server.properties
+* [x] ~~Edit server.properties~~
 
 * [ ] Mod/plugin list for supported server types
 
@@ -75,7 +77,7 @@ closing itself. **There are rare cases I have found where this does not work as 
 accounted for, and the server process is destroyed by the wrapper. **If that still doesn't work, the problem is likely
 with your server or PC, not this application.** Use Task Manager to close the server process.
 
-### Unknown Internal Errors/Forge errors
+### Internal Errors/Forge errors
 
 In my experience, these are heavily correlated. It is *almost always* caused by a bad Java version. Both Forge servers
 and this wrapper are made on **Java 8** and should be run with such. If you don't know what version you have, run the
