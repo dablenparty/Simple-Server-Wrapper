@@ -200,6 +200,7 @@ public class WrapperGUI extends JFrame {
                     runButton.setText("Stopping...");
                     aliveTimer.stop();
                     if (restartTimer != null) restartTimer.stop();
+                    restartCounter = new int[]{0, 0, 0};
                     if (shutdownTimer != null) shutdownTimer.stop();
                     shutdownCounter = new int[]{0, 0};
                     if (playerCountListenerTimer != null) playerCountListenerTimer.stop();
