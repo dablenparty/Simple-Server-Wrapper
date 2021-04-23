@@ -15,6 +15,10 @@ public class ServerProperties extends HashMap {
         read();
     }
 
+    public File getPropsFile() {
+        return propsFile;
+    }
+
     public void read() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(propsFile))) {
             reader.lines().forEach(line -> {
