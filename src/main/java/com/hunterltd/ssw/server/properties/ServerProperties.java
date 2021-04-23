@@ -63,10 +63,4 @@ public class ServerProperties extends HashMap {
         writer.flush();
         writer.close();
     }
-
-    public static void main(String[] args) throws IOException {
-        ServerProperties props = new ServerProperties(new File("C:\\Users\\gener\\Desktop\\forge\\server.properties"));
-        props.replace("level-seed", 283475);
-        props.write();
-    }
 }

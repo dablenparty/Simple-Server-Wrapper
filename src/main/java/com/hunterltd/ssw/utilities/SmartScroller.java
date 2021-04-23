@@ -109,13 +109,7 @@ public class SmartScroller implements AdjustmentListener
 	@Override
 	public void adjustmentValueChanged(final AdjustmentEvent e)
 	{
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				checkScrollBar(e);
-			}
-		});
+		SwingUtilities.invokeLater(() -> checkScrollBar(e));
 	}
 
 	/*

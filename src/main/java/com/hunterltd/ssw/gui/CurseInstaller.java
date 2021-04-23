@@ -17,7 +17,6 @@ import javax.swing.filechooser.FileFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 
 public class CurseInstaller extends JFrame {
     private JTextField zipPathTextField;
@@ -122,7 +121,7 @@ public class CurseInstaller extends JFrame {
                             CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
                             firePropertyChange("status",
                                     "Getting files...",
-                                    String.format("Mod %d of %d: %s", i + 1, filesLength, addon.toString()));
+                                    String.format("Mod %d of %d: %s", i + 1, filesLength, addon));
                             addon.download(serverPath.toString());
                         } catch (ParseException | IOException e) {
                             e.printStackTrace();
