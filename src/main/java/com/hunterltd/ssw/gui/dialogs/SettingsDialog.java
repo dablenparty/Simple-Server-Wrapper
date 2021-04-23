@@ -6,6 +6,7 @@ import com.hunterltd.ssw.utilities.Settings;
 
 import javax.swing.*;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class SettingsDialog extends JDialog {
     private JPanel rootPanel;
@@ -30,6 +31,7 @@ public class SettingsDialog extends JDialog {
     private JLabel shutdownIntervalLabel;
     private JSlider shutdownIntervalSlider;
     private JPanel propsPanel;
+    private JButton openPropsInEditorButton;
     private boolean directChange = true;
     private final Settings settings;
     private final MinecraftServer server;
@@ -54,6 +56,13 @@ public class SettingsDialog extends JDialog {
 
         final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "txt";
         batchFileButton.addActionListener(e -> server.generateBatch(ext));
+        openPropsInEditorButton.addActionListener(e -> {
+            try {
+                java.awt.Desktop.getDesktop().edit(server.getProperties().getPropsFile());
+            } catch (IOException ioException) {
+                new InternalErrorDialog(ioException);
+            }
+        });
 
         memorySlider.addChangeListener(e -> updateComboBox(memoryComboBox, (JSlider) e.getSource()));
         memoryComboBox.addActionListener(e -> updateSlider((JComboBox<?>) e.getSource(), memorySlider));
