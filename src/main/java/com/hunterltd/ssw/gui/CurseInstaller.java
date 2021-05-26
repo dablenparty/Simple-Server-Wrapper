@@ -3,6 +3,7 @@ package com.hunterltd.ssw.gui;
 import com.hunterltd.ssw.curse.CurseAddon;
 import com.hunterltd.ssw.curse.CurseModpack;
 import com.hunterltd.ssw.curse.data.CurseManifestFileEntry;
+import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
@@ -17,10 +18,11 @@ import javax.swing.filechooser.FileFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 public class CurseInstaller extends JFrame {
     private JTextField zipPathTextField;
-    private JButton newFileButton;
+    private JButton modpackFileButton;
     private JProgressBar installProgressBar;
     private JPanel rootPanel;
     private JTextField serverPathTextField;
@@ -34,7 +36,7 @@ public class CurseInstaller extends JFrame {
     public CurseInstaller() {
         add(rootPanel);
 
-        newFileButton.addActionListener(e -> {
+        modpackFileButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileFilter(new FileFilter() {
                 @Override
@@ -74,7 +76,7 @@ public class CurseInstaller extends JFrame {
         });
 
         installButton.addActionListener(e -> {
-            JComponent[] components = {newFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
+            JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
             for (JComponent comp :
                     components) {
                 comp.setEnabled(false);
@@ -95,6 +97,7 @@ public class CurseInstaller extends JFrame {
                                 "ZIP already extracted",
                                 JOptionPane.YES_NO_OPTION);
                         if (result == JOptionPane.YES_OPTION) {
+                            FileUtils.deleteDirectory(new File(curseModpack.getExtractPath()));
                             curseModpack.extractAll();
                         } else {
                             curseModpack.getManifest().load();
@@ -106,8 +109,19 @@ public class CurseInstaller extends JFrame {
                     firePropertyChange("status", "Extracting...", "Getting files...");
                     CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
 
+                    File modsFolder = Paths.get(serverPath.toString(), "mods").toFile();
+                    if (Objects.requireNonNull(modsFolder.listFiles()).length != 0) {
+                        int result = JOptionPane.showConfirmDialog(null,
+                                "The mods folder is not empty. Would you like to overwrite it?",
+                                "Mods folder not empty",
+                                JOptionPane.YES_NO_OPTION);
+                        if (result == JOptionPane.NO_OPTION) return null;
+                        FileUtils.deleteDirectory(modsFolder);
+                    }
+
                     Client client = ClientBuilder.newClient();
                     int filesLength = files.length;
+                    int maxNameLength = 20;
                     for (int i = 0; i < filesLength; i++) {
                         // Mimics the CurseModpack's download method, but restructured to fire property changes along
                         // the way to update the EDT
@@ -119,9 +133,12 @@ public class CurseInstaller extends JFrame {
                         ).request(MediaType.APPLICATION_JSON).get();
                         try {
                             CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
+                            String addonName = addon.toString().length() > maxNameLength ?
+                                    addon.toString().substring(0, maxNameLength - 4) + "..." :
+                                    addon.toString();
                             firePropertyChange("status",
                                     "Getting files...",
-                                    String.format("Mod %d of %d: %s", i + 1, filesLength, addon));
+                                    String.format("Mod %d of %d: %20s", i + 1, filesLength, addonName));
                             addon.download(serverPath.toString());
                         } catch (ParseException | IOException e) {
                             e.printStackTrace();
@@ -150,7 +167,11 @@ public class CurseInstaller extends JFrame {
                             }
                         }
                     }
-                    if (!new File(curseModpack.getExtractPath()).delete()) System.out.println("An error occurred removing the folder");
+                    try {
+                        FileUtils.deleteDirectory(new File(curseModpack.getExtractPath()));
+                    } catch (IOException e) {
+                        new InternalErrorDialog(e);
+                    }
                     return null;
                 }
 
@@ -158,7 +179,7 @@ public class CurseInstaller extends JFrame {
                 protected void done() {
                     installProgressBar.setString("Done!");
                     installProgressBar.setValue(100);
-                    JComponent[] components = {newFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
+                    JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
                     for (JComponent comp :
                             components) {
                         comp.setEnabled(true);
