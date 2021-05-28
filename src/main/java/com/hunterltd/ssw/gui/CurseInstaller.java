@@ -28,10 +28,10 @@ public class CurseInstaller extends JFrame {
     private JTextField serverPathTextField;
     private JButton serverPathButton;
     private JButton installButton;
-    private JButton cancelButton;
     private CurseModpack curseModpack;
     private File serverPath;
     private SwingWorker<Void, Void> worker;
+    private boolean installing = false;
 
     public CurseInstaller() {
         add(rootPanel);
@@ -65,25 +65,26 @@ public class CurseInstaller extends JFrame {
             }
         });
 
-        cancelButton.addActionListener(evt -> {
-            int result = JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to cancel?",
-                    "Cancel pack installation",
-                    JOptionPane.YES_NO_OPTION);
-            if (result == JOptionPane.YES_OPTION) {
-                worker.cancel(true);
-            }
-        });
-
         installButton.addActionListener(e -> {
-            JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
+            JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField};
             for (JComponent comp :
                     components) {
                 comp.setEnabled(false);
             }
-            cancelButton.setEnabled(true);
+            if (installing) {
+                int result = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to cancel?",
+                        "Cancel pack installation",
+                        JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    worker.cancel(true);
+                }
+                return;
+            }
+            installButton.setText("Cancel");
             installProgressBar.setValue(0);
             installProgressBar.setString("");
+            installing = true;
 
             // Delegates the downloading/installing of mod files to a separate worker thread to avoid blocking the EDT
             worker = new SwingWorker<Void, Void>() {
@@ -110,14 +111,16 @@ public class CurseInstaller extends JFrame {
                     CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
 
                     File modsFolder = Paths.get(serverPath.toString(), "mods").toFile();
-                    if (Objects.requireNonNull(modsFolder.listFiles()).length != 0) {
-                        int result = JOptionPane.showConfirmDialog(null,
-                                "The mods folder is not empty. Would you like to overwrite it?",
-                                "Mods folder not empty",
-                                JOptionPane.YES_NO_OPTION);
-                        if (result == JOptionPane.NO_OPTION) return null;
-                        FileUtils.deleteDirectory(modsFolder);
-                    }
+                    try {
+                        if (Objects.requireNonNull(modsFolder.listFiles()).length != 0) {
+                            int result = JOptionPane.showConfirmDialog(null,
+                                    "The mods folder is not empty. Would you like to overwrite it?",
+                                    "Mods folder not empty",
+                                    JOptionPane.YES_NO_OPTION);
+                            if (result == JOptionPane.NO_OPTION) return null;
+                            FileUtils.deleteDirectory(modsFolder);
+                        }
+                    } catch (NullPointerException ignored) {}
 
                     Client client = ClientBuilder.newClient();
                     int filesLength = files.length;
@@ -179,12 +182,13 @@ public class CurseInstaller extends JFrame {
                 protected void done() {
                     installProgressBar.setString("Done!");
                     installProgressBar.setValue(100);
-                    JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField, installButton};
+                    JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField};
                     for (JComponent comp :
                             components) {
                         comp.setEnabled(true);
                     }
-                    cancelButton.setEnabled(false);
+                    installing = false;
+                    installButton.setText("Install");
                 }
             };
 
