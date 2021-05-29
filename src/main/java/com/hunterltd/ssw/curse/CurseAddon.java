@@ -8,14 +8,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 
+/**
+ * Wrapper class for a CurseForge addon
+ */
 @SuppressWarnings("unchecked")
 public class CurseAddon extends JSONObject {
     public CurseAddon(JSONObject obj) {
         this.putAll(obj);
-    }
-
-    public boolean isAvailable() {
-        return (boolean) this.get("isAvailable");
     }
 
     @Override
@@ -23,9 +22,13 @@ public class CurseAddon extends JSONObject {
         return (String) this.get("displayName");
     }
 
+    /**
+     * @param destFolder Folder to download the addon to
+     * @throws IOException if an I/O error occurs downloading or saving the file
+     */
     public void download(String destFolder) throws IOException {
         // Spaces don't produce a MalformedURLException, although they will cause IOExceptions because although they're
-        // not technically invalid characters, a browser cannot interpret them. Instead, they use the "%20" character
+        // not technically invalid characters, a browser cannot interpret them. Instead, use the "%20" character
         URL source = new URL(((String) this.get("downloadUrl")).replace(" ", "%20"));
         String folderName = ((String) this.get("fileName")).endsWith(".zip") ? "resourcepacks" : "mods";
         File dest = Paths.get(destFolder, folderName, (String) this.get("fileName")).toFile();
