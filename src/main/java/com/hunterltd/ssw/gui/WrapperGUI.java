@@ -185,11 +185,8 @@ public class WrapperGUI extends JFrame {
 
     private void runButtonAction() {
         // Server is null on initial startup
-        if (server.getServerProcess() == null || !server.isRunning()) {
-            startServer();
-        } else {
-            stopServer();
-        }
+        if (server.getServerProcess() == null || !server.isRunning()) startServer();
+        else stopServer();
     }
 
     private void sendServerStatus(boolean start) {
