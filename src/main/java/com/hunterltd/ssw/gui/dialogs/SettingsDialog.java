@@ -44,6 +44,7 @@ public class SettingsDialog extends JDialog {
         settings = server.getServerSettings();
         setContentPane(rootPanel);
         setModal(true);
+        setModalityType(ModalityType.APPLICATION_MODAL);
         getRootPane().setDefaultButton(buttonSave);
         setTitle("Server Settings - " + server.getServerPath().getFileName());
 
