@@ -12,13 +12,24 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+/**
+ * A CurseForge file wrapper class based upon the manifest.json file
+ */
 @SuppressWarnings("unchecked")
 public class CurseManifestFileEntry extends JSONObject {
+    /**
+     * Takes all key/value pairs from the given object and puts them into the Manifest entry
+     * @param obj JSON data
+     */
     public CurseManifestFileEntry(JSONObject obj) {
         this.putAll(obj);
     }
 
+    /**
+     * @return ID for the project in the CurseForge database
+     */
     public int getProjectID() {
+        // Sometimes the JSON parser reads as an int, other times as a long. Rather annoying
         try {
             return (int) this.get("projectID");
         } catch (ClassCastException e) {
@@ -26,6 +37,9 @@ public class CurseManifestFileEntry extends JSONObject {
         }
     }
 
+    /**
+     * @return ID for the file in the CurseForge database
+     */
     public int getFileID() {
         try {
             return (int) this.get("fileID");
