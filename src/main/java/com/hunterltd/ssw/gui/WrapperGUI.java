@@ -219,6 +219,7 @@ public class WrapperGUI extends JFrame {
                             String time = new SimpleDateFormat("HH:mm:ss").format(System.currentTimeMillis());
                             consoleTextArea.append(String.format("[%s] [SSW thread] Server has been stopped.\n", time));
                             try {
+                                // closes server streams
                                 server.getServerProcess().getOutputStream().close();
                                 server.getServerProcess().getInputStream().close();
                                 server.getServerProcess().getErrorStream().close();
@@ -457,6 +458,7 @@ public class WrapperGUI extends JFrame {
         settingsItem.removeActionListener(settingsOpen);
         openInFolderItem.removeActionListener(openInFolder);
 
+        // lambda for an ActionListener
         settingsOpen = e -> {
             SettingsDialog settingsDialog = new SettingsDialog(server);
             settingsDialog.pack();
