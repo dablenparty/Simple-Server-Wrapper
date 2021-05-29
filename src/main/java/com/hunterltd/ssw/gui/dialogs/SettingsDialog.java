@@ -80,7 +80,7 @@ public class SettingsDialog extends JDialog {
                 new JComponent[]{shutdownIntervalLabel, shutdownIntervalSlider, shutdownIntervalComboBox}));
 
         // Set components based on UserSettings
-        memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024) - 1);
+        memoryComboBox.setSelectedIndex(((settings.getMemory() * 2) / 1024) - 1); // converts between raw number and index
         automaticRestartCheckBox.setSelected(settings.getRestart());
         restartIntervalComboBox.setSelectedIndex(settings.getRestartInterval() - 1);
         automaticShutdownCheckBox.setSelected(settings.getShutdown());
