@@ -21,7 +21,7 @@ import java.nio.file.Paths;
  * Wrapper class for a CurseForge modpack
  */
 public class CurseModpack extends ZipFile {
-    private final String extractPath;
+    private final File extractPath;
     private final CurseManifest manifest;
 
     /**
@@ -30,7 +30,7 @@ public class CurseModpack extends ZipFile {
      */
     public CurseModpack(File zipFile) {
         super(zipFile);
-        extractPath = String.valueOf(Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(zipFile.getName())));
+        extractPath = Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(zipFile.getName())).toFile();
         manifest = new CurseManifest(Paths.get(String.valueOf(extractPath), "manifest.json").toFile());
     }
 
@@ -40,7 +40,7 @@ public class CurseModpack extends ZipFile {
      * @throws ParseException if a parsing error occurs loading the manifest
      */
     public void extractAll() throws IOException, ParseException {
-        this.extractAll(extractPath);
+        this.extractAll(extractPath.toString());
         manifest.load();
     }
 
@@ -48,13 +48,13 @@ public class CurseModpack extends ZipFile {
      * @return Boolean on whether the extracted folder exists
      */
     public boolean isExtracted() {
-        return new File(extractPath).exists();
+        return extractPath.exists();
     }
 
     /**
-     * @return Extract folder as a String
+     * @return Extract folder as a File object
      */
-    public String getExtractPath() {
+    public File getExtractPath() {
         return extractPath;
     }
 
@@ -93,7 +93,7 @@ public class CurseModpack extends ZipFile {
         }
 
         // copies over the override files from the Curse modpack
-        File overrides = Paths.get(extractPath, "overrides", "mods").toFile();
+        File overrides = Paths.get(extractPath.toString(), "overrides", "mods").toFile();
         try {
             FileUtils.copyDirectory(overrides, Paths.get(folder, "mods").toFile());
         } catch (IOException e) {
@@ -111,7 +111,7 @@ public class CurseModpack extends ZipFile {
         } catch (ParseException | IOException e) {
             e.printStackTrace();
         }
-        String message = !pack.install(pack.getExtractPath()) ? "Done!" : "Error(s) occurred, see above";
+        String message = !pack.install(pack.getExtractPath().toString()) ? "Done!" : "Error(s) occurred, see above";
         System.out.println(message);
     }
 }

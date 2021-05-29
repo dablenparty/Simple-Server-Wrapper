@@ -134,7 +134,7 @@ public class CurseInstaller extends JFrame {
                         }
                     }
                     firePropertyChange("status", "Installing mods...", "Copying overrides...");
-                    File overrideFolder = Paths.get(curseModpack.getExtractPath(), "overrides").toFile();
+                    File overrideFolder = Paths.get(curseModpack.getExtractPath().toString(), "overrides").toFile();
                     File[] overrides = overrideFolder.listFiles();
                     if (overrides != null) {
                         for (File file :
@@ -149,7 +149,7 @@ public class CurseInstaller extends JFrame {
                         }
                     }
                     try {
-                        FileUtils.deleteDirectory(new File(curseModpack.getExtractPath()));
+                        FileUtils.deleteDirectory(curseModpack.getExtractPath());
                     } catch (IOException e) {
                         new InternalErrorDialog(e);
                     }
@@ -172,11 +172,11 @@ public class CurseInstaller extends JFrame {
                     if (curseModpack.isExtracted()) {
                         int result = JOptionPane.showConfirmDialog(null,
                                 String.format("%s has already been extracted. Would you like to extract again?",
-                                        Paths.get(curseModpack.getExtractPath()).getParent()),
+                                        curseModpack.getExtractPath().getParent()),
                                 "ZIP already extracted",
                                 JOptionPane.YES_NO_OPTION);
                         if (result == JOptionPane.YES_OPTION) {
-                            FileUtils.deleteDirectory(new File(curseModpack.getExtractPath()));
+                            FileUtils.deleteDirectory(curseModpack.getExtractPath());
                             curseModpack.extractAll();
                         } else {
                             curseModpack.getManifest().load();
