@@ -66,11 +66,7 @@ public class CurseInstaller extends JFrame {
         });
 
         installButton.addActionListener(e -> {
-            JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField};
-            for (JComponent comp :
-                    components) {
-                comp.setEnabled(false);
-            }
+            setComponentsEnabled(false);
             if (installing) {
                 int result = JOptionPane.showConfirmDialog(this,
                         "Are you sure you want to cancel?",
@@ -91,43 +87,26 @@ public class CurseInstaller extends JFrame {
                 @Override
                 protected Void doInBackground() throws IOException, ParseException {
                     firePropertyChange("status", "", "Extracting...");
-                    if (curseModpack.isExtracted()) {
-                        int result = JOptionPane.showConfirmDialog(null,
-                                String.format("%s has already been extracted. Would you like to extract again?",
-                                        Paths.get(curseModpack.getExtractPath()).getParent()),
-                                "ZIP already extracted",
-                                JOptionPane.YES_NO_OPTION);
-                        if (result == JOptionPane.YES_OPTION) {
-                            FileUtils.deleteDirectory(new File(curseModpack.getExtractPath()));
-                            curseModpack.extractAll();
-                        } else {
-                            curseModpack.getManifest().load();
-                        }
-                    } else {
-                        curseModpack.extractAll();
-                    }
+                    extractCurseZip();
 
                     firePropertyChange("status", "Extracting...", "Getting files...");
                     CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
-
                     File modsFolder = Paths.get(serverPath.toString(), "mods").toFile();
+
                     try {
-                        if (Objects.requireNonNull(modsFolder.listFiles()).length != 0) {
-                            int result = JOptionPane.showConfirmDialog(null,
-                                    "The mods folder is not empty. Would you like to overwrite it?",
-                                    "Mods folder not empty",
-                                    JOptionPane.YES_NO_OPTION);
-                            if (result == JOptionPane.NO_OPTION) return null;
-                            FileUtils.deleteDirectory(modsFolder);
-                        }
-                    } catch (NullPointerException ignored) {}
+                        if (overwriteModsFolder(modsFolder)) return null;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        new InternalErrorDialog(e);
+                        return null;
+                    }
+                    catch (NullPointerException ignored) {}
 
                     Client client = ClientBuilder.newClient();
                     int filesLength = files.length;
                     int maxNameLength = 20;
+
                     for (int i = 0; i < filesLength; i++) {
-                        // Mimics the CurseModpack's download method, but restructured to fire property changes along
-                        // the way to update the EDT
                         CurseManifestFileEntry manifestEntry = files[i];
                         Response response = client.target(
                                 String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
@@ -138,13 +117,14 @@ public class CurseInstaller extends JFrame {
                             CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
                             String addonName = addon.toString().length() > maxNameLength ?
                                     addon.toString().substring(0, maxNameLength - 4) + "..." :
-                                    addon.toString();
+                                    addon.toString(); // if the addon name is too long, truncates and appends "..."
                             firePropertyChange("status",
                                     "Getting files...",
                                     String.format("Mod %d of %d: %20s", i + 1, filesLength, addonName));
                             addon.download(serverPath.toString());
                         } catch (ParseException | IOException e) {
                             e.printStackTrace();
+                            new InternalErrorDialog(e);
                         } finally {
                             setProgress((int) Math.round((i / (double) filesLength) * 100));
                         }
@@ -160,13 +140,11 @@ public class CurseInstaller extends JFrame {
                         for (File file :
                                 overrides) {
                             try {
-                                if (file.isDirectory()) {
-                                    FileUtils.copyDirectory(file, Paths.get(serverPath.toString(), file.getName()).toFile());
-                                } else {
-                                    FileUtils.copyFileToDirectory(file, serverPath);
-                                }
+                                File copyTo = file.isDirectory() ? Paths.get(serverPath.toString(), file.getName()).toFile() : serverPath;
+                                FileUtils.copyFileToDirectory(file, copyTo);
                             } catch (IOException e) {
                                 e.printStackTrace();
+                                new InternalErrorDialog(e);
                             }
                         }
                     }
@@ -178,15 +156,41 @@ public class CurseInstaller extends JFrame {
                     return null;
                 }
 
+                private boolean overwriteModsFolder(File modsFolder) throws IOException {
+                    if (Objects.requireNonNull(modsFolder.listFiles()).length != 0) {
+                        int result = JOptionPane.showConfirmDialog(null,
+                                "The mods folder is not empty. Would you like to overwrite it?",
+                                "Mods folder not empty",
+                                JOptionPane.YES_NO_OPTION);
+                        if (result == JOptionPane.NO_OPTION) return true;
+                        FileUtils.deleteDirectory(modsFolder);
+                    }
+                    return false;
+                }
+
+                private void extractCurseZip() throws IOException, ParseException {
+                    if (curseModpack.isExtracted()) {
+                        int result = JOptionPane.showConfirmDialog(null,
+                                String.format("%s has already been extracted. Would you like to extract again?",
+                                        Paths.get(curseModpack.getExtractPath()).getParent()),
+                                "ZIP already extracted",
+                                JOptionPane.YES_NO_OPTION);
+                        if (result == JOptionPane.YES_OPTION) {
+                            FileUtils.deleteDirectory(new File(curseModpack.getExtractPath()));
+                            curseModpack.extractAll();
+                        } else {
+                            curseModpack.getManifest().load();
+                        }
+                    } else {
+                        curseModpack.extractAll();
+                    }
+                }
+
                 @Override
                 protected void done() {
                     installProgressBar.setString("Done!");
                     installProgressBar.setValue(100);
-                    JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField};
-                    for (JComponent comp :
-                            components) {
-                        comp.setEnabled(true);
-                    }
+                    setComponentsEnabled(true);
                     installing = false;
                     installButton.setText("Install");
                 }
@@ -206,6 +210,14 @@ public class CurseInstaller extends JFrame {
         });
 
         setTitle("CurseForge Modpack Installer");
+    }
+
+    private void setComponentsEnabled(boolean b) {
+        JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField};
+        for (JComponent comp :
+                components) {
+            comp.setEnabled(b);
+        }
     }
 
     public SwingWorker<Void, Void> getWorker() {
