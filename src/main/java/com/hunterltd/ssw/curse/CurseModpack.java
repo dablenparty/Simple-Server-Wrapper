@@ -54,7 +54,7 @@ public class CurseModpack extends ZipFile {
     /**
      * @return Extract folder as a File object
      */
-    public File getExtractPath() {
+    public File getExtractFolder() {
         return extractPath;
     }
 
@@ -111,7 +111,7 @@ public class CurseModpack extends ZipFile {
         } catch (ParseException | IOException e) {
             e.printStackTrace();
         }
-        String message = !pack.install(pack.getExtractPath().toString()) ? "Done!" : "Error(s) occurred, see above";
+        String message = !pack.install(pack.getExtractFolder().toString()) ? "Done!" : "Error(s) occurred, see above";
         System.out.println(message);
     }
 }
