@@ -17,33 +17,59 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+/**
+ * Wrapper class for a CurseForge modpack
+ */
 public class CurseModpack extends ZipFile {
     private final String extractPath;
     private final CurseManifest manifest;
 
+    /**
+     * Instantiates the wrapper class with the given ZIP archive
+     * @param zipFile ZIP archive containing modpack data
+     */
     public CurseModpack(File zipFile) {
         super(zipFile);
         extractPath = String.valueOf(Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(zipFile.getName())));
         manifest = new CurseManifest(Paths.get(String.valueOf(extractPath), "manifest.json").toFile());
     }
 
+    /**
+     * Extracts the modpack in-place and loads the manifest
+     * @throws IOException if an I/O error occurs loading the manifest
+     * @throws ParseException if a parsing error occurs loading the manifest
+     */
     public void extractAll() throws IOException, ParseException {
         this.extractAll(extractPath);
         manifest.load();
     }
 
+    /**
+     * @return Boolean on whether the extracted folder exists
+     */
     public boolean isExtracted() {
         return new File(extractPath).exists();
     }
 
+    /**
+     * @return Extract folder as a String
+     */
     public String getExtractPath() {
         return extractPath;
     }
 
+    /**
+     * @return Wrapper for the packs manifest.json
+     */
     public CurseManifest getManifest() {
         return manifest;
     }
 
+    /**
+     * Installs the modpack in the specified folder
+     * @param folder Install location
+     * @return Boolean representing if an error occurs or not
+     */
     public boolean install(String folder) {
         // this will return a boolean if an error occurs because one file having an error shouldn't block all files from
         // downloading/installing
