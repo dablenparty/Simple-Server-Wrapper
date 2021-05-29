@@ -11,6 +11,11 @@ public class ConnectionListener {
     private static AsynchronousServerSocketChannel listener;
     private static boolean connectionAttempted = false;
 
+    /**
+     * Listens for a connection on a port and sets a boolean flag on the first accepted connection
+     * @param port Port to listen on
+     * @throws IOException if an I/O error occurs binding the port
+     */
     public static void start(int port) throws IOException {
         connectionAttempted = false;
         listener = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
@@ -44,6 +49,9 @@ public class ConnectionListener {
         });
     }
 
+    /**
+     * Stops the listener
+     */
     public static void stop() {
         try {
             listener.close();
@@ -52,6 +60,9 @@ public class ConnectionListener {
         }
     }
 
+    /**
+     * @return Boolean on whether a connection was accepted by the listener
+     */
     public static boolean isConnectionAttempted() {
         return connectionAttempted;
     }
