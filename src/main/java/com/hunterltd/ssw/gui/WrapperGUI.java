@@ -42,7 +42,7 @@ public class WrapperGUI extends JFrame {
     private Timer aliveTimer, restartTimer, connectionListenerTimer, shutdownTimer, playerCountListenerTimer;
     private int[] restartCounter = new int[]{0, 0, 0}, // H:M:S
             shutdownCounter = new int[]{0, 0}; // M:S
-    private final String restartCommandTemplate = "me %sis restarting in %d %s!"; // color code, time integer, time unit
+    private final String restartCommandTemplate = "me %s is restarting in %d %s!"; // color code, time integer, time unit
     private final String baseTitle = "Simple Server Wrapper";
     private final ActionListener noServerSelected = e -> {
         InfoDialog dialog = new InfoDialog("No server selected",
@@ -197,13 +197,7 @@ public class WrapperGUI extends JFrame {
         if (server.isRunning() && server.shouldBeRunning()) {
             aliveTimer = new Timer(100, e -> {
                 if ((!server.shouldBeRunning() && server.isRunning()) || !server.isRunning()) {
-                    runButton.setText("Stopping...");
-                    aliveTimer.stop();
-                    if (restartTimer != null) restartTimer.stop();
-                    restartCounter = new int[]{0, 0, 0};
-                    if (shutdownTimer != null) shutdownTimer.stop();
-                    shutdownCounter = new int[]{0, 0};
-                    if (playerCountListenerTimer != null) playerCountListenerTimer.stop();
+                    resetTimersAndCounters();
                     SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                         @Override
                         protected Void doInBackground() {
@@ -229,6 +223,7 @@ public class WrapperGUI extends JFrame {
                                 server.getServerProcess().getInputStream().close();
                                 server.getServerProcess().getErrorStream().close();
                             } catch (IOException e) {
+                                e.printStackTrace();
                                 new InternalErrorDialog(e);
                             } finally {
                                 if (server.shouldRestart()) startServer();
@@ -247,20 +242,14 @@ public class WrapperGUI extends JFrame {
                 }
             });
 
-            // Keeps track of every second in a 3 element array
+            // Keeps track of every second
             restartTimer = serverSettings.getRestart() ? new Timer(1000, e -> {
                 final int interval = serverSettings.getRestartInterval();
                 int hours = restartCounter[0], minutes = restartCounter[1], seconds = restartCounter[2];
 
                 seconds++;
 
-                if (seconds != 60) {
-                    restartCounter[2] = seconds;
-                } else {
-                    minutes++;
-                    restartCounter[1] = minutes;
-                    restartCounter[2] = 0; // resets "seconds" counter
-                }
+                minutes = incrementCounter(minutes, seconds, restartCounter, 2, 1);
 
                 if (minutes == 60) {
                     hours++;
@@ -322,13 +311,7 @@ public class WrapperGUI extends JFrame {
 
                     seconds++;
 
-                    if (seconds != 60) {
-                        shutdownCounter[1] = seconds;
-                    } else {
-                        minutes++;
-                        shutdownCounter[0] = minutes;
-                        shutdownCounter[1] = 0; // resets seconds
-                    }
+                    minutes = incrementCounter(minutes, seconds, shutdownCounter, 1, 0);
 
                     if (minutes == interval) {
                         System.out.printf("[%s] No players have joined in a while, closing the server%n",
@@ -426,6 +409,27 @@ public class WrapperGUI extends JFrame {
         }
         runButton.setText(runText);
         setTitle(title);
+    }
+
+    private int incrementCounter(int minutes, int seconds, int[] restartCounter, int secondsIndex, int minutesIndex) {
+        if (seconds != 60) {
+            restartCounter[secondsIndex] = seconds;
+        } else {
+            minutes++;
+            restartCounter[minutesIndex] = minutes;
+            restartCounter[secondsIndex] = 0; // resets "seconds" counter
+        }
+        return minutes;
+    }
+
+    private void resetTimersAndCounters() {
+        runButton.setText("Stopping...");
+        aliveTimer.stop();
+        if (restartTimer != null) restartTimer.stop();
+        restartCounter = new int[]{0, 0, 0};
+        if (shutdownTimer != null) shutdownTimer.stop();
+        shutdownCounter = new int[]{0, 0};
+        if (playerCountListenerTimer != null) playerCountListenerTimer.stop();
     }
 
     private void selectNewFile() {
