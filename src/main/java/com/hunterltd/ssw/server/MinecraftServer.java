@@ -47,9 +47,10 @@ public class MinecraftServer {
 
         propsExists = updateProperties();
 
+        int settingsMemory = serverSettings.getMemory();
         serverArgs = new ArrayList<>(Arrays.asList("java",
-                String.format("-Xmx%dM", serverSettings.getMemory()),
-                String.format("-Xms%dM", serverSettings.getMemory()),
+                String.format("-Xmx%dM", settingsMemory),
+                String.format("-Xms%dM", settingsMemory),
                 "-jar",
                 serverPath.toString(),
                 "nogui"));
