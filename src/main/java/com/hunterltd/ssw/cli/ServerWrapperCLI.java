@@ -60,11 +60,6 @@ public class ServerWrapperCLI {
                     if (minecraftServer.isRunning()) {
                         minecraftServer.setShouldBeRunning(false);
                     }
-                    try {
-                        minecraftServer.getServerProcess().waitFor(5L, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
                     if (inputService != null) {
                         tryShutdownExecutorService(inputService);
                         tryShutdownExecutorService(errorService);
