@@ -12,12 +12,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class ServerWrapperCLI {
     private final Properties mavenProperties;
     private final boolean propertiesLoaded;
-    private volatile MinecraftServer minecraftServer;
+    private final MinecraftServer minecraftServer;
 
     public static void main(String[] args) throws IOException {
         if (args.length != 1) {
@@ -28,33 +30,45 @@ public class ServerWrapperCLI {
         ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));
         MinecraftServer minecraftServer = wrapperCli.getMinecraftServer();
         ExecutorService inputService = null, errorService = null;
+        ScheduledExecutorService serverStateService = Executors.newScheduledThreadPool(1);
+        serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1000, 1000, TimeUnit.MILLISECONDS);
         wrapperCli.showVersion();
 
         doLoop: do {
             Scanner inputScanner = new Scanner(System.in);
             String command = inputScanner.nextLine();
-            Process serverProcess = minecraftServer.getServerProcess();
             switch (command) {
                 case "start":
                     System.out.println("Starting server...");
+                    minecraftServer.setShouldBeRunning(true);
                     minecraftServer.run();
                     // submits process streams to stream gobblers to redirect output to standard out and error
-                    inputService = StreamGobbler.execute(serverProcess.getInputStream(), System.out::println);
-                    errorService = StreamGobbler.execute(serverProcess.getErrorStream(), System.err::println);
+                    inputService = StreamGobbler.execute(minecraftServer.getServerProcess().getInputStream(), System.out::println);
+                    errorService = StreamGobbler.execute(minecraftServer.getServerProcess().getErrorStream(), System.err::println);
+                    break;
+                case "stop":
+                    if (minecraftServer.isRunning()) {
+                        minecraftServer.setShouldBeRunning(false);
+                    }
+
+                    if (inputService != null) {
+                        tryShutdownExecutorService(inputService);
+                        tryShutdownExecutorService(errorService);
+                    }
                     break;
                 case "close":
                     if (minecraftServer.isRunning()) {
-                        try {
-                            minecraftServer.stop();
-                            serverProcess.waitFor(5L, TimeUnit.SECONDS);
-                        } catch (IOException | InterruptedException exception) {
-                            System.err.println(exception.getLocalizedMessage());
-                            serverProcess.destroy();
-                        }
+                        minecraftServer.setShouldBeRunning(false);
+                    }
+                    try {
+                        minecraftServer.getServerProcess().waitFor(5L, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                     if (inputService != null) {
                         tryShutdownExecutorService(inputService);
                         tryShutdownExecutorService(errorService);
+                        tryShutdownExecutorService(serverStateService);
                     }
                     inputScanner.close();
                     break doLoop;
@@ -65,20 +79,18 @@ public class ServerWrapperCLI {
         } while (true);
     }
 
-    private static boolean tryShutdownExecutorService(ExecutorService service) {
-        boolean ret;
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private static void tryShutdownExecutorService(ExecutorService service) {
         service.shutdown();
         try {
-            ret = service.awaitTermination(5L, TimeUnit.SECONDS);
+            service.awaitTermination(5L, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             System.err.println(e.getLocalizedMessage());
-            ret = false;
         } finally {
             if (!service.isTerminated())
                 System.err.println("Task didn't terminate, forcing shutdown");
             service.shutdownNow();
         }
-        return ret;
     }
 
     ServerWrapperCLI(File serverFile) {
