@@ -3,13 +3,30 @@ package com.hunterltd.ssw.utilities;
 import com.dablenparty.jsondata.UserDataObject;
 import org.json.simple.JSONArray;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
 public class Settings extends UserDataObject {
+    /**
+     * Creates a new settings file in the default path ({serverFile.parent}/ssw/wrapperSettings.json)
+     * @param serverFile Server file object
+     * @return Settings object
+     */
+    public static Settings getSettingsFromDefaultPath(File serverFile) {
+        Path settingsPath = Paths.get(serverFile.getParent(), "ssw", "wrapperSettings.json");
+        try {
+            return new Settings(settingsPath);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
     public Settings(String appName) throws IOException {
         super(appName);
     }
