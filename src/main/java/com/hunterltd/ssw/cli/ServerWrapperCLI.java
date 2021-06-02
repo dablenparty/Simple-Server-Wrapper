@@ -1,5 +1,9 @@
 package com.hunterltd.ssw.cli;
 
+import com.hunterltd.ssw.server.MinecraftServer;
+import com.hunterltd.ssw.utilities.Settings;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -9,16 +13,22 @@ import java.util.Properties;
 public class ServerWrapperCLI {
     private final Properties mavenProperties;
     private final boolean propertiesLoaded;
+    private volatile MinecraftServer minecraftServer;
 
     public static void main(String[] args) {
-        System.out.println("Hello from the CLI");
-        ServerWrapperCLI wrapperCli = new ServerWrapperCLI();
+        if (args.length != 1) {
+            // TODO: write help message
+            throw new IllegalArgumentException((args.length > 1 ? "Too many" : "Missing") + " arguments");
+        }
+
+        ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));
         wrapperCli.showVersion();
     }
 
-    ServerWrapperCLI() {
+    ServerWrapperCLI(File serverFile) {
         mavenProperties = new Properties();
         propertiesLoaded = loadProperties();
+        minecraftServer = new MinecraftServer(serverFile, Settings.getSettingsFromDefaultPath(serverFile));
     }
 
     public void showVersion() {
