@@ -33,21 +33,23 @@ public class ServerWrapperCLI {
         doLoop: do {
             Scanner inputScanner = new Scanner(System.in);
             String command = inputScanner.nextLine();
+            Process serverProcess = minecraftServer.getServerProcess();
             switch (command) {
                 case "start":
                     System.out.println("Starting server...");
                     minecraftServer.run();
-                    inputService = StreamGobbler.execute(minecraftServer.getServerProcess().getInputStream(), System.out::println);
-                    errorService = StreamGobbler.execute(minecraftServer.getServerProcess().getErrorStream(), System.err::println);
+                    // submits process streams to stream gobblers to redirect output to standard out and error
+                    inputService = StreamGobbler.execute(serverProcess.getInputStream(), System.out::println);
+                    errorService = StreamGobbler.execute(serverProcess.getErrorStream(), System.err::println);
                     break;
                 case "close":
                     if (minecraftServer.isRunning()) {
                         try {
                             minecraftServer.stop();
-                            minecraftServer.getServerProcess().waitFor(5L, TimeUnit.SECONDS);
+                            serverProcess.waitFor(5L, TimeUnit.SECONDS);
                         } catch (IOException | InterruptedException exception) {
                             System.err.println(exception.getLocalizedMessage());
-                            minecraftServer.getServerProcess().destroy();
+                            serverProcess.destroy();
                         }
                     }
                     if (inputService != null) {
