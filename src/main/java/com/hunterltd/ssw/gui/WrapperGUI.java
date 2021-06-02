@@ -53,7 +53,6 @@ public class WrapperGUI extends JFrame {
     private ActionListener settingsOpen, openInFolder;
     private Settings serverSettings;
     private SwingWorker<Void, Void> serverPingWorker;
-    private boolean serverShuttingDown = false;
     private int historyLocation = 0;
 
     public WrapperGUI() {
@@ -178,7 +177,7 @@ public class WrapperGUI extends JFrame {
     }
 
     public void stopServer(boolean restart) {
-        serverShuttingDown = true;
+        server.setShuttingDown(true);
         server.setShouldRestart(restart);
         server.setShouldBeRunning(false);
     }
@@ -226,7 +225,7 @@ public class WrapperGUI extends JFrame {
                             } finally {
                                 if (server.shouldRestart()) startServer();
                                 else sendServerStatus(false);
-                                serverShuttingDown = false;
+                                server.setShuttingDown(false);
                             }
                         }
                     };
@@ -327,10 +326,10 @@ public class WrapperGUI extends JFrame {
                             try {
                                 // putting this in the try block lets me still sleep the thread from the if statement without
                                 // calling sleep again
-                                if (!server.isRunning() || serverShuttingDown) continue;
+                                if (!server.isRunning() || server.isShuttingDown()) continue;
 
                                 ServerListPing.StatusResponse response = pinger.fetchData();
-                                if (server.isRunning() && !serverShuttingDown) {
+                                if (server.isRunning() && !server.isShuttingDown()) {
                                     if (response.getPlayers().getOnline() != 0) {
                                         firePropertyChange("playersOnline", 0, response.getPlayers().getOnline());
                                     } else {
@@ -397,7 +396,7 @@ public class WrapperGUI extends JFrame {
                         return;
                     }
                     // SocketException
-                    if (!server.isRunning() && !serverShuttingDown) {
+                    if (!server.isRunning() && !server.isShuttingDown()) {
                         connectionListenerTimer.stop();
                         if (serverSettings.getShutdown()) startServer();
                     }

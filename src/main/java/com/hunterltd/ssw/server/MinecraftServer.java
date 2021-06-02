@@ -29,6 +29,7 @@ public class MinecraftServer {
     private int port = 25565;
     private boolean shouldBeRunning;
     private boolean shouldRestart = false;
+    private boolean shuttingDown = false;
 
     /**
      * Creates a class from an archive file and settings class
@@ -256,5 +257,20 @@ public class MinecraftServer {
      */
     public int getPort() {
         return port;
+    }
+
+    /**
+     * @return Boolean on if the server is shutting down
+     */
+    public boolean isShuttingDown() {
+        return shuttingDown;
+    }
+
+    /**
+     * Sets if the server is shutting down
+     * @param shuttingDown Value
+     */
+    public void setShuttingDown(boolean shuttingDown) {
+        this.shuttingDown = shuttingDown;
     }
 }
