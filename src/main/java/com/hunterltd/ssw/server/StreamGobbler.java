@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
@@ -28,8 +29,10 @@ public class StreamGobbler implements Runnable {
         }
     }
 
-    public static void execute(InputStream inputStream, Consumer<String> consumer) {
+    public static ExecutorService execute(InputStream inputStream, Consumer<String> consumer) {
         StreamGobbler gobbler = new StreamGobbler(inputStream, consumer);
-        Executors.newSingleThreadExecutor().submit(gobbler);
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.submit(gobbler);
+        return service;
     }
 }
