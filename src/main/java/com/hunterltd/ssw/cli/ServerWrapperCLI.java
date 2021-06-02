@@ -53,8 +53,8 @@ public class ServerWrapperCLI {
                         }
                     }
                     if (inputService != null) {
-                        inputService.shutdown();
-                        errorService.shutdown();
+                        tryShutdownExecutorService(inputService);
+                        tryShutdownExecutorService(errorService);
                     }
                     inputScanner.close();
                     break doLoop;
@@ -63,6 +63,22 @@ public class ServerWrapperCLI {
                     break;
             }
         } while (true);
+    }
+
+    private static boolean tryShutdownExecutorService(ExecutorService service) {
+        boolean ret;
+        service.shutdown();
+        try {
+            ret = service.awaitTermination(5L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            System.err.println(e.getLocalizedMessage());
+            ret = false;
+        } finally {
+            if (!service.isTerminated())
+                System.err.println("Task didn't terminate, forcing shutdown");
+            service.shutdownNow();
+        }
+        return ret;
     }
 
     ServerWrapperCLI(File serverFile) {
