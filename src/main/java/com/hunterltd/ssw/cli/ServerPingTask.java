@@ -21,11 +21,9 @@ public class ServerPingTask implements Runnable {
 
     @Override
     public void run() {
-        if (!server.isRunning() || server.isShuttingDown()) return;
-
         try {
-            ServerListPing.StatusResponse response = pinger.fetchData();
-            if (server.isRunning() && !server.isShuttingDown()) {
+            if (server.shouldBeRunning() && server.isRunning() && !server.isShuttingDown()) {
+                ServerListPing.StatusResponse response = pinger.fetchData();
                 if (response.getPlayers().getOnline() == 0 && shutdownService == null) {
                     // shutdown timer begins
                     shutdownService = Executors.newScheduledThreadPool(1);
@@ -41,5 +39,9 @@ public class ServerPingTask implements Runnable {
         } catch (IOException | NullPointerException exception) {
 //            exception.printStackTrace();
         }
+    }
+
+    public ScheduledExecutorService getShutdownService() {
+        return shutdownService;
     }
 }
