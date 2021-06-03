@@ -32,8 +32,11 @@ public class ServerWrapperCLI {
         ExecutorService inputService = null, errorService = null;
         ScheduledExecutorService serverStateService = Executors.newScheduledThreadPool(1),
                 serverPingService = null;
-        if (minecraftServer.getServerSettings().getShutdown())
+        ServerPingTask pingTask = null;
+        if (minecraftServer.getServerSettings().getShutdown()) {
             serverPingService = Executors.newScheduledThreadPool(1);
+            pingTask = new ServerPingTask(minecraftServer);
+        }
         serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 100L, 100L, TimeUnit.MILLISECONDS);
         wrapperCli.showVersion();
 
@@ -48,8 +51,9 @@ public class ServerWrapperCLI {
                     // submits process streams to stream gobblers to redirect output to standard out and error
                     inputService = StreamGobbler.execute(minecraftServer.getServerProcess().getInputStream(), System.out::println);
                     errorService = StreamGobbler.execute(minecraftServer.getServerProcess().getErrorStream(), System.err::println);
-                    if (serverPingService != null)
-                        serverPingService.scheduleWithFixedDelay(new ServerPingTask(minecraftServer), 2L, 2L, TimeUnit.SECONDS);
+                    if (serverPingService != null) {
+                        serverPingService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
+                    }
                     break;
                 case "stop":
                     if (minecraftServer.isRunning()) {
@@ -70,6 +74,8 @@ public class ServerWrapperCLI {
                         if (service != null)
                             tryShutdownExecutorService(service);
                     }
+                    if (pingTask != null && pingTask.getShutdownService() != null)
+                        tryShutdownExecutorService(pingTask.getShutdownService());
                     inputScanner.close();
                     break doLoop;
                 default:
@@ -81,6 +87,7 @@ public class ServerWrapperCLI {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void tryShutdownExecutorService(ExecutorService service) {
+        System.out.println("Shutting down background service...");
         service.shutdown();
         try {
             service.awaitTermination(5L, TimeUnit.SECONDS);
@@ -88,8 +95,9 @@ public class ServerWrapperCLI {
             System.err.println(e.getLocalizedMessage());
         } finally {
             if (!service.isTerminated())
-                System.err.println("Task didn't terminate, forcing shutdown");
+                System.err.println("Service didn't terminate, forcing shutdown");
             service.shutdownNow();
+            System.out.println("Service closed");
         }
     }
 
