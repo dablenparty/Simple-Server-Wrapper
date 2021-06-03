@@ -30,8 +30,11 @@ public class ServerWrapperCLI {
         ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));
         MinecraftServer minecraftServer = wrapperCli.getMinecraftServer();
         ExecutorService inputService = null, errorService = null;
-        ScheduledExecutorService serverStateService = Executors.newScheduledThreadPool(1);
-        serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1000, 1000, TimeUnit.MILLISECONDS);
+        ScheduledExecutorService serverStateService = Executors.newScheduledThreadPool(1),
+                serverPingService = null;
+        if (minecraftServer.getServerSettings().getShutdown())
+            serverPingService = Executors.newScheduledThreadPool(1);
+        serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 100L, 100L, TimeUnit.MILLISECONDS);
         wrapperCli.showVersion();
 
         doLoop: do {
@@ -45,6 +48,8 @@ public class ServerWrapperCLI {
                     // submits process streams to stream gobblers to redirect output to standard out and error
                     inputService = StreamGobbler.execute(minecraftServer.getServerProcess().getInputStream(), System.out::println);
                     errorService = StreamGobbler.execute(minecraftServer.getServerProcess().getErrorStream(), System.err::println);
+                    if (serverPingService != null)
+                        serverPingService.scheduleWithFixedDelay(new ServerPingTask(minecraftServer), 2L, 2L, TimeUnit.SECONDS);
                     break;
                 case "stop":
                     if (minecraftServer.isRunning()) {
@@ -64,6 +69,8 @@ public class ServerWrapperCLI {
                         tryShutdownExecutorService(inputService);
                         tryShutdownExecutorService(errorService);
                         tryShutdownExecutorService(serverStateService);
+                        if (serverPingService != null)
+                            tryShutdownExecutorService(serverPingService);
                     }
                     inputScanner.close();
                     break doLoop;
@@ -75,7 +82,7 @@ public class ServerWrapperCLI {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private static void tryShutdownExecutorService(ExecutorService service) {
+    public static void tryShutdownExecutorService(ExecutorService service) {
         service.shutdown();
         try {
             service.awaitTermination(5L, TimeUnit.SECONDS);
