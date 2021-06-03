@@ -22,9 +22,14 @@ public class ServerWrapperCLI {
     private final MinecraftServer minecraftServer;
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 1) {
+        if (args.length != 1 && args.length != 3) {
             // TODO: write help message
             throw new IllegalArgumentException((args.length > 1 ? "Too many" : "Missing") + " arguments");
+        }
+
+        if (args.length > 1 && args[1].equalsIgnoreCase("--modpack")) {
+            new CurseCli(new File(args[2]), new File(args[0])).run();
+            return;
         }
 
         ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));

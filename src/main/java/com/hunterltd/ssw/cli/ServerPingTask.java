@@ -29,6 +29,11 @@ public class ServerPingTask implements Runnable {
                     shutdownService = Executors.newScheduledThreadPool(1);
                     long delay = server.getServerSettings().getShutdownInterval();
                     shutdownService.schedule(new ServerShutdownTask(server), delay, TimeUnit.MINUTES);
+                } else {
+                    if (response.getPlayers().getOnline() != 0 && shutdownService != null) {
+                        ServerWrapperCLI.tryShutdownExecutorService(shutdownService);
+                        shutdownService = null;
+                    }
                 }
             } else {
                 if (shutdownService != null) {
