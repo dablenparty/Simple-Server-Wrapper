@@ -65,12 +65,10 @@ public class ServerWrapperCLI {
                     if (minecraftServer.isRunning()) {
                         minecraftServer.setShouldBeRunning(false);
                     }
-                    if (inputService != null) {
-                        tryShutdownExecutorService(inputService);
-                        tryShutdownExecutorService(errorService);
-                        tryShutdownExecutorService(serverStateService);
-                        if (serverPingService != null)
-                            tryShutdownExecutorService(serverPingService);
+                    for (ExecutorService service :
+                            new ExecutorService[]{inputService, errorService, serverPingService, serverStateService}) {
+                        if (service != null)
+                            tryShutdownExecutorService(service);
                     }
                     inputScanner.close();
                     break doLoop;
