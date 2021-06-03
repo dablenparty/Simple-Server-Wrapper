@@ -67,6 +67,25 @@ public class CurseCli {
                 System.err.println(errorMessage);
             }
         }
+        File overrideFolder = Paths.get(curseModpack.getExtractFolder().toString(), "overrides").toFile();
+        File[] overrides = overrideFolder.listFiles();
+        if (overrides != null) {
+            for (File file :
+                    overrides) {
+                try {
+                    File copyTo = file.isDirectory() ?
+                            Paths.get(serverFolder.toString(), file.getName()).toFile() : serverFolder;
+                    FileUtils.copyFileToDirectory(file, copyTo);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
+            }
+        }
+        try {
+            FileUtils.deleteDirectory(curseModpack.getExtractFolder());
+        } catch (IOException e) {
+            System.err.println("Error occurred cleaning up modpack files");
+        }
     }
 
     private void extractModpack(Scanner inputScanner) throws IOException, ParseException {
