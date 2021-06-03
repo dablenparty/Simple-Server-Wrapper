@@ -29,6 +29,7 @@ public class CurseCli {
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Extracting modpack...");
         try {
             extractModpack(scanner);
         } catch (IOException | ParseException exception) {
@@ -39,13 +40,19 @@ public class CurseCli {
         CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
         File modsFolder = Paths.get(serverFolder.toString(), "mods").toFile();
         try {
-            if (Objects.requireNonNull(modsFolder.listFiles()).length != 0)
-                FileUtils.deleteDirectory(modsFolder);
-            else return;
+            if (Objects.requireNonNull(modsFolder.listFiles()).length != 0) {
+                System.out.print("The mods folder is not empty, would you like to overwrite it? (y/N): ");
+                if (scanner.next().startsWith("y"))
+                    FileUtils.deleteDirectory(modsFolder);
+                else return;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
         } catch (NullPointerException ignored) {}
+        finally {
+            scanner.close();
+        }
 
         Client client = ClientBuilder.newClient();
         int filesLength = files.length;
@@ -59,7 +66,7 @@ public class CurseCli {
             try {
                 JSONObject responseData = (JSONObject) new JSONParser().parse(response.readEntity(String.class));
                 CurseAddon addon = new CurseAddon(responseData);
-                System.out.printf("Mod %d of %d: %s%n", i + 1, filesLength, addon);
+                System.out.printf("Downloading mod %d of %d: %s%n", i + 1, filesLength, addon);
                 addon.download(serverFolder.toString());
             } catch (ParseException | IOException e) {
                 String errorMessage = e instanceof ParseException ?
@@ -67,15 +74,21 @@ public class CurseCli {
                 System.err.println(errorMessage);
             }
         }
+        System.out.println("Copying overrides...");
         File overrideFolder = Paths.get(curseModpack.getExtractFolder().toString(), "overrides").toFile();
         File[] overrides = overrideFolder.listFiles();
         if (overrides != null) {
             for (File file :
                     overrides) {
                 try {
-                    File copyTo = file.isDirectory() ?
-                            Paths.get(serverFolder.toString(), file.getName()).toFile() : serverFolder;
-                    FileUtils.copyFileToDirectory(file, copyTo);
+                    File copyTo;
+                    if (file.isDirectory()) {
+                        copyTo = Paths.get(serverFolder.toString(), file.getName()).toFile();
+                        FileUtils.copyDirectory(file, copyTo);
+                    } else {
+                        copyTo = serverFolder;
+                        FileUtils.copyFileToDirectory(file, copyTo);
+                    }
                 } catch (IOException exception) {
                     exception.printStackTrace();
                 }
