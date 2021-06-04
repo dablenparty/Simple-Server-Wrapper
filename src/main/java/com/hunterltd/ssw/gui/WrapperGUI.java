@@ -199,7 +199,7 @@ public class WrapperGUI extends JFrame {
                         protected Void doInBackground() {
                             try {
                                 server.stop();
-                            } catch (IOException ioException) {
+                            } catch (IOException | InterruptedException ioException) {
                                 firePropertyChange("error", null, ioException);
                             }
 
