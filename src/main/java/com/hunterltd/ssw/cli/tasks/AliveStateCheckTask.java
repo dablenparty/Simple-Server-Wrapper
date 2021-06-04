@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.cli.tasks;
 
+import com.hunterltd.ssw.server.ConnectionListener;
 import com.hunterltd.ssw.server.MinecraftServer;
 
 import java.io.IOException;
@@ -22,11 +23,27 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                 serverProcess.getOutputStream().close();
                 serverProcess.getInputStream().close();
                 serverProcess.getErrorStream().close();
+                if (server.getServerSettings().getShutdown()) {
+                    ConnectionListener.start(server.getPort());
+                    System.out.println("Listener opened");
+                }
             } catch (IOException | InterruptedException exception) {
                 exception.printStackTrace();
                 serverProcess.destroy();
             } finally {
                 server.setShuttingDown(false);
+            }
+        } else if (server.getServerSettings().getShutdown()
+                && ConnectionListener.isConnectionAttempted()
+                && !server.isRunning()) {
+            try {
+                server.run();
+                server.setShouldBeRunning(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                ConnectionListener.stop();
+                System.out.println("Listener closed, starting server...");
             }
         }
     }
