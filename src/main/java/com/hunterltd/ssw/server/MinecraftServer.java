@@ -116,9 +116,17 @@ public class MinecraftServer {
 
     public void stop(long timeout, TimeUnit timeUnit) throws IOException, InterruptedException {
         sendCommand("stop");
-        if (!serverProcess.waitFor(timeout, timeUnit)) serverProcess.destroy();
-        ServerWrapperCLI.tryShutdownExecutorService(inputService);
-        ServerWrapperCLI.tryShutdownExecutorService(errorService);
+        try {
+        if (!serverProcess.waitFor(timeout, timeUnit)) serverProcess.destroy(); } catch (InterruptedException e) {
+            serverProcess.destroy();
+        } finally {
+            ServerWrapperCLI.tryShutdownExecutorService(inputService);
+            ServerWrapperCLI.tryShutdownExecutorService(errorService);
+            serverProcess.getInputStream().close();
+            serverProcess.getErrorStream().close();
+            serverProcess.getOutputStream().close();
+        }
+
     }
 
     /**

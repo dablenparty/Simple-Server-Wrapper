@@ -18,10 +18,6 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
             Process serverProcess = server.getServerProcess();
             try {
                 server.stop();
-                // closes server streams
-                serverProcess.getOutputStream().close();
-                serverProcess.getInputStream().close();
-                serverProcess.getErrorStream().close();
                 if (server.getServerSettings().getShutdown()) {
                     ConnectionListener.start(server.getPort());
                     System.out.println("Listener opened");
