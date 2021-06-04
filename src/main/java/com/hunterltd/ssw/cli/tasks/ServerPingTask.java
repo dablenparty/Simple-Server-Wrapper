@@ -10,18 +10,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class ServerPingTask implements Runnable {
-    private final MinecraftServer server;
+public class ServerPingTask extends ServerBasedRunnable {
     private final ServerListPing pinger = new ServerListPing();
     private volatile ScheduledExecutorService shutdownService = null;
 
     public ServerPingTask(MinecraftServer server) {
-        this.server = server;
+        super(server);
         pinger.setAddress(new InetSocketAddress(server.getPort()));
     }
 
     @Override
     public void run() {
+        MinecraftServer server = getServer();
         try {
             if (server.shouldBeRunning() && server.isRunning() && !server.isShuttingDown()) {
                 ServerListPing.StatusResponse response = pinger.fetchData();

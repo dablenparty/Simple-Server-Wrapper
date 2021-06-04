@@ -5,15 +5,14 @@ import com.hunterltd.ssw.server.MinecraftServer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class AliveStateCheckTask implements Runnable {
-    private final MinecraftServer server;
-
+public class AliveStateCheckTask extends ServerBasedRunnable {
     public AliveStateCheckTask(MinecraftServer server) {
-        this.server = server;
+        super(server);
     }
 
     @Override
     public void run() {
+        MinecraftServer server = getServer();
         if (server.getServerProcess() != null && !server.shouldBeRunning() && server.isRunning()) {
             Process serverProcess = server.getServerProcess();
             try {
