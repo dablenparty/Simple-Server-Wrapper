@@ -44,7 +44,7 @@ public class ServerWrapperCLI {
             serverPingService = Executors.newScheduledThreadPool(1);
             pingTask = new ServerPingTask(minecraftServer);
         }
-        serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 100L, 100L, TimeUnit.MILLISECONDS);
+        serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
         wrapperCli.showVersion();
 
         doLoop: do {
@@ -65,11 +65,6 @@ public class ServerWrapperCLI {
                 case "stop":
                     if (minecraftServer.isRunning()) {
                         minecraftServer.setShouldBeRunning(false);
-                    }
-
-                    if (inputService != null) {
-                        tryShutdownExecutorService(inputService);
-                        tryShutdownExecutorService(errorService);
                     }
                     break;
                 case "close":
