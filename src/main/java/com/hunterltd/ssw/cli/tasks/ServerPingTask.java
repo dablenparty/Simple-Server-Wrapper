@@ -1,5 +1,6 @@
-package com.hunterltd.ssw.cli;
+package com.hunterltd.ssw.cli.tasks;
 
+import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.ServerListPing;
 

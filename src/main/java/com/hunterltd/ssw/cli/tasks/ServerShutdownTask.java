@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.cli;
+package com.hunterltd.ssw.cli.tasks;
 
 import com.hunterltd.ssw.server.MinecraftServer;
 
