@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.server;
 
+import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Minecraft server wrapper class
@@ -32,6 +35,7 @@ public class MinecraftServer {
     private volatile boolean shouldRestart = false;
     private volatile boolean shuttingDown = false;
     private volatile ExecutorService inputService, errorService;
+    private final Consumer<String> inputConsumer, errorConsumer;
 
     /**
      * Creates a class from an archive file and settings class
@@ -39,10 +43,10 @@ public class MinecraftServer {
      * @param serverSettings Server settings
      */
     public MinecraftServer(File serverFile, Settings serverSettings) {
-        this(serverFile.getParent(), serverFile.getName(), serverSettings);
+        this(serverFile.getParent(), serverFile.getName(), serverSettings, System.out::println, System.err::println);
     }
 
-    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
+    public MinecraftServer(String serverFolder, String serverFilename, Settings settings, Consumer<String> input, Consumer<String> error) {
         pB = new ProcessBuilder();
         pB.directory(new File(serverFolder));
         serverSettings = settings;
@@ -65,6 +69,8 @@ public class MinecraftServer {
 
         commandHistory = new ArrayList<>();
         commandHistory.add(""); // Not entirely sure why this is needed, but the command history won't work without it
+        inputConsumer = input;
+        errorConsumer = error;
     }
 
     /**
@@ -96,14 +102,23 @@ public class MinecraftServer {
     public void run() throws IOException {
         propsExists = updateProperties();
         serverProcess = pB.start();
+        inputService = StreamGobbler.execute(serverProcess.getInputStream(), inputConsumer);
+        errorService = StreamGobbler.execute(serverProcess.getErrorStream(), errorConsumer);
     }
 
     /**
      * Sends the stop command to the server
      * @throws IOException if an I/O error occurs writing to the server process
      */
-    public void stop() throws IOException {
+    public void stop() throws IOException, InterruptedException {
+        stop(5L, TimeUnit.SECONDS);
+    }
+
+    public void stop(long timeout, TimeUnit timeUnit) throws IOException, InterruptedException {
         sendCommand("stop");
+        if (!serverProcess.waitFor(timeout, timeUnit)) serverProcess.destroy();
+        ServerWrapperCLI.tryShutdownExecutorService(inputService);
+        ServerWrapperCLI.tryShutdownExecutorService(errorService);
     }
 
     /**
