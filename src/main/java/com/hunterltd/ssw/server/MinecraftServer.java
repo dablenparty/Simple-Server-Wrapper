@@ -48,10 +48,21 @@ public class MinecraftServer {
 
     public MinecraftServer(String serverFolder, String serverFilename, Settings settings, Consumer<String> input, Consumer<String> error) {
         pB = new ProcessBuilder();
-        pB.directory(new File(serverFolder));
+        File pBDirectory = new File(serverFolder);
+        try {
+            pBDirectory = pBDirectory.getCanonicalFile();
+        } catch (IOException ignored) {
+        }
+        pB.directory(pBDirectory);
         serverSettings = settings;
-        serverPath = Paths.get(serverFolder, serverFilename);
 
+        Path serverPath1 = Paths.get(serverFolder, serverFilename);
+        try {
+            serverPath1 = Path.of(Paths.get(serverFolder, serverFilename).toFile().getCanonicalPath());
+        } catch (IOException ignored) {
+        }
+
+        serverPath = serverPath1;
         propsExists = updateProperties();
 
         int settingsMemory = serverSettings.getMemory();
