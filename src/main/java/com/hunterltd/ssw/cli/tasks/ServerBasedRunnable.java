@@ -9,7 +9,7 @@ public abstract class ServerBasedRunnable implements Runnable {
         this.server = server;
     }
 
-    public MinecraftServer getServer() {
+    protected MinecraftServer getServer() {
         return server;
     }
 }
