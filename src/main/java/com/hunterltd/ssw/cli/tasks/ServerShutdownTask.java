@@ -1,17 +1,16 @@
-package com.hunterltd.ssw.cli;
+package com.hunterltd.ssw.cli.tasks;
 
 import com.hunterltd.ssw.server.MinecraftServer;
 
-public class ServerShutdownTask implements Runnable {
-    private final MinecraftServer server;
-
+public class ServerShutdownTask extends ServerBasedRunnable {
     public ServerShutdownTask(MinecraftServer server) {
-        this.server = server;
+        super(server);
     }
 
     @Override
     public void run() {
         System.out.println("Nobody has joined in a while, closing the server...");
+        MinecraftServer server = getServer();
         server.setShouldBeRunning(false);
         server.setShuttingDown(true);
     }

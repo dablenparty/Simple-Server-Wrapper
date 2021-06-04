@@ -1,5 +1,7 @@
 package com.hunterltd.ssw.cli;
 
+import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
+import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.server.StreamGobbler;
 import com.hunterltd.ssw.utilities.Settings;
@@ -34,7 +36,6 @@ public class ServerWrapperCLI {
 
         ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));
         MinecraftServer minecraftServer = wrapperCli.getMinecraftServer();
-        ExecutorService inputService = null, errorService = null;
         ScheduledExecutorService serverStateService = Executors.newScheduledThreadPool(1),
                 serverPingService = null;
         ServerPingTask pingTask = null;
@@ -42,7 +43,7 @@ public class ServerWrapperCLI {
             serverPingService = Executors.newScheduledThreadPool(1);
             pingTask = new ServerPingTask(minecraftServer);
         }
-        serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 100L, 100L, TimeUnit.MILLISECONDS);
+        serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
         wrapperCli.showVersion();
 
         doLoop: do {
@@ -54,8 +55,6 @@ public class ServerWrapperCLI {
                     minecraftServer.setShouldBeRunning(true);
                     minecraftServer.run();
                     // submits process streams to stream gobblers to redirect output to standard out and error
-                    inputService = StreamGobbler.execute(minecraftServer.getServerProcess().getInputStream(), System.out::println);
-                    errorService = StreamGobbler.execute(minecraftServer.getServerProcess().getErrorStream(), System.err::println);
                     if (serverPingService != null) {
                         serverPingService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
                     }
@@ -64,18 +63,19 @@ public class ServerWrapperCLI {
                     if (minecraftServer.isRunning()) {
                         minecraftServer.setShouldBeRunning(false);
                     }
-
-                    if (inputService != null) {
-                        tryShutdownExecutorService(inputService);
-                        tryShutdownExecutorService(errorService);
-                    }
                     break;
                 case "close":
                     if (minecraftServer.isRunning()) {
                         minecraftServer.setShouldBeRunning(false);
+                        minecraftServer.setShuttingDown(true);
+                        try {
+                            minecraftServer.stop();
+                        } catch (IOException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                     for (ExecutorService service :
-                            new ExecutorService[]{inputService, errorService, serverPingService, serverStateService}) {
+                            new ExecutorService[]{serverPingService, serverStateService}) {
                         if (service != null)
                             tryShutdownExecutorService(service);
                     }

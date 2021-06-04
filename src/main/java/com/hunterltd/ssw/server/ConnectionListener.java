@@ -9,7 +9,7 @@ import java.nio.channels.CompletionHandler;
 
 public class ConnectionListener {
     private static AsynchronousServerSocketChannel listener;
-    private static boolean connectionAttempted = false;
+    private static volatile boolean connectionAttempted = false;
 
     /**
      * Listens for a connection on a port and sets a boolean flag on the first accepted connection
@@ -57,6 +57,8 @@ public class ConnectionListener {
             listener.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            connectionAttempted = false;
         }
     }
 
