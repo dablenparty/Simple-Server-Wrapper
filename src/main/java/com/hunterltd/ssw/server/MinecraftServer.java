@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Minecraft server wrapper class
@@ -27,9 +28,10 @@ public class MinecraftServer {
     private ServerProperties properties = null;
     private boolean propsExists;
     private int port = 25565;
-    private boolean shouldBeRunning;
-    private boolean shouldRestart = false;
-    private boolean shuttingDown = false;
+    private volatile boolean shouldBeRunning;
+    private volatile boolean shouldRestart = false;
+    private volatile boolean shuttingDown = false;
+    private volatile ExecutorService inputService, errorService;
 
     /**
      * Creates a class from an archive file and settings class
