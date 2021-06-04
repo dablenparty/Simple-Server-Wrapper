@@ -36,7 +36,6 @@ public class ServerWrapperCLI {
 
         ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));
         MinecraftServer minecraftServer = wrapperCli.getMinecraftServer();
-        ExecutorService inputService = null, errorService = null;
         ScheduledExecutorService serverStateService = Executors.newScheduledThreadPool(1),
                 serverPingService = null;
         ServerPingTask pingTask = null;
@@ -56,8 +55,6 @@ public class ServerWrapperCLI {
                     minecraftServer.setShouldBeRunning(true);
                     minecraftServer.run();
                     // submits process streams to stream gobblers to redirect output to standard out and error
-                    inputService = StreamGobbler.execute(minecraftServer.getServerProcess().getInputStream(), System.out::println);
-                    errorService = StreamGobbler.execute(minecraftServer.getServerProcess().getErrorStream(), System.err::println);
                     if (serverPingService != null) {
                         serverPingService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
                     }
@@ -70,9 +67,15 @@ public class ServerWrapperCLI {
                 case "close":
                     if (minecraftServer.isRunning()) {
                         minecraftServer.setShouldBeRunning(false);
+                        minecraftServer.setShuttingDown(true);
+                        try {
+                            minecraftServer.stop();
+                        } catch (IOException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                     for (ExecutorService service :
-                            new ExecutorService[]{inputService, errorService, serverPingService, serverStateService}) {
+                            new ExecutorService[]{serverPingService, serverStateService}) {
                         if (service != null)
                             tryShutdownExecutorService(service);
                     }
