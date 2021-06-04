@@ -22,7 +22,6 @@ public class SimpleServerWrapper {
                     JFrame frame = (JFrame) e.getSource();
 
                     if (wrapperGUI.getServer() != null &&
-                            wrapperGUI.getServer().getServerProcess() != null &&
                             wrapperGUI.getServer().isRunning())
                     {
                         int result = JOptionPane.showConfirmDialog(

@@ -156,7 +156,13 @@ public class MinecraftServer {
      * @return Boolean on whether the server is running
      */
     public boolean isRunning() {
-        return serverProcess.isAlive();
+        boolean result;
+        try {
+            result = serverProcess.isAlive();
+        } catch (NullPointerException ignored) {
+            result = false;
+        }
+        return result;
     }
 
     /**

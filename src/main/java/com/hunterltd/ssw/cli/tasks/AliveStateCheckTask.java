@@ -14,7 +14,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
     @Override
     public void run() {
         MinecraftServer server = getServer();
-        if (server.getServerProcess() != null && !server.shouldBeRunning() && server.isRunning()) {
+        if (!server.shouldBeRunning() && server.isRunning()) {
             Process serverProcess = server.getServerProcess();
             try {
                 server.stop();
