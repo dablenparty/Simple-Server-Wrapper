@@ -127,7 +127,7 @@ public class ServerWrapperCLI {
 
     public void showVersion() {
         if (propertiesLoaded)
-            printlnWithTimeAndThread(System.out,mavenProperties.getProperty("artifactId") + " v" + mavenProperties.getProperty("version")
+            System.out.println(mavenProperties.getProperty("artifactId") + " v" + mavenProperties.getProperty("version")
                     + " on " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd yyyy, HH:mm:ss")));
     }
 
