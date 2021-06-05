@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.server;
 
+import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 
 import java.io.BufferedReader;
@@ -29,9 +30,9 @@ public class StreamGobbler implements Runnable {
         }
     }
 
-    public static ExecutorService execute(InputStream inputStream, Consumer<String> consumer) {
+    public static ExecutorService execute(InputStream inputStream, Consumer<String> consumer, String threadName) {
         StreamGobbler gobbler = new StreamGobbler(inputStream, consumer);
-        ExecutorService service = Executors.newSingleThreadExecutor();
+        ExecutorService service = Executors.newSingleThreadExecutor(ServerWrapperCLI.newNamedThreadFactory(threadName));
         service.submit(gobbler);
         return service;
     }

@@ -27,7 +27,7 @@ public class ServerPingTask extends ServerBasedRunnable {
                 ServerListPing.StatusResponse response = pinger.fetchData();
                 if (response.getPlayers().getOnline() == 0 && shutdownService == null) {
                     // shutdown timer begins
-                    shutdownService = Executors.newScheduledThreadPool(1);
+                    shutdownService = Executors.newScheduledThreadPool(1, ServerWrapperCLI.newNamedThreadFactory("Server Shutdown Service"));
                     long delay = server.getServerSettings().getShutdownInterval();
                     shutdownService.schedule(new ServerShutdownTask(server), delay, TimeUnit.MINUTES);
                 } else {

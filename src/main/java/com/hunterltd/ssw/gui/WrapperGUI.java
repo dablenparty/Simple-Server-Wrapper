@@ -166,8 +166,8 @@ public class WrapperGUI extends JFrame {
 
         Consumer<String> addConsoleText = text -> consoleTextArea.append(text + '\n');
         // Pipes the server outputs into the GUI using the pre-defined consumers
-        StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText);
-        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText);
+        StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText, "Server Input Stream");
+        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText, "Server Error Stream");
 
         sendServerStatus(true);
     }

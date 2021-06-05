@@ -3,8 +3,8 @@ package com.hunterltd.ssw.cli;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.server.StreamGobbler;
 import com.hunterltd.ssw.utilities.Settings;
+import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,10 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class ServerWrapperCLI {
     private final Properties mavenProperties;
@@ -36,11 +33,12 @@ public class ServerWrapperCLI {
 
         ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));
         MinecraftServer minecraftServer = wrapperCli.getMinecraftServer();
-        ScheduledExecutorService serverStateService = Executors.newScheduledThreadPool(1),
+        ScheduledExecutorService
+                serverStateService = Executors.newScheduledThreadPool(1, newNamedThreadFactory("Server State Check Service")),
                 serverPingService = null;
         ServerPingTask pingTask = null;
         if (minecraftServer.getServerSettings().getShutdown()) {
-            serverPingService = Executors.newScheduledThreadPool(1);
+            serverPingService = Executors.newScheduledThreadPool(1, newNamedThreadFactory("Server Ping Service"));
             pingTask = new ServerPingTask(minecraftServer);
         }
         serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
@@ -88,6 +86,10 @@ public class ServerWrapperCLI {
                     break;
             }
         } while (true);
+    }
+
+    public static ThreadFactory newNamedThreadFactory(String threadName) {
+        return new ThreadFactoryBuilder().setNameFormat(threadName).build();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

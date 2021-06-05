@@ -113,8 +113,8 @@ public class MinecraftServer {
     public void run() throws IOException {
         propsExists = updateProperties();
         serverProcess = pB.start();
-        inputService = StreamGobbler.execute(serverProcess.getInputStream(), inputConsumer);
-        errorService = StreamGobbler.execute(serverProcess.getErrorStream(), errorConsumer);
+        inputService = StreamGobbler.execute(serverProcess.getInputStream(), inputConsumer, "Server Input Stream");
+        errorService = StreamGobbler.execute(serverProcess.getErrorStream(), errorConsumer, "Server Error Stream");
     }
 
     /**
