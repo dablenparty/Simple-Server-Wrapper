@@ -2,6 +2,8 @@ package com.hunterltd.ssw.cli.tasks;
 
 import com.hunterltd.ssw.server.MinecraftServer;
 
+import static com.hunterltd.ssw.cli.ServerWrapperCLI.printlnWithTimeAndThread;
+
 public class ServerShutdownTask extends ServerBasedRunnable {
     public ServerShutdownTask(MinecraftServer server) {
         super(server);
@@ -9,7 +11,7 @@ public class ServerShutdownTask extends ServerBasedRunnable {
 
     @Override
     public void run() {
-        System.out.println("Nobody has joined in a while, closing the server...");
+        printlnWithTimeAndThread("Nobody has joined in a while, closing the server...");
         MinecraftServer server = getServer();
         server.setShouldBeRunning(false);
         server.setShuttingDown(true);

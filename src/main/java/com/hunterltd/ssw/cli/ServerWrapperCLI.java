@@ -9,6 +9,7 @@ import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class ServerWrapperCLI {
+    private static final SimpleDateFormat SIMPLE_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private final Properties mavenProperties;
     private final boolean propertiesLoaded;
     private final MinecraftServer minecraftServer;
@@ -49,7 +51,7 @@ public class ServerWrapperCLI {
             String command = inputScanner.nextLine();
             switch (command) {
                 case "start":
-                    System.out.println("Starting server...");
+                    printlnWithTimeAndThread("Starting server...");
                     minecraftServer.setShouldBeRunning(true);
                     minecraftServer.run();
                     // submits process streams to stream gobblers to redirect output to standard out and error
@@ -94,7 +96,7 @@ public class ServerWrapperCLI {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void tryShutdownExecutorService(ExecutorService service) {
-        System.out.println("Shutting down background service...");
+        printlnWithTimeAndThread("Shutting down background service...");
         service.shutdown();
         try {
             service.awaitTermination(5L, TimeUnit.SECONDS);
@@ -104,8 +106,16 @@ public class ServerWrapperCLI {
             if (!service.isTerminated())
                 System.err.println("Service didn't terminate, forcing shutdown");
             service.shutdownNow();
-            System.out.println("Service closed");
+            printlnWithTimeAndThread("Service closed");
         }
+    }
+
+    public static void printfWithTimeAndThread(String toFormat, Object... args) {
+        printlnWithTimeAndThread(String.format(toFormat, args));
+    }
+
+    public static void printlnWithTimeAndThread(String string) {
+        System.out.printf("[%s] [ssw/%s]: %s%n", SIMPLE_TIME_FORMAT.format(System.currentTimeMillis()), Thread.currentThread().getName(), string);
     }
 
     ServerWrapperCLI(File serverFile) {
@@ -116,7 +126,7 @@ public class ServerWrapperCLI {
 
     public void showVersion() {
         if (propertiesLoaded)
-            System.out.println(mavenProperties.getProperty("artifactId") + " v" + mavenProperties.getProperty("version")
+            printlnWithTimeAndThread(mavenProperties.getProperty("artifactId") + " v" + mavenProperties.getProperty("version")
                     + " on " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd yyyy, HH:mm:ss")));
     }
 

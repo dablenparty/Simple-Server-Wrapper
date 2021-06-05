@@ -18,6 +18,9 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Scanner;
 
+import static com.hunterltd.ssw.cli.ServerWrapperCLI.printfWithTimeAndThread;
+import static com.hunterltd.ssw.cli.ServerWrapperCLI.printlnWithTimeAndThread;
+
 public class CurseCli {
     private final CurseModpack curseModpack;
     private final File serverFolder;
@@ -29,14 +32,14 @@ public class CurseCli {
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Extracting modpack...");
+        printlnWithTimeAndThread("Extracting modpack...");
         try {
             extractModpack(scanner);
         } catch (IOException | ParseException exception) {
             exception.printStackTrace();
         }
 
-        System.out.println("Reading manifest...");
+        printlnWithTimeAndThread("Reading manifest...");
         CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
         File modsFolder = Paths.get(serverFolder.toString(), "mods").toFile();
         try {
@@ -66,7 +69,7 @@ public class CurseCli {
             try {
                 JSONObject responseData = (JSONObject) new JSONParser().parse(response.readEntity(String.class));
                 CurseAddon addon = new CurseAddon(responseData);
-                System.out.printf("Downloading mod %d of %d: %s%n", i + 1, filesLength, addon);
+                printfWithTimeAndThread("Downloading mod %d of %d: %s%n", i + 1, filesLength, addon);
                 addon.download(serverFolder.toString());
             } catch (ParseException | IOException e) {
                 String errorMessage = e instanceof ParseException ?
@@ -74,7 +77,7 @@ public class CurseCli {
                 System.err.println(errorMessage);
             }
         }
-        System.out.println("Copying overrides...");
+        printlnWithTimeAndThread("Copying overrides...");
         File overrideFolder = Paths.get(curseModpack.getExtractFolder().toString(), "overrides").toFile();
         File[] overrides = overrideFolder.listFiles();
         if (overrides != null) {
@@ -103,7 +106,7 @@ public class CurseCli {
 
     private void extractModpack(Scanner inputScanner) throws IOException, ParseException {
         if (curseModpack.isExtracted()) {
-            System.out.print("%s has already been extracted, overwrite? (y/N): ");
+            System.out.printf("%s has already been extracted, overwrite? (y/N): ",  new File(String.valueOf(curseModpack)).getName());
             if (!inputScanner.next().startsWith("y")) {
                 curseModpack.getManifest().load();
                 return;

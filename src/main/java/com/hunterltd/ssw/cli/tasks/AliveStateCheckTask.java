@@ -4,7 +4,8 @@ import com.hunterltd.ssw.server.ConnectionListener;
 import com.hunterltd.ssw.server.MinecraftServer;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+
+import static com.hunterltd.ssw.cli.ServerWrapperCLI.printlnWithTimeAndThread;
 
 public class AliveStateCheckTask extends ServerBasedRunnable {
     public AliveStateCheckTask(MinecraftServer server) {
@@ -20,7 +21,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                 server.stop();
                 if (server.getServerSettings().getShutdown()) {
                     ConnectionListener.start(server.getPort());
-                    System.out.println("Listener opened");
+                    printlnWithTimeAndThread("Listener opened");
                 }
             } catch (IOException | InterruptedException exception) {
                 exception.printStackTrace();
@@ -38,7 +39,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                 e.printStackTrace();
             } finally {
                 ConnectionListener.stop();
-                System.out.println("Listener closed, starting server...");
+                printlnWithTimeAndThread("Listener closed, starting server...");
             }
         }
     }
