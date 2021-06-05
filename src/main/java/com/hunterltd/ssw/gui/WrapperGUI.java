@@ -184,7 +184,7 @@ public class WrapperGUI extends JFrame {
 
     private void runButtonAction() {
         // Server is null on initial startup
-        if (server.getServerProcess() == null || !server.isRunning()) startServer();
+        if (!server.isRunning()) startServer();
         else stopServer();
     }
 
@@ -199,7 +199,7 @@ public class WrapperGUI extends JFrame {
                         protected Void doInBackground() {
                             try {
                                 server.stop();
-                            } catch (IOException ioException) {
+                            } catch (IOException | InterruptedException ioException) {
                                 firePropertyChange("error", null, ioException);
                             }
 

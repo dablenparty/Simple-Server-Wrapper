@@ -22,7 +22,6 @@ public class SimpleServerWrapper {
                     JFrame frame = (JFrame) e.getSource();
 
                     if (wrapperGUI.getServer() != null &&
-                            wrapperGUI.getServer().getServerProcess() != null &&
                             wrapperGUI.getServer().isRunning())
                     {
                         int result = JOptionPane.showConfirmDialog(
@@ -34,7 +33,7 @@ public class SimpleServerWrapper {
                         if (result == JOptionPane.YES_OPTION) {
                             try {
                                 wrapperGUI.getServer().stop();
-                            } catch (IOException ioException) {
+                            } catch (IOException | InterruptedException ioException) {
                                 ioException.printStackTrace();
                                 wrapperGUI.getServer().getServerProcess().destroy(); // Failsafe
                             }
