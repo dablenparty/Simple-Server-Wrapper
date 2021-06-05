@@ -32,14 +32,14 @@ public class CurseCli {
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        printlnWithTimeAndThread("Extracting modpack...");
+        printlnWithTimeAndThread(System.out, "Extracting modpack...");
         try {
             extractModpack(scanner);
         } catch (IOException | ParseException exception) {
             exception.printStackTrace();
         }
 
-        printlnWithTimeAndThread("Reading manifest...");
+        printlnWithTimeAndThread(System.out,"Reading manifest...");
         CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
         File modsFolder = Paths.get(serverFolder.toString(), "mods").toFile();
         try {
@@ -69,15 +69,15 @@ public class CurseCli {
             try {
                 JSONObject responseData = (JSONObject) new JSONParser().parse(response.readEntity(String.class));
                 CurseAddon addon = new CurseAddon(responseData);
-                printfWithTimeAndThread("Downloading mod %d of %d: %s%n", i + 1, filesLength, addon);
+                printfWithTimeAndThread(System.out, "Downloading mod %d of %d: %s%n", i + 1, filesLength, addon);
                 addon.download(serverFolder.toString());
             } catch (ParseException | IOException e) {
                 String errorMessage = e instanceof ParseException ?
                         "Failed to parse JSON data for an addon" : "Failed to download an addon";
-                System.err.println(errorMessage);
+                printlnWithTimeAndThread(System.err, errorMessage);
             }
         }
-        printlnWithTimeAndThread("Copying overrides...");
+        printlnWithTimeAndThread(System.out, "Copying overrides...");
         File overrideFolder = Paths.get(curseModpack.getExtractFolder().toString(), "overrides").toFile();
         File[] overrides = overrideFolder.listFiles();
         if (overrides != null) {
@@ -100,7 +100,7 @@ public class CurseCli {
         try {
             FileUtils.deleteDirectory(curseModpack.getExtractFolder());
         } catch (IOException e) {
-            System.err.println("Error occurred cleaning up modpack files");
+            printlnWithTimeAndThread(System.err, "Error occurred cleaning up modpack files");
         }
     }
 

@@ -11,7 +11,7 @@ public class ServerShutdownTask extends ServerBasedRunnable {
 
     @Override
     public void run() {
-        printlnWithTimeAndThread("Nobody has joined in a while, closing the server...");
+        printlnWithTimeAndThread(System.out,"Nobody has joined in a while, closing the server...");
         MinecraftServer server = getServer();
         server.setShouldBeRunning(false);
         server.setShuttingDown(true);
