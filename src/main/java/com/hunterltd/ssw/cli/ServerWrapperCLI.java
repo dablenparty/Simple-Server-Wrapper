@@ -3,7 +3,6 @@ package com.hunterltd.ssw.cli;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.server.StreamGobbler;
 import com.hunterltd.ssw.utilities.Settings;
 
 import java.io.File;
@@ -24,12 +23,12 @@ public class ServerWrapperCLI {
     private final MinecraftServer minecraftServer;
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 1 && args.length != 3) {
-            // TODO: write help message
-            throw new IllegalArgumentException((args.length > 1 ? "Too many" : "Missing") + " arguments");
-        }
-
-        if (args.length > 1 && args[1].equalsIgnoreCase("--modpack")) {
+        if ((args.length != 1 && args.length != 3) || (args[0].equals("-h") || args[0].equals("--help"))) {
+            // wrong number of args or help flag provided
+            showHelp();
+            return;
+        } else if (args.length > 2 && args[1].equalsIgnoreCase("--modpack")) {
+            // modpack flag provided
             new CurseCli(new File(args[2]), new File(args[0])).run();
             return;
         }
@@ -116,6 +115,10 @@ public class ServerWrapperCLI {
         if (propertiesLoaded)
             System.out.println(mavenProperties.getProperty("artifactId") + " v" + mavenProperties.getProperty("version")
                     + " on " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd yyyy, HH:mm:ss")));
+    }
+
+    public static void showHelp() {
+        System.out.println("Usage: ssw-cli.jar <server-file> --modpack [<zip-file>]");
     }
 
     private boolean loadProperties() {
