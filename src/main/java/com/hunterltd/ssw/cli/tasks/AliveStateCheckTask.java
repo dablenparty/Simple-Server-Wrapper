@@ -4,7 +4,6 @@ import com.hunterltd.ssw.server.ConnectionListener;
 import com.hunterltd.ssw.server.MinecraftServer;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 public class AliveStateCheckTask extends ServerBasedRunnable {
     public AliveStateCheckTask(MinecraftServer server) {
