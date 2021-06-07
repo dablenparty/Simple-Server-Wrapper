@@ -102,7 +102,7 @@ public class ServerWrapperCLI {
             return null;
         } else if (firstArg.isDirectory() || !args[0].toLowerCase().endsWith(".jar")) {
             throw new IllegalArgumentException(String.format("'%s' is not a jar file", args[0]));
-        } else if (!args[1].equals("--modpack"))
+        } else if (args.length > 2 && !args[1].equals("--modpack"))
             throw new IllegalArgumentException(String.format("Unrecognized flag '%s'", args[1]));
         return firstArg;
     }
