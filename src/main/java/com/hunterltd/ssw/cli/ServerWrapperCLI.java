@@ -24,17 +24,11 @@ public class ServerWrapperCLI {
     private final MinecraftServer minecraftServer;
 
     public static void main(String[] args) throws IOException {
-        if ((args.length != 1 && args.length != 3) || (args[0].equals("-h") || args[0].equals("--help"))) {
-            // wrong number of args or help flag provided
-            showHelp();
-            return;
-        } else if (args.length > 2 && args[1].equalsIgnoreCase("--modpack")) {
-            // modpack flag provided
-            new CurseCli(new File(args[2]), new File(args[0])).run();
-            return;
-        }
+        File firstArg = handleArgs(args);
+        // bad args or modpack flag provided
+        if (firstArg == null) return;
 
-        ServerWrapperCLI wrapperCli = new ServerWrapperCLI(new File(args[0]));
+        ServerWrapperCLI wrapperCli = new ServerWrapperCLI(firstArg);
         MinecraftServer minecraftServer = wrapperCli.getMinecraftServer();
         ScheduledExecutorService
                 serverStateService = Executors.newScheduledThreadPool(1, newNamedThreadFactory("Server State Check Service")),
@@ -89,6 +83,24 @@ public class ServerWrapperCLI {
                     break;
             }
         } while (true);
+    }
+
+    private static File handleArgs(String[] args) {
+        if ((args.length != 1 && args.length != 3) || (args[0].equals("-h") || args[0].equals("--help"))) {
+            // wrong number of args or help flag provided
+            showHelp();
+            return null;
+        }
+
+        File firstArg = new File(args[0]);
+        if (firstArg.isDirectory() || !args[0].toLowerCase().endsWith(".jar")) {
+            throw new IllegalArgumentException("First argument must be a '.jar' file");
+        } else if (args.length > 2 && args[1].equalsIgnoreCase("--modpack")) {
+            // modpack flag provided
+            new CurseCli(new File(args[2]), firstArg).run();
+            return null;
+        }
+        return firstArg;
     }
 
     public static ThreadFactory newNamedThreadFactory(String threadName) {
