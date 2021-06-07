@@ -16,6 +16,7 @@ public class SimpleServerWrapper {
             WrapperGUI wrapperGUI = new WrapperGUI();
             wrapperGUI.pack();
             wrapperGUI.setVisible(true);
+            wrapperGUI.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         });
     }
 }
