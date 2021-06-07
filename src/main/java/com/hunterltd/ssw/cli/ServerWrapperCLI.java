@@ -97,7 +97,10 @@ public class ServerWrapperCLI {
             throw new IllegalArgumentException("First argument must be a '.jar' file");
         } else if (args.length > 2 && args[1].equalsIgnoreCase("--modpack")) {
             // modpack flag provided
-            new CurseCli(new File(args[2]), firstArg).run();
+            File secondArg = new File(args[2]);
+            if (secondArg.isDirectory() || !args[2].toLowerCase().endsWith(".zip"))
+                throw new IllegalArgumentException("Third argument must be a ZIP archive");
+            new CurseCli(secondArg, firstArg).run();
             return null;
         }
         return firstArg;
