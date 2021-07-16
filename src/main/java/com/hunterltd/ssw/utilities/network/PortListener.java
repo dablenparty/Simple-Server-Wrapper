@@ -12,26 +12,6 @@ import java.nio.channels.CompletionHandler;
 public class PortListener extends EventEmitter {
     private final int port;
     private AsynchronousServerSocketChannel socketChannel;
-    private final CompletionHandler<AsynchronousSocketChannel, Void> completionHandler = new CompletionHandler<>() {
-        @Override
-        public void completed(AsynchronousSocketChannel result, Void attachment) {
-            socketChannel.accept(null, null);
-            emit("connection");
-            if (result.isOpen()) {
-                try {
-                    result.close();
-                } catch (IOException e) {
-                    emit("error", e);
-                }
-            }
-        }
-
-        @Override
-        public void failed(Throwable exc, Void attachment) {
-            if (exc instanceof AsynchronousCloseException) emit("close");
-            else emit("error", exc);
-        }
-    };
 
     public PortListener(int port) {
         this.port = port;
@@ -39,7 +19,26 @@ public class PortListener extends EventEmitter {
 
     public void start() throws IOException {
         socketChannel = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
-        socketChannel.accept(null, completionHandler);
+        socketChannel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
+            @Override
+            public void completed(AsynchronousSocketChannel result, Void attachment) {
+                socketChannel.accept(null, this);
+                emit("connection");
+                if (result.isOpen()) {
+                    try {
+                        result.close();
+                    } catch (IOException e) {
+                        emit("error", e);
+                    }
+                }
+            }
+
+            @Override
+            public void failed(Throwable exc, Void attachment) {
+                if (exc instanceof AsynchronousCloseException) emit("close");
+                else emit("error", exc);
+            }
+        });
     }
 
     public void stop() {
