@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.server;
 
+import com.dablenparty.jsevents.EventEmitter;
 import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
@@ -21,7 +22,7 @@ import java.util.function.Consumer;
 /**
  * Minecraft server wrapper class
  */
-public class MinecraftServer {
+public class MinecraftServer extends EventEmitter {
     private Process serverProcess;
     private final ProcessBuilder pB;
     private final Settings serverSettings;
@@ -35,7 +36,6 @@ public class MinecraftServer {
     private volatile boolean shouldRestart = false;
     private volatile boolean shuttingDown = false;
     private volatile ExecutorService inputService, errorService;
-    private final Consumer<String> inputConsumer, errorConsumer;
 
     /**
      * Creates a class from an archive file and settings class
@@ -43,10 +43,10 @@ public class MinecraftServer {
      * @param serverSettings Server settings
      */
     public MinecraftServer(File serverFile, Settings serverSettings) {
-        this(serverFile.getParent(), serverFile.getName(), serverSettings, System.out::println, System.err::println);
+        this(serverFile.getParent(), serverFile.getName(), serverSettings);
     }
 
-    public MinecraftServer(String serverFolder, String serverFilename, Settings settings, Consumer<String> input, Consumer<String> error) {
+    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
         pB = new ProcessBuilder();
         File pBDirectory = new File(serverFolder);
         try {
@@ -80,8 +80,6 @@ public class MinecraftServer {
 
         commandHistory = new ArrayList<>();
         commandHistory.add(""); // Not entirely sure why this is needed, but the command history won't work without it
-        inputConsumer = input;
-        errorConsumer = error;
     }
 
     /**
@@ -113,8 +111,18 @@ public class MinecraftServer {
     public void run() throws IOException {
         propsExists = updateProperties();
         serverProcess = pB.start();
-        inputService = StreamGobbler.execute(serverProcess.getInputStream(), inputConsumer, "Server Input Stream");
-        errorService = StreamGobbler.execute(serverProcess.getErrorStream(), errorConsumer, "Server Error Stream");
+        Consumer<String> gobblerConsumer = text -> emit("data", text);
+        emit("start", serverProcess);
+        inputService = StreamGobbler.execute(
+                serverProcess.getInputStream(),
+                gobblerConsumer,
+                "Server Input Stream"
+        );
+        errorService = StreamGobbler.execute(
+                serverProcess.getErrorStream(),
+                gobblerConsumer,
+                "Server Error Stream"
+        );
     }
 
     /**
@@ -125,7 +133,8 @@ public class MinecraftServer {
         stop(5L, TimeUnit.SECONDS);
     }
 
-    public void stop(long timeout, TimeUnit timeUnit) throws IOException, InterruptedException {
+    public void stop(long timeout, TimeUnit timeUnit) throws IOException {
+        emit("exiting");
         sendCommand("stop");
         try {
         if (!serverProcess.waitFor(timeout, timeUnit)) serverProcess.destroy(); } catch (InterruptedException e) {
@@ -136,6 +145,7 @@ public class MinecraftServer {
             serverProcess.getInputStream().close();
             serverProcess.getErrorStream().close();
             serverProcess.getOutputStream().close();
+            emit("exit");
         }
 
     }
