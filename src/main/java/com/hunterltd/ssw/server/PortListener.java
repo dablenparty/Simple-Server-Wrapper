@@ -10,8 +10,8 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
 public class PortListener extends EventEmitter {
-    private AsynchronousServerSocketChannel socketChannel;
     private final int port;
+    private AsynchronousServerSocketChannel socketChannel;
     private final CompletionHandler<AsynchronousSocketChannel, Void> completionHandler = new CompletionHandler<>() {
         @Override
         public void completed(AsynchronousSocketChannel result, Void attachment) {

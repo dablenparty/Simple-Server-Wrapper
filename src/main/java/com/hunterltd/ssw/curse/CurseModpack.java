@@ -1,7 +1,7 @@
 package com.hunterltd.ssw.curse;
 
-import com.hunterltd.ssw.curse.data.CurseManifestFileEntry;
 import com.hunterltd.ssw.curse.data.CurseManifest;
+import com.hunterltd.ssw.curse.data.CurseManifestFileEntry;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
@@ -26,6 +26,7 @@ public class CurseModpack extends ZipFile {
 
     /**
      * Instantiates the wrapper class with the given ZIP archive
+     *
      * @param zipFile ZIP archive containing modpack data
      */
     public CurseModpack(File zipFile) {
@@ -34,9 +35,21 @@ public class CurseModpack extends ZipFile {
         manifest = new CurseManifest(Paths.get(String.valueOf(extractPath), "manifest.json").toFile());
     }
 
+    public static void main(String[] args) {
+        CurseModpack pack = new CurseModpack(Paths.get(System.getProperty("user.home"), "Downloads", "Minecraft Enhanced-v1.6.zip").toFile());
+        try {
+            pack.extractAll();
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+        }
+        String message = !pack.install(pack.getExtractFolder().toString()) ? "Done!" : "Error(s) occurred, see above";
+        System.out.println(message);
+    }
+
     /**
      * Extracts the modpack in-place and loads the manifest
-     * @throws IOException if an I/O error occurs loading the manifest
+     *
+     * @throws IOException    if an I/O error occurs loading the manifest
      * @throws ParseException if a parsing error occurs loading the manifest
      */
     public void extractAll() throws IOException, ParseException {
@@ -67,6 +80,7 @@ public class CurseModpack extends ZipFile {
 
     /**
      * Installs the modpack in the specified folder
+     *
      * @param folder Install location
      * @return Boolean representing if an error occurs or not
      */
@@ -102,16 +116,5 @@ public class CurseModpack extends ZipFile {
         }
 
         return error;
-    }
-
-    public static void main(String[] args) {
-        CurseModpack pack = new CurseModpack(Paths.get(System.getProperty("user.home"), "Downloads", "Minecraft Enhanced-v1.6.zip").toFile());
-        try {
-            pack.extractAll();
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-        }
-        String message = !pack.install(pack.getExtractFolder().toString()) ? "Done!" : "Error(s) occurred, see above";
-        System.out.println(message);
     }
 }

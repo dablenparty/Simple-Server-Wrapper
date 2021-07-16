@@ -16,12 +16,19 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 public class WrapperGUI extends JFrame {
+    @Serial
     private static final long serialVersionUID = 1L;
-    private JFileChooser serverFileInfo;
+    private final ActionListener noServerSelected = e -> {
+        InfoDialog dialog = new InfoDialog("No server selected",
+                "A server must be selected to do this!");
+        dialog.pack();
+        dialog.setVisible(true);
+    };
     private JButton openDialogButton;
     private JButton runButton;
     private JButton sendButton;
@@ -33,14 +40,6 @@ public class WrapperGUI extends JFrame {
     private JTextField commandTextField;
     private JTextField serverPathTextField;
     private MinecraftServer server;
-    private final String restartCommandTemplate = "me %s is restarting in %d %s!"; // color code, time integer, time unit
-    private final String baseTitle = "Simple Server Wrapper";
-    private final ActionListener noServerSelected = e -> {
-        InfoDialog dialog = new InfoDialog("No server selected",
-                "A server must be selected to do this!");
-        dialog.pack();
-        dialog.setVisible(true);
-    };
     private ActionListener settingsOpen, openInFolder;
     private Settings serverSettings;
     private SwingWorker<Void, Void> serverPingWorker;
@@ -57,23 +56,23 @@ public class WrapperGUI extends JFrame {
         // Keyboard Registers
         // Pressing Enter sends the typed command
         rootPanel.registerKeyboardAction(e -> {
-                historyLocation = 0;
-                sendCommand(commandTextField.getText());
-                commandTextField.setText("");
-            },
+                    historyLocation = 0;
+                    sendCommand(commandTextField.getText());
+                    commandTextField.setText("");
+                },
                 KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         // Up and down arrows cycle through the command history
         rootPanel.registerKeyboardAction(e -> {
-            if (server != null && server.getHistorySize() > 1) {
-                if (historyLocation < server.getHistorySize() - 1 && historyLocation >= 0) {
-                    historyLocation += 1;
-                    commandTextField.setText(
-                            server.getCommandFromHistory(server.getHistorySize() - historyLocation));
-                }
-            }
-        },
+                    if (server != null && server.getHistorySize() > 1) {
+                        if (historyLocation < server.getHistorySize() - 1 && historyLocation >= 0) {
+                            historyLocation += 1;
+                            commandTextField.setText(
+                                    server.getCommandFromHistory(server.getHistorySize() - historyLocation));
+                        }
+                    }
+                },
                 KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -125,6 +124,7 @@ public class WrapperGUI extends JFrame {
         }
 
         new SmartScroller(consoleScrollPane);
+        String baseTitle = "Simple Server Wrapper";
         setTitle(baseTitle);
     }
 
@@ -195,7 +195,7 @@ public class WrapperGUI extends JFrame {
             serverPingWorker.cancel(true);
         } catch (NullPointerException ignored) {
         }
-        serverFileInfo = new JFileChooser();
+        JFileChooser serverFileInfo = new JFileChooser();
         serverFileInfo.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File f) {

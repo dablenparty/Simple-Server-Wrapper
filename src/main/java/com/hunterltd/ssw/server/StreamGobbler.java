@@ -14,6 +14,13 @@ import java.util.function.Consumer;
 public record StreamGobbler(InputStream inputStream,
                             Consumer<String> consumer) implements Runnable {
 
+    public static ExecutorService execute(InputStream inputStream, Consumer<String> consumer, String threadName) {
+        StreamGobbler gobbler = new StreamGobbler(inputStream, consumer);
+        ExecutorService service = Executors.newSingleThreadExecutor(ServerWrapperCLI.newNamedThreadFactory(threadName));
+        service.submit(gobbler);
+        return service;
+    }
+
     @Override
     public void run() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -22,12 +29,5 @@ public record StreamGobbler(InputStream inputStream,
             e.printStackTrace();
             new InternalErrorDialog(e);
         }
-    }
-
-    public static ExecutorService execute(InputStream inputStream, Consumer<String> consumer, String threadName) {
-        StreamGobbler gobbler = new StreamGobbler(inputStream, consumer);
-        ExecutorService service = Executors.newSingleThreadExecutor(ServerWrapperCLI.newNamedThreadFactory(threadName));
-        service.submit(gobbler);
-        return service;
     }
 }

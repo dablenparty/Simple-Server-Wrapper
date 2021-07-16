@@ -99,8 +99,8 @@ public class CurseInstaller extends JFrame {
                         e.printStackTrace();
                         new InternalErrorDialog(e);
                         return null;
+                    } catch (NullPointerException ignored) {
                     }
-                    catch (NullPointerException ignored) {}
 
                     Client client = ClientBuilder.newClient();
                     int filesLength = files.length;
@@ -212,6 +212,12 @@ public class CurseInstaller extends JFrame {
         setTitle("CurseForge Modpack Installer");
     }
 
+    public static void main(String[] args) {
+        CurseInstaller installer = new CurseInstaller();
+        installer.pack();
+        installer.setVisible(true);
+    }
+
     private void setComponentsEnabled(boolean b) {
         JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField};
         for (JComponent comp :
@@ -222,11 +228,5 @@ public class CurseInstaller extends JFrame {
 
     public SwingWorker<Void, Void> getWorker() {
         return worker;
-    }
-
-    public static void main(String[] args) {
-        CurseInstaller installer = new CurseInstaller();
-        installer.pack();
-        installer.setVisible(true);
     }
 }

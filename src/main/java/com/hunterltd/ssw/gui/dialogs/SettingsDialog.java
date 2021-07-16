@@ -9,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class SettingsDialog extends JDialog {
+    private final Settings settings;
+    private final MinecraftServer server;
     private JPanel rootPanel;
     private JButton buttonSave;
     private JButton buttonCancel;
@@ -33,8 +35,6 @@ public class SettingsDialog extends JDialog {
     private JPanel propsPanel;
     private JButton openPropsInEditorButton;
     private boolean directChange = true;
-    private final Settings settings;
-    private final MinecraftServer server;
 
     public SettingsDialog(MinecraftServer minecraftServer) {
         server = minecraftServer;
@@ -51,9 +51,9 @@ public class SettingsDialog extends JDialog {
         buttonSave.addActionListener(e -> onSave());
         buttonCancel.addActionListener(e -> onCancel());
 
-        for (double i = 0.5; i <= 16; i+=0.5) memoryComboBox.addItem(i);
+        for (double i = 0.5; i <= 16; i += 0.5) memoryComboBox.addItem(i);
         for (int i = 1; i <= 24; i++) restartIntervalComboBox.addItem(i);
-        for (int i = 5; i <= 60; i+=5) shutdownIntervalComboBox.addItem(i);
+        for (int i = 5; i <= 60; i += 5) shutdownIntervalComboBox.addItem(i);
 
         final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "txt";
         batchFileButton.addActionListener(e -> server.generateBatch(ext));
@@ -86,11 +86,9 @@ public class SettingsDialog extends JDialog {
         automaticShutdownCheckBox.setSelected(settings.getShutdown());
         shutdownIntervalComboBox.setSelectedIndex((settings.getShutdownInterval() / 5) - 1);
         extraArgsTextField.setText(String.join(" ", settings.getExtraArgs()));
-        if (server.propertiesExists() || server.updateProperties()) {
+        if (server.propertiesExists() || server.updateProperties())
             propsTable.setModel(new PropertiesTableModel(server.getProperties()));
-        } else {
-            settingsTabs.removeTabAt(2); // remove properties tab
-        }
+        else settingsTabs.removeTabAt(2); // remove properties tab
     }
 
     @SuppressWarnings("unchecked")

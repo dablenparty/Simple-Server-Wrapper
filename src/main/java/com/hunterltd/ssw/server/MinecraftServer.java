@@ -23,12 +23,12 @@ import java.util.function.Consumer;
  * Minecraft server wrapper class
  */
 public class MinecraftServer extends EventEmitter {
-    private Process serverProcess;
     private final ProcessBuilder pB;
     private final Settings serverSettings;
-    private List<String> serverArgs;
     private final List<String> commandHistory;
     private final Path serverPath;
+    private Process serverProcess;
+    private List<String> serverArgs;
     private ServerProperties properties = null;
     private boolean propsExists;
     private int port = 25565;
@@ -39,7 +39,8 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Creates a class from an archive file and settings class
-     * @param serverFile Server .jar file
+     *
+     * @param serverFile     Server .jar file
      * @param serverSettings Server settings
      */
     public MinecraftServer(File serverFile, Settings serverSettings) {
@@ -91,6 +92,7 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Sends a command to tge server process
+     *
      * @param cmd Command
      * @throws IOException if an I/O error occurs writing to the server process
      */
@@ -106,6 +108,7 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Updates the classes properties and starts the server
+     *
      * @throws IOException if an I/O error occurs starting the server process
      */
     public void run() throws IOException {
@@ -127,6 +130,7 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Sends the stop command to the server
+     *
      * @throws IOException if an I/O error occurs writing to the server process
      */
     public void stop() throws IOException {
@@ -153,6 +157,7 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Generates a launch script for the server with the corresponding file extension
+     *
      * @param ext File extension
      */
     public void generateBatch(String ext) {
@@ -193,6 +198,7 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Sets whether the server should be running or not
+     *
      * @param shouldBeRunning Value to assign to
      */
     public void setShouldBeRunning(boolean shouldBeRunning) {
@@ -236,6 +242,7 @@ public class MinecraftServer extends EventEmitter {
     /**
      * The properties don't always exist (e.g. on a servers first run) so this tries to read the properties file if it
      * exists
+     *
      * @return Boolean on whether the properties were updated or not
      */
     public boolean updateProperties() {
@@ -284,6 +291,7 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Sets whether the server should restart or not
+     *
      * @param shouldRestart Value to set
      */
     public void setShouldRestart(boolean shouldRestart) {
@@ -321,6 +329,7 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Sets if the server is shutting down
+     *
      * @param shuttingDown Value
      */
     public void setShuttingDown(boolean shuttingDown) {
