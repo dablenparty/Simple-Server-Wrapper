@@ -3,7 +3,7 @@ package com.hunterltd.ssw.cli;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.utilities.Settings;
+import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
 
 import java.io.File;
@@ -138,7 +138,7 @@ public class ServerWrapperCLI {
     ServerWrapperCLI(File serverFile) {
         mavenProperties = new Properties();
         propertiesLoaded = loadProperties();
-        minecraftServer = new MinecraftServer(serverFile, Settings.getSettingsFromDefaultPath(serverFile));
+        minecraftServer = new MinecraftServer(serverFile, MinecraftServerSettings.getSettingsFromDefaultPath(serverFile));
     }
 
     public void showVersion() {

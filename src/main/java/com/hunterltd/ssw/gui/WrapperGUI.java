@@ -4,7 +4,7 @@ import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.utilities.Settings;
+import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import com.hunterltd.ssw.utilities.SmartScroller;
 
 import javax.swing.*;
@@ -41,7 +41,7 @@ public class WrapperGUI extends JFrame {
     private JTextField serverPathTextField;
     private MinecraftServer server;
     private ActionListener settingsOpen, openInFolder;
-    private Settings serverSettings;
+    private MinecraftServerSettings serverSettings;
     private SwingWorker<Void, Void> serverPingWorker;
     private int historyLocation = 0;
 
@@ -93,7 +93,7 @@ public class WrapperGUI extends JFrame {
             MenuBar menuBar = new MenuBar();
             Menu fileMenu = new Menu("File"),
                     serverMenu = new Menu("Server");
-            MenuItem settingsItem = new MenuItem("Server Settings"),
+            MenuItem settingsItem = new MenuItem("Server MinecraftServerSettings"),
                     openInFolderItem = new MenuItem("Open in folder"),
                     curseInstallItem = new MenuItem("Install CurseForge Modpack");
             // Adds the modpack installer, settings, and open in folder items
@@ -221,7 +221,7 @@ public class WrapperGUI extends JFrame {
             settingsDialog.setVisible(true);
         };
         try {
-            serverSettings = new Settings(Paths.get(serverFileInfo.getSelectedFile().getParent(),
+            serverSettings = new MinecraftServerSettings(Paths.get(serverFileInfo.getSelectedFile().getParent(),
                     "ssw",
                     "wrapperSettings.json"));
         } catch (IOException e) {

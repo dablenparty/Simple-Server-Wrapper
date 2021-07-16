@@ -11,12 +11,12 @@ import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class Settings extends UserDataObject {
-    public Settings(String appName) throws IOException {
+public class MinecraftServerSettings extends UserDataObject {
+    public MinecraftServerSettings(String appName) throws IOException {
         super(appName);
     }
 
-    public Settings(Path settingsPath) throws IOException {
+    public MinecraftServerSettings(Path settingsPath) throws IOException {
         super(settingsPath);
     }
 
@@ -24,12 +24,12 @@ public class Settings extends UserDataObject {
      * Creates a new settings file in the default path ({serverFile.parent}/ssw/wrapperSettings.json)
      *
      * @param serverFile Server file object
-     * @return Settings object
+     * @return MinecraftServerSettings object
      */
-    public static Settings getSettingsFromDefaultPath(File serverFile) {
+    public static MinecraftServerSettings getSettingsFromDefaultPath(File serverFile) {
         Path settingsPath = Paths.get(serverFile.getParent(), "ssw", "wrapperSettings.json");
         try {
-            return new Settings(settingsPath);
+            return new MinecraftServerSettings(settingsPath);
         } catch (IOException exception) {
             exception.printStackTrace();
             return null;

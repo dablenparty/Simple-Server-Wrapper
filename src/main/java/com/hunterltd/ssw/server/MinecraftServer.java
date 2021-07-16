@@ -5,7 +5,7 @@ import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
-import com.hunterltd.ssw.utilities.Settings;
+import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import com.hunterltd.ssw.utilities.StreamGobbler;
 
 import javax.swing.*;
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  */
 public class MinecraftServer extends EventEmitter {
     private final ProcessBuilder pB;
-    private final Settings serverSettings;
+    private final MinecraftServerSettings serverSettings;
     private final List<String> commandHistory;
     private final Path serverPath;
     private Process serverProcess;
@@ -44,11 +44,11 @@ public class MinecraftServer extends EventEmitter {
      * @param serverFile     Server .jar file
      * @param serverSettings Server settings
      */
-    public MinecraftServer(File serverFile, Settings serverSettings) {
+    public MinecraftServer(File serverFile, MinecraftServerSettings serverSettings) {
         this(serverFile.getParent(), serverFile.getName(), serverSettings);
     }
 
-    public MinecraftServer(String serverFolder, String serverFilename, Settings settings) {
+    public MinecraftServer(String serverFolder, String serverFilename, MinecraftServerSettings minecraftServerSettings) {
         pB = new ProcessBuilder();
         File pBDirectory = new File(serverFolder);
         try {
@@ -56,7 +56,7 @@ public class MinecraftServer extends EventEmitter {
         } catch (IOException ignored) {
         }
         pB.directory(pBDirectory);
-        serverSettings = settings;
+        serverSettings = minecraftServerSettings;
 
         Path serverPath1 = Paths.get(serverFolder, serverFilename);
         try {
@@ -75,7 +75,7 @@ public class MinecraftServer extends EventEmitter {
                 serverPath.toString(),
                 "nogui"));
 
-        if (serverSettings.hasExtraArgs()) serverArgs.addAll(3, settings.getExtraArgs());
+        if (serverSettings.hasExtraArgs()) serverArgs.addAll(3, minecraftServerSettings.getExtraArgs());
         updateExtraArgs();
 
         pB.command(serverArgs);
@@ -222,7 +222,7 @@ public class MinecraftServer extends EventEmitter {
     /**
      * @return The servers settings
      */
-    public Settings getServerSettings() {
+    public MinecraftServerSettings getServerSettings() {
         return serverSettings;
     }
 
