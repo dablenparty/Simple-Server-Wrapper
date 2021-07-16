@@ -6,6 +6,7 @@ import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import com.hunterltd.ssw.utilities.SmartScroller;
+import com.hunterltd.ssw.utilities.network.PortListener;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -29,6 +30,7 @@ public class WrapperGUI extends JFrame {
         dialog.pack();
         dialog.setVisible(true);
     };
+    private PortListener portListener;
     private JButton openDialogButton;
     private JButton runButton;
     private JButton sendButton;
@@ -93,7 +95,7 @@ public class WrapperGUI extends JFrame {
             MenuBar menuBar = new MenuBar();
             Menu fileMenu = new Menu("File"),
                     serverMenu = new Menu("Server");
-            MenuItem settingsItem = new MenuItem("Server MinecraftServerSettings"),
+            MenuItem settingsItem = new MenuItem("Server settings"),
                     openInFolderItem = new MenuItem("Open in folder"),
                     curseInstallItem = new MenuItem("Install CurseForge Modpack");
             // Adds the modpack installer, settings, and open in folder items
@@ -138,6 +140,11 @@ public class WrapperGUI extends JFrame {
     }
 
     public void startServer() {
+        try {
+            portListener.stop();
+        } catch (NullPointerException e) {
+            //ignored
+        }
         server.updateProperties();
         try {
             server.run();
@@ -242,6 +249,19 @@ public class WrapperGUI extends JFrame {
         server.on("exit", args -> {
             runButton.setText("Start");
             consoleTextArea.append("Server stopped\n");
+            if (serverSettings.getShutdown()) {
+                portListener = new PortListener(server.getPort());
+                try {
+                    // starts the port listener on the server port
+                    portListener.start();
+                    portListener.on("connection", objs -> startServer());
+                    portListener.on("error", objects -> new InternalErrorDialog((Exception) objects[0]));
+                    portListener.on("close", objects -> System.out.println("Listener closed"));
+                    portListener.on("stop", objects -> System.out.println("Listener stopped"));
+                } catch (IOException e) {
+                    new InternalErrorDialog(e);
+                }
+            }
         });
         server.on("data", args -> consoleTextArea.append((String) args[0] + '\n'));
         server.on("error", args -> new InternalErrorDialog((Exception) args[0]));
