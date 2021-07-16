@@ -167,7 +167,7 @@ public class WrapperGUI extends JFrame {
         server.setShouldRestart(restart);
         server.setShouldBeRunning(false);
 
-        SwingWorker<Void, Void> shutdownServerWorker = new SwingWorker<>() {
+        final SwingWorker<Void, Void> shutdownServerWorker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
                 try {
