@@ -1,11 +1,11 @@
 package com.hunterltd.ssw.gui;
 
+import com.dablenparty.jsevents.EventCallback;
 import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
 import com.hunterltd.ssw.server.ConnectionListener;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.server.StreamGobbler;
 import com.hunterltd.ssw.utilities.ServerListPing;
 import com.hunterltd.ssw.utilities.Settings;
 import com.hunterltd.ssw.utilities.SmartScroller;
@@ -51,6 +51,7 @@ public class WrapperGUI extends JFrame {
         dialog.setVisible(true);
     };
     private ActionListener settingsOpen, openInFolder;
+    private final EventCallback serverDataPipe = args -> consoleTextArea.append((String) args[0] + '\n');
     private Settings serverSettings;
     private SwingWorker<Void, Void> serverPingWorker;
     private int historyLocation = 0;
@@ -151,6 +152,7 @@ public class WrapperGUI extends JFrame {
         } catch (NullPointerException ignored) {
         }
         consoleTextArea.setText("");
+        server.on("data", serverDataPipe);
         // Essentially flushes the output windows
         server.updateProperties();
         try {
@@ -164,10 +166,9 @@ public class WrapperGUI extends JFrame {
             return;
         }
 
-        Consumer<String> addConsoleText = text -> consoleTextArea.append(text + '\n');
+//        Consumer<String> addConsoleText = text -> consoleTextArea.append(text + '\n');
         // Pipes the server outputs into the GUI using the pre-defined consumers
-        StreamGobbler.execute(server.getServerProcess().getInputStream(), addConsoleText, "Server Input Stream");
-        StreamGobbler.execute(server.getServerProcess().getErrorStream(), addConsoleText, "Server Error Stream");
+        // uses js style event listener
 
         sendServerStatus(true);
     }
@@ -223,6 +224,7 @@ public class WrapperGUI extends JFrame {
                                 e.printStackTrace();
                                 new InternalErrorDialog(e);
                             } finally {
+                                server.removeListener("data", serverDataPipe);
                                 if (server.shouldRestart()) startServer();
                                 else sendServerStatus(false);
                                 server.setShuttingDown(false);
