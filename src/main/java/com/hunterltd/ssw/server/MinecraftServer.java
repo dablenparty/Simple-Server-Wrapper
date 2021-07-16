@@ -6,6 +6,7 @@ import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
 import com.hunterltd.ssw.utilities.Settings;
+import com.hunterltd.ssw.utilities.StreamGobbler;
 
 import javax.swing.*;
 import java.io.*;

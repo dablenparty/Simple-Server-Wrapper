@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.server;
+package com.hunterltd.ssw.utilities;
 
 import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;

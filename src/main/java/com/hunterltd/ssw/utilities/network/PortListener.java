@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.server;
+package com.hunterltd.ssw.utilities.network;
 
 import com.dablenparty.jsevents.EventEmitter;
 

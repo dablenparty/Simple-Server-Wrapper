@@ -1,6 +1,6 @@
 package com.hunterltd.ssw.cli.tasks;
 
-import com.hunterltd.ssw.server.ConnectionListener;
+import com.hunterltd.ssw.utilities.network.ConnectionListener;
 import com.hunterltd.ssw.server.MinecraftServer;
 
 import java.io.IOException;
