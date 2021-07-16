@@ -45,6 +45,13 @@
             <scope>system</scope>
             <systemPath>${basedir}/local-dependencies/JSONData.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.dablenparty.jsevents</groupId>
+            <artifactId>JsEvents</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/local-dependencies/JsEvents.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <properties>
