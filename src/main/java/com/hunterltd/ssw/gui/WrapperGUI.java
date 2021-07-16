@@ -18,6 +18,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
+import java.net.BindException;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
@@ -191,8 +192,12 @@ public class WrapperGUI extends JFrame {
 
     private void runButtonAction() {
         // Server is null on initial startup
-        if (!server.isRunning()) startServer();
-        else stopServer();
+        try {
+            if (!server.isRunning()) startServer();
+            else stopServer();
+        } catch (NullPointerException e) {
+            // ignored
+        }
     }
 
 
@@ -258,6 +263,12 @@ public class WrapperGUI extends JFrame {
                     portListener.on("error", objects -> new InternalErrorDialog((Exception) objects[0]));
                     portListener.on("close", objects -> System.out.println("Listener closed"));
                     portListener.on("stop", objects -> System.out.println("Listener stopped"));
+                } catch (BindException bindException) {
+                    InfoDialog infoDialog = new InfoDialog("Bind Exception",
+                            String.format("An error occurred binding the port listener to port %d. Make sure no other" +
+                                    " servers are running and try again.", server.getPort()));
+                    infoDialog.pack();
+                    infoDialog.setVisible(true);
                 } catch (IOException e) {
                     new InternalErrorDialog(e);
                 }
