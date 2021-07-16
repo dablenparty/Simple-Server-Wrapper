@@ -11,14 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class StreamGobbler implements Runnable {
-    private final InputStream inputStream;
-    private final Consumer<String> consumer;
-
-    public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
-        this.inputStream = inputStream;
-        this.consumer = consumer;
-    }
+public record StreamGobbler(InputStream inputStream,
+                            Consumer<String> consumer) implements Runnable {
 
     @Override
     public void run() {
