@@ -23,7 +23,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                     ConnectionListener.start(server.getPort());
                     printlnWithTimeAndThread(System.out,"Listener opened");
                 }
-            } catch (IOException | InterruptedException exception) {
+            } catch (IOException exception) {
                 exception.printStackTrace();
                 serverProcess.destroy();
             } finally {

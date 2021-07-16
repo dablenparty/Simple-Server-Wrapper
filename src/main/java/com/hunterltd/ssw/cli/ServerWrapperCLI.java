@@ -65,7 +65,7 @@ public class ServerWrapperCLI {
                         minecraftServer.setShuttingDown(true);
                         try {
                             minecraftServer.stop();
-                        } catch (IOException | InterruptedException e) {
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }

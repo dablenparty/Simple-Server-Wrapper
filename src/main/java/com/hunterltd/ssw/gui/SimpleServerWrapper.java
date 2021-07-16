@@ -33,7 +33,7 @@ public class SimpleServerWrapper {
                         if (result == JOptionPane.YES_OPTION) {
                             try {
                                 wrapperGUI.getServer().stop();
-                            } catch (IOException | InterruptedException ioException) {
+                            } catch (IOException ioException) {
                                 ioException.printStackTrace();
                                 wrapperGUI.getServer().getServerProcess().destroy(); // Failsafe
                             }

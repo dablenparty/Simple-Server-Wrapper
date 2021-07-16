@@ -111,8 +111,8 @@ public class MinecraftServer extends EventEmitter {
     public void run() throws IOException {
         propsExists = updateProperties();
         serverProcess = pB.start();
-        Consumer<String> gobblerConsumer = text -> emit("data", text);
         emit("start", serverProcess);
+        Consumer<String> gobblerConsumer = text -> emit("data", text);
         inputService = StreamGobbler.execute(
                 serverProcess.getInputStream(),
                 gobblerConsumer,
@@ -129,7 +129,7 @@ public class MinecraftServer extends EventEmitter {
      * Sends the stop command to the server
      * @throws IOException if an I/O error occurs writing to the server process
      */
-    public void stop() throws IOException, InterruptedException {
+    public void stop() throws IOException {
         stop(5L, TimeUnit.SECONDS);
     }
 
@@ -137,7 +137,8 @@ public class MinecraftServer extends EventEmitter {
         emit("exiting");
         sendCommand("stop");
         try {
-        if (!serverProcess.waitFor(timeout, timeUnit)) serverProcess.destroy(); } catch (InterruptedException e) {
+            if (!serverProcess.waitFor(timeout, timeUnit)) serverProcess.destroy();
+        } catch (InterruptedException e) {
             serverProcess.destroy();
         } finally {
             ServerWrapperCLI.tryShutdownExecutorService(inputService);
