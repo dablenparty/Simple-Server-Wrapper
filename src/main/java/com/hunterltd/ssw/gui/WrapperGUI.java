@@ -99,38 +99,40 @@ public class WrapperGUI extends JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        // Menu Bar
-        MenuBar menuBar = new MenuBar();
-        Menu fileMenu = new Menu("File"),
-                serverMenu = new Menu("Server");
-        MenuItem settingsItem = new MenuItem("Server Settings"),
-                openInFolderItem = new MenuItem("Open in folder"),
-                curseInstallItem = new MenuItem("Install CurseForge Modpack");
-        // Adds the modpack installer, settings, and open in folder items
-        fileMenu.add(curseInstallItem);
-        serverMenu.add(settingsItem);
-        serverMenu.add(openInFolderItem);
-        menuBar.add(fileMenu);
-        menuBar.add(serverMenu);
-        serverMenu.addActionListener(noServerSelected);
-        curseInstallItem.addActionListener(e -> {
-            CurseInstaller installer = new CurseInstaller();
-            installer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-            installer.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    SwingWorker<Void, Void> worker = installer.getWorker();
-                    if (worker != null) {
-                        worker.cancel(true);
+        {
+            // Menu Bar
+            MenuBar menuBar = new MenuBar();
+            Menu fileMenu = new Menu("File"),
+                    serverMenu = new Menu("Server");
+            MenuItem settingsItem = new MenuItem("Server Settings"),
+                    openInFolderItem = new MenuItem("Open in folder"),
+                    curseInstallItem = new MenuItem("Install CurseForge Modpack");
+            // Adds the modpack installer, settings, and open in folder items
+            fileMenu.add(curseInstallItem);
+            serverMenu.add(settingsItem);
+            serverMenu.add(openInFolderItem);
+            menuBar.add(fileMenu);
+            menuBar.add(serverMenu);
+            serverMenu.addActionListener(noServerSelected);
+            curseInstallItem.addActionListener(e -> {
+                CurseInstaller installer = new CurseInstaller();
+                installer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+                installer.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        SwingWorker<Void, Void> worker = installer.getWorker();
+                        if (worker != null) {
+                            worker.cancel(true);
+                        }
+                        installer.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
                     }
-                    installer.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                }
+                });
+                installer.pack();
+                installer.setVisible(true);
             });
-            installer.pack();
-            installer.setVisible(true);
-        });
 
-        this.setMenuBar(menuBar);
+            this.setMenuBar(menuBar);
+        }
 
         new SmartScroller(consoleScrollPane);
         setTitle(baseTitle);
@@ -143,6 +145,10 @@ public class WrapperGUI extends JFrame {
             ioException.printStackTrace();
             new InternalErrorDialog(ioException);
         }
+    }
+
+    public void startServer2() {
+
     }
 
     public void startServer() {
@@ -165,10 +171,6 @@ public class WrapperGUI extends JFrame {
             }
             return;
         }
-
-//        Consumer<String> addConsoleText = text -> consoleTextArea.append(text + '\n');
-        // Pipes the server outputs into the GUI using the pre-defined consumers
-        // uses js style event listener
 
         sendServerStatus(true);
     }
