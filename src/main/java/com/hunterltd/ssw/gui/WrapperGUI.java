@@ -47,8 +47,7 @@ public class WrapperGUI extends JFrame {
     private MinecraftServer server;
     private ActionListener settingsOpen, openInFolder;
     private MinecraftServerSettings serverSettings;
-    private SwingWorker<Void, Void> serverPingWorker;
-    private Timer serverPingTimer;
+    private final Timer serverPingTimer;
     private ServerListPing serverPinger;
     private int historyLocation = 0;
 
@@ -175,6 +174,7 @@ public class WrapperGUI extends JFrame {
         server.updateProperties();
         try {
             server.run();
+            server.setShouldBeRunning(true);
         } catch (IOException e) {
             e.printStackTrace();
             new InternalErrorDialog(e);
@@ -185,12 +185,7 @@ public class WrapperGUI extends JFrame {
     }
 
     public void stopServer() {
-        stopServer(false);
-    }
-
-    public void stopServer(boolean restart) {
         server.setShuttingDown(true);
-        server.setShouldRestart(restart);
         server.setShouldBeRunning(false);
 
         final SwingWorker<Void, Void> shutdownServerWorker = new SwingWorker<>() {
@@ -228,11 +223,6 @@ public class WrapperGUI extends JFrame {
 
 
     private void selectNewFile() {
-        try {
-            // this will be null if the auto-shutdown feature is disabled or the wrapper was just launched
-            serverPingWorker.cancel(true);
-        } catch (NullPointerException ignored) {
-        }
         JFileChooser serverFileInfo = new JFileChooser();
         serverFileInfo.setFileFilter(new FileFilter() {
             @Override
@@ -273,7 +263,20 @@ public class WrapperGUI extends JFrame {
         server = new MinecraftServer(serverFileInfo.getSelectedFile(),
                 serverSettings);
 
-        // set up listeners for server events
+        registerServerListeners();
+        openInFolder = e -> {
+            try {
+                // Opens the enclosing folder in File Explorer, Finder, etc.
+                Desktop.getDesktop().open(server.getServerPath().getParent().toFile());
+            } catch (IOException ioException) {
+                new InternalErrorDialog(ioException);
+            }
+        };
+        openInFolderItem.addActionListener(openInFolder);
+    }
+
+    private void registerServerListeners() {
+        // sets up the listeners for the minecraft server
         server.on("start", args -> {
             runButton.setText("Stop");
             consoleTextArea.setText("Starting server...\n");
@@ -308,15 +311,6 @@ public class WrapperGUI extends JFrame {
         });
         server.on("data", args -> consoleTextArea.append((String) args[0] + '\n'));
         server.on("error", args -> new InternalErrorDialog((Exception) args[0]));
-        openInFolder = e -> {
-            try {
-                // Opens the enclosing folder in File Explorer, Finder, etc.
-                Desktop.getDesktop().open(server.getServerPath().getParent().toFile());
-            } catch (IOException ioException) {
-                new InternalErrorDialog(ioException);
-            }
-        };
-        openInFolderItem.addActionListener(openInFolder);
     }
 
     public MinecraftServer getServer() {
