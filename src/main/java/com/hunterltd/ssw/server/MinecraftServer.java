@@ -140,10 +140,10 @@ public class MinecraftServer extends EventEmitter {
 
     public void stop(long timeout, TimeUnit timeUnit) throws IOException {
         emit("exiting");
-        sendCommand("stop");
         try {
+            sendCommand("stop");
             if (!serverProcess.waitFor(timeout, timeUnit)) serverProcess.destroy();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
             serverProcess.destroy();
         } finally {
             ThreadUtils.tryShutdownExecutorService(inputService);
