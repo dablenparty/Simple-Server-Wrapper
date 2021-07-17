@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class SimpleServerWrapper {
     public static void main(String[] args) {
@@ -31,10 +32,9 @@ public class SimpleServerWrapper {
                         );
                         if (result == JOptionPane.YES_OPTION) {
                             try {
-                                wrapperGUI.getServer().stop();
+                                wrapperGUI.getServer().stop(10L, TimeUnit.SECONDS);
                             } catch (IOException ioException) {
                                 ioException.printStackTrace();
-                                wrapperGUI.getServer().getServerProcess().destroy(); // Failsafe
                             }
                             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                         }
