@@ -115,6 +115,7 @@ public class MinecraftServer extends EventEmitter {
     public void run() throws IOException {
         propsExists = updateProperties();
         serverProcess = pB.start();
+        serverProcess.onExit().thenApply(process -> emit("exit", process)); // emits "exit" when the process exits
         emit("start", serverProcess);
         Consumer<String> gobblerConsumer = text -> emit("data", text);
         inputService = StreamGobbler.execute(
@@ -151,7 +152,6 @@ public class MinecraftServer extends EventEmitter {
             serverProcess.getInputStream().close();
             serverProcess.getErrorStream().close();
             serverProcess.getOutputStream().close();
-            emit("exit");
         }
 
     }
