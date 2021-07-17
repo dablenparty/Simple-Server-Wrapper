@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Properties;
+import java.util.Scanner;
 
 public class SswClientCli {
     private Socket clientSocket;
@@ -28,8 +29,13 @@ public class SswClientCli {
             System.err.println(connectException.getLocalizedMessage());
             return;
         }
-        String response = clientCli.sendToServer("hello friend");
-        System.out.println(response);
+        String message, response;
+        Scanner userInputScanner = new Scanner(System.in);
+        while (!(message = userInputScanner.nextLine()).equals("close")) {
+            response = clientCli.sendToServer(message);
+            System.out.printf("[Server] %s%n", response);
+        }
+        userInputScanner.close();
         clientCli.closeConnection();
     }
 
