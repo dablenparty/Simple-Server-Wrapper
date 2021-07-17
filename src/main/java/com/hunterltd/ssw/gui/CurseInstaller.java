@@ -83,7 +83,7 @@ public class CurseInstaller extends JFrame {
             installing = true;
 
             // Delegates the downloading/installing of mod files to a separate worker thread to avoid blocking the EDT
-            worker = new SwingWorker<Void, Void>() {
+            worker = new SwingWorker<>() {
                 @Override
                 protected Void doInBackground() throws IOException, ParseException {
                     firePropertyChange("status", "", "Extracting...");
@@ -99,8 +99,8 @@ public class CurseInstaller extends JFrame {
                         e.printStackTrace();
                         new InternalErrorDialog(e);
                         return null;
+                    } catch (NullPointerException ignored) {
                     }
-                    catch (NullPointerException ignored) {}
 
                     Client client = ClientBuilder.newClient();
                     int filesLength = files.length;
@@ -140,11 +140,18 @@ public class CurseInstaller extends JFrame {
                         for (File file :
                                 overrides) {
                             try {
-                                File copyTo = file.isDirectory() ? Paths.get(serverPath.toString(), file.getName()).toFile() : serverPath;
-                                FileUtils.copyFileToDirectory(file, copyTo);
+                                if (file.isDirectory()) {
+                                    FileUtils.copyDirectory(
+                                            file,
+                                            Paths.get(String.valueOf(serverPath), file.getName()).toFile()
+                                    );
+                                } else {
+                                    File copyTo = file.isDirectory() ? Paths.get(serverPath.toString(), file.getName()).toFile() : serverPath;
+                                    FileUtils.copyFileToDirectory(file, copyTo);
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
-                                new InternalErrorDialog(e);
+                                firePropertyChange("error", null, e);
                             }
                         }
                     }
@@ -197,12 +204,18 @@ public class CurseInstaller extends JFrame {
             };
 
             worker.addPropertyChangeListener(evt -> {
-                if (evt.getPropertyName().equals("progress")) {
-                    int progress = (Integer) evt.getNewValue();
-                    installProgressBar.setValue(progress);
-
-                } else if (evt.getPropertyName().equals("status")) {
-                    installProgressBar.setString((String) evt.getNewValue());
+                switch (evt.getPropertyName()) {
+                    case "progress":
+                        int progress = (Integer) evt.getNewValue();
+                        installProgressBar.setValue(progress);
+                        break;
+                    case "status":
+                        installProgressBar.setString((String) evt.getNewValue());
+                        break;
+                    case "error":
+                        new InternalErrorDialog((Exception) evt.getNewValue());
+                    default:
+                        break;
                 }
             });
 
@@ -210,6 +223,13 @@ public class CurseInstaller extends JFrame {
         });
 
         setTitle("CurseForge Modpack Installer");
+    }
+
+    public static void main(String[] args) {
+        CurseInstaller installer = new CurseInstaller();
+        installer.pack();
+        installer.setVisible(true);
+//        installer.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
     private void setComponentsEnabled(boolean b) {
@@ -222,11 +242,5 @@ public class CurseInstaller extends JFrame {
 
     public SwingWorker<Void, Void> getWorker() {
         return worker;
-    }
-
-    public static void main(String[] args) {
-        CurseInstaller installer = new CurseInstaller();
-        installer.pack();
-        installer.setVisible(true);
     }
 }

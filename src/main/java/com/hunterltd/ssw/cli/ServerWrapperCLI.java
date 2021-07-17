@@ -3,14 +3,12 @@ package com.hunterltd.ssw.cli;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.utilities.Settings;
-import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
+import com.hunterltd.ssw.utilities.MinecraftServerSettings;
+import com.hunterltd.ssw.utilities.ThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
@@ -18,7 +16,6 @@ import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class ServerWrapperCLI {
-    private static final SimpleDateFormat SIMPLE_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private final Properties mavenProperties;
     private final boolean propertiesLoaded;
     private final MinecraftServer minecraftServer;
@@ -31,11 +28,11 @@ public class ServerWrapperCLI {
         ServerWrapperCLI wrapperCli = new ServerWrapperCLI(firstArg);
         MinecraftServer minecraftServer = wrapperCli.getMinecraftServer();
         ScheduledExecutorService
-                serverStateService = Executors.newScheduledThreadPool(1, newNamedThreadFactory("Server State Check Service")),
+                serverStateService = Executors.newScheduledThreadPool(1, ThreadUtils.newNamedThreadFactory("Server State Check Service")),
                 serverPingService = null;
         ServerPingTask pingTask = null;
         if (minecraftServer.getServerSettings().getShutdown()) {
-            serverPingService = Executors.newScheduledThreadPool(1, newNamedThreadFactory("Server Ping Service"));
+            serverPingService = Executors.newScheduledThreadPool(1, ThreadUtils.newNamedThreadFactory("Server Ping Service"));
             pingTask = new ServerPingTask(minecraftServer);
         }
         serverStateService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
@@ -46,7 +43,7 @@ public class ServerWrapperCLI {
             String command = inputScanner.nextLine();
             switch (command) {
                 case "start":
-                    printlnWithTimeAndThread(System.out,"Starting server...");
+                    ThreadUtils.printlnWithTimeAndThread(System.out,"Starting server...");
                     minecraftServer.setShouldBeRunning(true);
                     minecraftServer.run();
                     // submits process streams to stream gobblers to redirect output to standard out and error
@@ -65,17 +62,17 @@ public class ServerWrapperCLI {
                         minecraftServer.setShuttingDown(true);
                         try {
                             minecraftServer.stop();
-                        } catch (IOException | InterruptedException e) {
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                     for (ExecutorService service :
                             new ExecutorService[]{serverPingService, serverStateService}) {
                         if (service != null)
-                            tryShutdownExecutorService(service);
+                            ThreadUtils.tryShutdownExecutorService(service);
                     }
                     if (pingTask != null && pingTask.getShutdownService() != null)
-                        tryShutdownExecutorService(pingTask.getShutdownService());
+                        ThreadUtils.tryShutdownExecutorService(pingTask.getShutdownService());
                     inputScanner.close();
                     break doLoop;
                 default:
@@ -107,38 +104,10 @@ public class ServerWrapperCLI {
         return firstArg;
     }
 
-    public static ThreadFactory newNamedThreadFactory(String threadName) {
-        return new ThreadFactoryBuilder().setNameFormat(threadName).build();
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void tryShutdownExecutorService(ExecutorService service) {
-        printlnWithTimeAndThread(System.out,"Shutting down background service...");
-        service.shutdown();
-        try {
-            service.awaitTermination(5L, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            printlnWithTimeAndThread(System.err, e.getLocalizedMessage());
-        } finally {
-            if (!service.isTerminated())
-                printlnWithTimeAndThread(System.err, "Service didn't terminate, forcing shutdown");
-            service.shutdownNow();
-            printlnWithTimeAndThread(System.out,"Service closed");
-        }
-    }
-
-    public static void printfWithTimeAndThread(PrintStream stream, String toFormat, Object... args) {
-        printlnWithTimeAndThread(stream, String.format(toFormat, args));
-    }
-
-    public static void printlnWithTimeAndThread(PrintStream stream, String string) {
-        stream.printf("[%s] [ssw/%s]: %s%n", SIMPLE_TIME_FORMAT.format(System.currentTimeMillis()), Thread.currentThread().getName(), string);
-    }
-
     ServerWrapperCLI(File serverFile) {
         mavenProperties = new Properties();
         propertiesLoaded = loadProperties();
-        minecraftServer = new MinecraftServer(serverFile, Settings.getSettingsFromDefaultPath(serverFile));
+        minecraftServer = new MinecraftServer(serverFile, MinecraftServerSettings.getSettingsFromDefaultPath(serverFile));
     }
 
     public void showVersion() {
@@ -157,7 +126,7 @@ public class ServerWrapperCLI {
             mavenProperties.load(resourceStream);
             return true;
         } catch (IOException exception) {
-            printlnWithTimeAndThread(System.err, exception.getLocalizedMessage());
+            ThreadUtils.printlnWithTimeAndThread(System.err, exception.getLocalizedMessage());
             return false;
         }
     }

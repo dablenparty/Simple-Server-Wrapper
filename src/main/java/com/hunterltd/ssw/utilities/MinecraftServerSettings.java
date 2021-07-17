@@ -11,28 +11,29 @@ import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class Settings extends UserDataObject {
+public class MinecraftServerSettings extends UserDataObject {
+    public MinecraftServerSettings(String appName) throws IOException {
+        super(appName);
+    }
+
+    public MinecraftServerSettings(Path settingsPath) throws IOException {
+        super(settingsPath);
+    }
+
     /**
      * Creates a new settings file in the default path ({serverFile.parent}/ssw/wrapperSettings.json)
+     *
      * @param serverFile Server file object
-     * @return Settings object
+     * @return MinecraftServerSettings object
      */
-    public static Settings getSettingsFromDefaultPath(File serverFile) {
+    public static MinecraftServerSettings getSettingsFromDefaultPath(File serverFile) {
         Path settingsPath = Paths.get(serverFile.getParent(), "ssw", "wrapperSettings.json");
         try {
-            return new Settings(settingsPath);
+            return new MinecraftServerSettings(settingsPath);
         } catch (IOException exception) {
             exception.printStackTrace();
             return null;
         }
-    }
-
-    public Settings(String appName) throws IOException {
-        super(appName);
-    }
-
-    public Settings(Path settingsPath) throws IOException {
-        super(settingsPath);
     }
 
     @Override
@@ -83,7 +84,7 @@ public class Settings extends UserDataObject {
     public void setExtraArgs(String[] newArgs) {
         JSONArray args = new JSONArray();
         args.addAll(Arrays.asList(newArgs));
-        this.replace("extraArgs",  args);
+        this.replace("extraArgs", args);
     }
 
     public boolean hasExtraArgs() {

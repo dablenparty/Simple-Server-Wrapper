@@ -16,6 +16,7 @@ public class CurseManifest extends JSONObject {
 
     /**
      * Instantiates the wrapper class from the manifest file object
+     *
      * @param manifestFile Manifest file
      */
     public CurseManifest(File manifestFile) {
@@ -24,7 +25,8 @@ public class CurseManifest extends JSONObject {
 
     /**
      * Loads the manifest.json data
-     * @throws IOException if an I/O error occurs reading the dada
+     *
+     * @throws IOException    if an I/O error occurs reading the dada
      * @throws ParseException if a parsing error occurs reading the data
      */
     public void load() throws IOException, ParseException {
@@ -40,6 +42,7 @@ public class CurseManifest extends JSONObject {
 
     /**
      * Creates {@link CurseManifestFileEntry} objects from the files array in the manifest
+     *
      * @return Array of ManifestEntry objects from the files array in the manifest
      */
     public CurseManifestFileEntry[] getFiles() {

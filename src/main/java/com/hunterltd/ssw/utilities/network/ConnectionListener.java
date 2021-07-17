@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.server;
+package com.hunterltd.ssw.utilities.network;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,6 +13,7 @@ public class ConnectionListener {
 
     /**
      * Listens for a connection on a port and sets a boolean flag on the first accepted connection
+     *
      * @param port Port to listen on
      * @throws IOException if an I/O error occurs binding the port
      */

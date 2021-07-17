@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class SimpleServerWrapper {
     public static void main(String[] args) {
@@ -22,8 +23,7 @@ public class SimpleServerWrapper {
                     JFrame frame = (JFrame) e.getSource();
 
                     if (wrapperGUI.getServer() != null &&
-                            wrapperGUI.getServer().isRunning())
-                    {
+                            wrapperGUI.getServer().isRunning()) {
                         int result = JOptionPane.showConfirmDialog(
                                 frame,
                                 "Are you sure you want to exit the server wrapper? This will stop the server.",
@@ -32,10 +32,9 @@ public class SimpleServerWrapper {
                         );
                         if (result == JOptionPane.YES_OPTION) {
                             try {
-                                wrapperGUI.getServer().stop();
-                            } catch (IOException | InterruptedException ioException) {
+                                wrapperGUI.getServer().stop(10L, TimeUnit.SECONDS);
+                            } catch (IOException ioException) {
                                 ioException.printStackTrace();
-                                wrapperGUI.getServer().getServerProcess().destroy(); // Failsafe
                             }
                             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                         }

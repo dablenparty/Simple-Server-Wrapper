@@ -1,9 +1,13 @@
 package com.hunterltd.ssw.gui.dialogs;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.Serial;
 
 public class InfoDialog extends JDialog {
+    @Serial
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     private JButton buttonOK;

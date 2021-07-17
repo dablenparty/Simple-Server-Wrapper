@@ -1,42 +1,45 @@
-package com.hunterltd.ssw.utilities;
+package com.hunterltd.ssw.utilities.network;
 
 import com.google.gson.Gson;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 
 /**
- *
  * @author zh32 <zh32 at zh32.de>
  */
 public class ServerListPing {
 
     private InetSocketAddress host;
     private int timeout = 7000;
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
-    public void setAddress(InetSocketAddress host) {
-        this.host = host;
+    public static void main(String[] args) throws IOException {
+        ServerListPing pinger = new ServerListPing();
+        InetSocketAddress address = new InetSocketAddress("localhost", 25565);
+        pinger.setAddress(address);
+        StatusResponse response = pinger.fetchData();
+        if (response != null) {
+            System.out.println(response.getPlayers().getOnline());
+        }
     }
 
     public InetSocketAddress getAddress() {
         return this.host;
     }
 
-    void setTimeout(int timeout) {
-        this.timeout = timeout;
+    public void setAddress(InetSocketAddress host) {
+        this.host = host;
     }
 
     int getTimeout() {
         return this.timeout;
+    }
+
+    void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     public int readVarInt(DataInputStream in) throws IOException {
@@ -155,7 +158,6 @@ public class ServerListPing {
         return response;
     }
 
-
     public class StatusResponse {
         private Description description;
         private Players players;
@@ -241,15 +243,5 @@ public class ServerListPing {
             return text;
         }
 
-    }
-
-    public static void main(String[] args) throws IOException {
-        ServerListPing pinger = new ServerListPing();
-        InetSocketAddress address = new InetSocketAddress("localhost", 25565);
-        pinger.setAddress(address);
-        StatusResponse response = pinger.fetchData();
-        if (response != null) {
-            System.out.println(response.getPlayers().getOnline());
-        }
     }
 }
