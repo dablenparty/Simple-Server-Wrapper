@@ -7,6 +7,7 @@ import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import com.hunterltd.ssw.utilities.SmartScroller;
 import com.hunterltd.ssw.utilities.network.PortListener;
+import com.hunterltd.ssw.utilities.network.ServerListPing;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
 import java.net.BindException;
+import java.net.InetSocketAddress;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +48,8 @@ public class WrapperGUI extends JFrame {
     private ActionListener settingsOpen, openInFolder;
     private MinecraftServerSettings serverSettings;
     private SwingWorker<Void, Void> serverPingWorker;
+    private Timer serverPingTimer;
+    private ServerListPing serverPinger;
     private int historyLocation = 0;
 
     public WrapperGUI() {
@@ -125,6 +129,28 @@ public class WrapperGUI extends JFrame {
 
             this.setMenuBar(menuBar);
         }
+
+        // keeps track of how many half minutes pass
+        final int[] halfMinutesPassed = new int[]{0};
+
+        // every 30 seconds
+        serverPingTimer = new Timer(30000, e -> {
+            if (!server.isRunning() || server.isShuttingDown()) return;
+
+            ServerListPing.StatusResponse response;
+            try {
+                response = serverPinger.fetchData();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                new InternalErrorDialog(ioException);
+                return;
+            }
+            int onlinePlayers = response.getPlayers().getOnline();
+            if (onlinePlayers > 0) halfMinutesPassed[0] = 0;
+            else if (halfMinutesPassed[0] == serverSettings.getShutdownInterval() << 1) stopServer();
+            else halfMinutesPassed[0] += 1;
+        });
+
 
         new SmartScroller(consoleScrollPane);
         String baseTitle = "Simple Server Wrapper";
@@ -246,15 +272,21 @@ public class WrapperGUI extends JFrame {
         this.getMenuBar().getMenu(1).removeActionListener(noServerSelected);
         server = new MinecraftServer(serverFileInfo.getSelectedFile(),
                 serverSettings);
+
+        // set up listeners for server events
         server.on("start", args -> {
             runButton.setText("Stop");
             consoleTextArea.setText("Starting server...\n");
+            serverPinger = new ServerListPing();
+            serverPinger.setAddress(new InetSocketAddress(server.getPort()));
+            if (serverSettings.getShutdown()) serverPingTimer.start();
         });
         server.on("exiting", args -> runButton.setText("Stopping..."));
         server.on("exit", args -> {
             runButton.setText("Start");
             consoleTextArea.append("Server stopped\n");
             if (serverSettings.getShutdown()) {
+                serverPingTimer.stop();
                 portListener = new PortListener(server.getPort());
                 try {
                     // starts the port listener on the server port
