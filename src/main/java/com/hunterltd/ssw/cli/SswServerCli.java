@@ -53,6 +53,7 @@ public class SswServerCli {
         int port = namespace.getInt("port");
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
+        serverCli.stop();
     }
 
     SswServerCli(int port, File serverFile) {
@@ -66,7 +67,7 @@ public class SswServerCli {
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         String message = in.readLine();
-        System.out.printf("Message from client: %s", message);
+        System.out.printf("Message from client: %s%n", message);
         out.println("hello from the server!");
     }
 

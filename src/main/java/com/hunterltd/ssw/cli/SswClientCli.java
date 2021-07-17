@@ -30,6 +30,7 @@ public class SswClientCli {
         }
         String response = clientCli.sendToServer("hello friend");
         System.out.println(response);
+        clientCli.closeConnection();
     }
 
     public static Namespace parseArgs(String[] args) {
