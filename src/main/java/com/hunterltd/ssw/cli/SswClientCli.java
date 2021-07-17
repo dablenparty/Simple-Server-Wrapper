@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.cli;
 
+import com.hunterltd.ssw.utilities.MavenUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -32,7 +33,7 @@ public class SswClientCli {
     }
 
     public Namespace parseArgs(String[] args) {
-        Properties mavenProperties = getMavenProperties();
+        Properties mavenProperties = MavenUtils.getMavenProperties();
         ArgumentParser parser = ArgumentParsers.newFor("Simple Server Wrapper Client CLI").build()
                 .defaultHelp(true)
                 .version(String.format("${prog} v%s", mavenProperties.getProperty("version")))
@@ -50,16 +51,6 @@ public class SswClientCli {
                 .setDefault("127.0.0.1")
                 .help("target address, defaults to 127.0.0.1");
         return parser.parseArgsOrFail(args);
-    }
-
-    private Properties getMavenProperties() {
-        Properties mavenProperties = new Properties();
-        try (InputStream resourceStream = SswClientCli.class.getClassLoader().getResourceAsStream("project.properties")) {
-            mavenProperties.load(resourceStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return mavenProperties;
     }
 
     public void connect(String targetIp, int port) throws IOException {
