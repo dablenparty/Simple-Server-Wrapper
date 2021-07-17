@@ -12,12 +12,17 @@ import java.net.Socket;
 import java.util.Properties;
 
 public class SswServerCli {
+    private final int port;
+    private final File serverFile;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
-    private final int port;
-    private final File serverFile;
+
+    SswServerCli(int port, File serverFile) {
+        this.port = port;
+        this.serverFile = serverFile;
+    }
 
     public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
@@ -54,11 +59,6 @@ public class SswServerCli {
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
         serverCli.stop();
-    }
-
-    SswServerCli(int port, File serverFile) {
-        this.port = port;
-        this.serverFile = serverFile;
     }
 
     public void start() throws IOException {
