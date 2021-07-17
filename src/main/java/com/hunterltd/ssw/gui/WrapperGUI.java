@@ -33,6 +33,7 @@ public class WrapperGUI extends JFrame {
         dialog.pack();
         dialog.setVisible(true);
     };
+    private final Timer serverPingTimer;
     private PortListener portListener;
     private JButton openDialogButton;
     private JButton runButton;
@@ -47,7 +48,6 @@ public class WrapperGUI extends JFrame {
     private MinecraftServer server;
     private ActionListener settingsOpen, openInFolder;
     private MinecraftServerSettings serverSettings;
-    private final Timer serverPingTimer;
     private ServerListPing serverPinger;
     private int historyLocation = 0;
 
