@@ -5,7 +5,7 @@ import com.hunterltd.ssw.server.MinecraftServer;
 
 import java.io.IOException;
 
-import static com.hunterltd.ssw.cli.ServerWrapperCLI.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
 
 public class AliveStateCheckTask extends ServerBasedRunnable {
     public AliveStateCheckTask(MinecraftServer server) {

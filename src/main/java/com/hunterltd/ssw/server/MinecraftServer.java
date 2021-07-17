@@ -1,12 +1,12 @@
 package com.hunterltd.ssw.server;
 
 import com.dablenparty.jsevents.EventEmitter;
-import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import com.hunterltd.ssw.utilities.StreamGobbler;
+import com.hunterltd.ssw.utilities.ThreadUtils;
 
 import javax.swing.*;
 import java.io.*;
@@ -146,8 +146,8 @@ public class MinecraftServer extends EventEmitter {
         } catch (InterruptedException e) {
             serverProcess.destroy();
         } finally {
-            ServerWrapperCLI.tryShutdownExecutorService(inputService);
-            ServerWrapperCLI.tryShutdownExecutorService(errorService);
+            ThreadUtils.tryShutdownExecutorService(inputService);
+            ThreadUtils.tryShutdownExecutorService(errorService);
             serverProcess.getInputStream().close();
             serverProcess.getErrorStream().close();
             serverProcess.getOutputStream().close();

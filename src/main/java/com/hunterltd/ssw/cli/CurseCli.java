@@ -18,8 +18,8 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Scanner;
 
-import static com.hunterltd.ssw.cli.ServerWrapperCLI.printfWithTimeAndThread;
-import static com.hunterltd.ssw.cli.ServerWrapperCLI.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.ThreadUtils.printfWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
 
 public class CurseCli {
     private final CurseModpack curseModpack;

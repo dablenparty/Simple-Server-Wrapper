@@ -1,7 +1,7 @@
 package com.hunterltd.ssw.cli.tasks;
 
-import com.hunterltd.ssw.cli.ServerWrapperCLI;
 import com.hunterltd.ssw.server.MinecraftServer;
+import com.hunterltd.ssw.utilities.ThreadUtils;
 import com.hunterltd.ssw.utilities.network.ServerListPing;
 
 import java.io.IOException;
@@ -27,18 +27,18 @@ public class ServerPingTask extends ServerBasedRunnable {
                 ServerListPing.StatusResponse response = pinger.fetchData();
                 if (response.getPlayers().getOnline() == 0 && shutdownService == null) {
                     // shutdown timer begins
-                    shutdownService = Executors.newScheduledThreadPool(1, ServerWrapperCLI.newNamedThreadFactory("Server Shutdown Service"));
+                    shutdownService = Executors.newScheduledThreadPool(1, ThreadUtils.newNamedThreadFactory("Server Shutdown Service"));
                     long delay = server.getServerSettings().getShutdownInterval();
                     shutdownService.schedule(new ServerShutdownTask(server), delay, TimeUnit.MINUTES);
                 } else {
                     if (response.getPlayers().getOnline() != 0 && shutdownService != null) {
-                        ServerWrapperCLI.tryShutdownExecutorService(shutdownService);
+                        ThreadUtils.tryShutdownExecutorService(shutdownService);
                         shutdownService = null;
                     }
                 }
             } else {
                 if (shutdownService != null) {
-                    ServerWrapperCLI.tryShutdownExecutorService(shutdownService);
+                    ThreadUtils.tryShutdownExecutorService(shutdownService);
                     shutdownService = null;
                 }
             }

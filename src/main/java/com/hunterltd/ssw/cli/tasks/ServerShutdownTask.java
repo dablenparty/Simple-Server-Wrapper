@@ -2,7 +2,7 @@ package com.hunterltd.ssw.cli.tasks;
 
 import com.hunterltd.ssw.server.MinecraftServer;
 
-import static com.hunterltd.ssw.cli.ServerWrapperCLI.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
 
 public class ServerShutdownTask extends ServerBasedRunnable {
     public ServerShutdownTask(MinecraftServer server) {
