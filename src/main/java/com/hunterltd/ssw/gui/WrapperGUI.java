@@ -280,6 +280,7 @@ public class WrapperGUI extends JFrame {
         server.on("start", args -> {
             runButton.setText("Stop");
             consoleTextArea.setText("Starting server...\n");
+            enableServerBasedComponents(true);
             serverPinger = new ServerListPing();
             serverPinger.setAddress(new InetSocketAddress(server.getPort()));
             if (serverSettings.getShutdown()) serverPingTimer.start();
@@ -287,6 +288,7 @@ public class WrapperGUI extends JFrame {
         server.on("exiting", args -> runButton.setText("Stopping..."));
         server.on("exit", args -> {
             runButton.setText("Start");
+            enableServerBasedComponents(false);
             consoleTextArea.append("Server stopped\n");
             if (serverSettings.getShutdown()) {
                 serverPingTimer.stop();
@@ -311,6 +313,13 @@ public class WrapperGUI extends JFrame {
         });
         server.on("data", args -> consoleTextArea.append((String) args[0] + '\n'));
         server.on("error", args -> new InternalErrorDialog((Exception) args[0]));
+    }
+
+    private void enableServerBasedComponents(boolean enable) {
+        sendButton.setEnabled(enable);
+        commandTextField.setEnabled(enable);
+        openDialogButton.setEnabled(!enable);
+        serverPathTextField.setEnabled(!enable);
     }
 
     public MinecraftServer getServer() {
