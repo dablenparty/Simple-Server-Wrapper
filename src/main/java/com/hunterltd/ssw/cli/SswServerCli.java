@@ -64,17 +64,21 @@ public class SswServerCli {
     public void start() throws IOException {
         serverSocket = new ServerSocket(port);
         clientSocket = serverSocket.accept();
-        System.out.println("Connection accepted");
+        System.out.printf("Connection accepted from %s on port %s%n",
+                clientSocket.getInetAddress(), clientSocket.getPort());
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         String message;
         while ((message = in.readLine()) != null) {
+            System.out.printf("[Client %s:%s] %s%n",
+                    clientSocket.getInetAddress(), clientSocket.getPort(), message);
             if (message.equals("close")) {
                 out.println("Closing SSW server...");
                 break;
             }
             out.println(message);
         }
+        stop();
     }
 
     public void stop() throws IOException {
