@@ -17,8 +17,8 @@ public class SswClientCli {
     private PrintWriter out;
 
     public static void main(String[] args) throws IOException {
+        Namespace namespace = parseArgs(args);
         SswClientCli clientCli = new SswClientCli();
-        Namespace namespace = clientCli.parseArgs(args);
         int port = namespace.getInt("port");
         String target = namespace.getString("target");
 
@@ -32,7 +32,7 @@ public class SswClientCli {
         System.out.println(response);
     }
 
-    public Namespace parseArgs(String[] args) {
+    public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
         ArgumentParser parser = ArgumentParsers.newFor("Simple Server Wrapper Client CLI").build()
                 .defaultHelp(true)
