@@ -86,7 +86,6 @@ public class SswServerCli {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            // TODO delegate executor shutdown to client handler
             executorServices.forEach(ThreadUtils::tryShutdownExecutorService);
             try {
                 stop();
