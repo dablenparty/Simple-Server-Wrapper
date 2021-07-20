@@ -49,6 +49,7 @@ public class SswClientCli {
 
         try {
             clientCli.connect(target, port);
+            System.out.printf("Connected to %s:%d%n", target, port);
         } catch (ConnectException connectException) {
             System.err.println(connectException.getLocalizedMessage());
             return;
