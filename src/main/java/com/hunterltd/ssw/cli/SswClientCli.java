@@ -11,17 +11,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousSocketChannel;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class SswClientCli {
-    private final AsynchronousSocketChannel client;
+    private Socket clientSocket;
+    private BufferedReader in;
+    private PrintWriter out;
 
     public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
@@ -44,41 +41,43 @@ public class SswClientCli {
         return parser.parseArgsOrFail(args);
     }
 
-    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         Namespace namespace = parseArgs(args);
-        SswClientCli clientCli = new SswClientCli(namespace.getInt("port"), namespace.getString("target"));
-        Scanner systemInScanner = new Scanner(System.in);
-        String userInput;
-        while (!(userInput = systemInScanner.nextLine()).equals("close")) {
-            String response = clientCli.sendMessage(userInput);
+        SswClientCli clientCli = new SswClientCli();
+        int port = namespace.getInt("port");
+        String target = namespace.getString("target");
+
+        try {
+            clientCli.connect(target, port);
+        } catch (ConnectException connectException) {
+            System.err.println(connectException.getLocalizedMessage());
+            return;
+        }
+        String message, response;
+        Scanner userInputScanner = new Scanner(System.in);
+        while (!(message = userInputScanner.nextLine()).equals("close")) {
+            response = clientCli.sendToServer(message);
             System.out.printf("[Server] %s%n", response);
         }
-        clientCli.sendMessage("close");
-        clientCli.stop();
+        userInputScanner.close();
+        clientCli.closeConnection();
     }
 
-    SswClientCli(int port, String target) throws IOException, ExecutionException, InterruptedException {
-        client = AsynchronousSocketChannel.open();
-        Future<Void> connectionStatus = client.connect(new InetSocketAddress(target, port));
-        connectionStatus.get();
+    public void connect(String targetIp, int port) throws IOException {
+        clientSocket = new Socket(targetIp, port);
+        out = new PrintWriter(clientSocket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
-    public void stop() throws IOException {
-        client.close();
+    public void closeConnection() throws IOException {
+        in.close();
+        out.close();
+        clientSocket.close();
     }
 
-    public String sendMessage(String message) throws ExecutionException, InterruptedException {
-        byte[] asBytes = message.getBytes();
-        ByteBuffer buffer = ByteBuffer.wrap(asBytes);
-        Future<Integer> writeResult = client.write(buffer);
-
-        writeResult.get();
-        buffer.flip();
-        Future<Integer> readResult = client.read(buffer);
-        readResult.get();
-
-        String fromBuffer = new String(buffer.array()).trim();
-        buffer.clear();
-        return fromBuffer;
+    public String sendToServer(String message) throws IOException {
+        out.println(message);
+        return in.readLine();
     }
+
 }
