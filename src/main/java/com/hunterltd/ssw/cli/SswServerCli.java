@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.cli;
 
 import com.hunterltd.ssw.utilities.MavenUtils;
+import com.hunterltd.ssw.utilities.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -9,15 +10,18 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 public class SswServerCli {
     private final int port;
     private final File serverFile;
     private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private final List<ExecutorService> executorServices = new ArrayList<>(1);
 
     SswServerCli(int port, File serverFile) {
         this.port = port;
@@ -61,30 +65,69 @@ public class SswServerCli {
         serverCli.stop();
     }
 
-    public void start() throws IOException {
-        serverSocket = new ServerSocket(port);
-        clientSocket = serverSocket.accept();
-        System.out.printf("Connection accepted from %s on port %s%n",
-                clientSocket.getInetAddress(), clientSocket.getPort());
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        String message;
-        while ((message = in.readLine()) != null) {
-            System.out.printf("[Client %s:%s] %s%n",
-                    clientSocket.getInetAddress(), clientSocket.getPort(), message);
-            if (message.equals("close")) {
-                out.println("Closing SSW server...");
-                break;
+    public void start() {
+        try {
+            serverSocket = new ServerSocket(port);
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                System.out.printf("Connection accepted from %s on port %s%n",
+                        clientSocket.getInetAddress(), clientSocket.getPort());
+                SswClientHandler clientHandler = new SswClientHandler(clientSocket);
+                ExecutorService currentService = Executors.newSingleThreadExecutor(
+                        ThreadUtils.newNamedThreadFactory(
+                                String.format("Client %s:%d",
+                        clientSocket.getRemoteSocketAddress(), clientSocket.getPort()
+                                )
+                        )
+                );
+                currentService.submit(clientHandler);
+                executorServices.add(currentService);
             }
-            out.println(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // TODO delegate executor shutdown to client handler
+            executorServices.forEach(ThreadUtils::tryShutdownExecutorService);
+            try {
+                stop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        stop();
     }
 
     public void stop() throws IOException {
-        in.close();
-        out.close();
-        clientSocket.close();
         serverSocket.close();
+    }
+
+    private static class SswClientHandler implements Runnable {
+        private final Socket socket;
+
+        SswClientHandler(Socket clientSocket) {
+            socket = clientSocket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                String message;
+                while (!socket.isClosed() && (message = in.readLine()) != null) {
+                    System.out.printf("[Client @%s] %s%n", socket.getInetAddress(), message);
+                    if (message.equals("close")) {
+                        out.println("Closing ssw server...");
+                        break;
+                    }
+                    out.printf(message);
+                }
+                in.close();
+                out.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
