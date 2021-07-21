@@ -14,7 +14,7 @@ public class PasswordHasher {
      * @param password Password to hash
      * @return 128 character hash
      */
-    public byte[] hashPassword(String password) {
+    public static byte[] hashPassword(String password) {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
