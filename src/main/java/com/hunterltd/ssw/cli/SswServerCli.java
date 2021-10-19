@@ -8,6 +8,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
@@ -64,7 +65,7 @@ public class SswServerCli {
     }
 
     public void start() throws IOException {
-        serverSocket = new ServerSocket(port);
+        serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         clientSocket = serverSocket.accept();
         System.out.printf("Connection accepted from %s on port %s%n",
                 clientSocket.getInetAddress(), clientSocket.getPort());
