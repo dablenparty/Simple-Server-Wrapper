@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.cli;
 
+import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
@@ -17,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class SswServerCli {
     private final int port;
@@ -89,6 +93,12 @@ public class SswServerCli {
         this.out.println(message);
     }
 
+    private void startAllServices() {
+        ScheduledExecutorService aliveService = Executors.newSingleThreadScheduledExecutor();
+        serviceList.add(aliveService);
+        aliveService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
+    }
+
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         clientSocket = serverSocket.accept();
@@ -96,6 +106,7 @@ public class SswServerCli {
                 clientSocket.getInetAddress(), clientSocket.getPort());
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         out = new PrintWriter(clientSocket.getOutputStream(), true);
+        startAllServices();
 
         String message;
         while ((message = in.readLine()) != null) {
@@ -107,9 +118,10 @@ public class SswServerCli {
                     // running is handled in AliveStateCheckTask
                     minecraftServer.setShouldBeRunning(true);
                 }
-                case "stop" ->
-                        // this requires a special case so a separate thread can stop the server
-                        printlnToServerAndClient("Stopping server...");
+                case "stop" -> {
+                    printlnToServerAndClient("Stopping server...");
+                    minecraftServer.setShouldBeRunning(false);
+                }
                 case "close" -> printlnToServerAndClient("Closing client connection");
                 default -> {
                     if (minecraftServer.isRunning())
@@ -132,5 +144,6 @@ public class SswServerCli {
         out.close();
         clientSocket.close();
         serverSocket.close();
+        serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
     }
 }
