@@ -55,6 +55,10 @@ public class ThreadUtils {
      * @param string Message
      */
     public static void printlnWithTimeAndThread(PrintStream stream, String string) {
-        stream.printf("[%s] [ssw/%s]: %s%n", SIMPLE_TIME_FORMAT.format(System.currentTimeMillis()), Thread.currentThread().getName(), string);
+        stream.println(threadStampString(string));
+    }
+
+    public static String threadStampString(String string) {
+        return String.format("[%s] [ssw/%s]: %s", SIMPLE_TIME_FORMAT.format(System.currentTimeMillis()), Thread.currentThread().getName(), string);
     }
 }
