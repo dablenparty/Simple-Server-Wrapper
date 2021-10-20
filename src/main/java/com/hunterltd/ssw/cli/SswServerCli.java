@@ -96,14 +96,8 @@ public class SswServerCli {
             switch (message) {
                 case "start" -> {
                     printlnToServerAndClient("Starting server...");
+                    // running is handled in AliveStateCheckTask
                     minecraftServer.setShouldBeRunning(true);
-                    try {
-                        minecraftServer.run();
-                        // start the ping task
-                    } catch (IOException e) {
-                        printfToServerAndClient("There was an error starting the server: %s%n", e.getLocalizedMessage());
-                        minecraftServer.setShouldBeRunning(false);
-                    }
                 }
                 case "stop" ->
                         // this requires a special case so a separate thread can stop the server
