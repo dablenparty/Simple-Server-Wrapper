@@ -13,11 +13,15 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 
 public class SswServerCli {
     private final int port;
     private final MinecraftServer minecraftServer;
+    private final List<ExecutorService> serviceList = new ArrayList<>();
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
