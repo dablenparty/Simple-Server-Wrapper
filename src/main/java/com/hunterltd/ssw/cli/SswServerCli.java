@@ -30,7 +30,7 @@ public class SswServerCli {
     SswServerCli(int port, File serverFile) {
         this.port = port;
         minecraftServer = new MinecraftServer(serverFile, MinecraftServerSettings.getSettingsFromDefaultPath(serverFile));
-        minecraftServer.on("data", objects -> out.println((String) objects[0]));
+        minecraftServer.on("data", objects -> printlnToServerAndClientRaw((String) objects[0]));
         minecraftServer.on("exiting", objects -> printlnToServerAndClient("Stopping server..."));
         minecraftServer.on("exit", objects -> printlnToServerAndClient("Server successfully stopped!"));
     }
@@ -81,6 +81,10 @@ public class SswServerCli {
 
     private void printlnToServerAndClient(String string) {
         String message = ThreadUtils.threadStampString(string);
+        printlnToServerAndClientRaw(message);
+    }
+
+    private void printlnToServerAndClientRaw(String message) {
         System.out.println(message);
         this.out.println(message);
     }
