@@ -110,6 +110,8 @@ public class SswServerCli {
                         printlnToServerAndClient("Stopping server...");
                 case "close" -> printlnToServerAndClient("Closing client connection");
                 default -> {
+                    if (minecraftServer.isRunning())
+                        minecraftServer.sendCommand(message.trim());
                 }
             }
             if (message.equals("close")) {
