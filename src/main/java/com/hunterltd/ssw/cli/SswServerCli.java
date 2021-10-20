@@ -84,7 +84,7 @@ public class SswServerCli {
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         clientSocket = serverSocket.accept();
-        System.out.printf("Connection accepted from %s on port %s%n",
+        System.out.printf("Connection accepted from %s on port %d%n",
                 clientSocket.getInetAddress(), clientSocket.getPort());
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         out = new PrintWriter(clientSocket.getOutputStream(), true);
