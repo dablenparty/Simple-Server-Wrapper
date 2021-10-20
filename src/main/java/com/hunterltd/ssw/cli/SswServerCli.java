@@ -109,7 +109,7 @@ public class SswServerCli {
         startAllServices();
 
         String message;
-        while ((message = in.readLine()) != null) {
+        mainLoop: while ((message = in.readLine()) != null) {
             System.out.printf("[Client %s:%s] %s%n",
                     clientSocket.getInetAddress(), clientSocket.getPort(), message);
             switch (message) {
@@ -128,7 +128,10 @@ public class SswServerCli {
                     } else
                         printlnToServerAndClient("No server is running");
                 }
-                case "close" -> printlnToServerAndClient("Closing client connection...");
+                case "close" -> {
+                    printlnToServerAndClient("Closing client connection...");
+                    break mainLoop;
+                }
                 default -> {
                     if (minecraftServer.isRunning())
                         minecraftServer.sendCommand(message.trim());
@@ -136,11 +139,6 @@ public class SswServerCli {
                         printfToServerAndClient("Unknown command: %s%n", message);
                 }
             }
-            if (message.equals("close")) {
-                out.println("Closing SSW server...");
-                break;
-            }
-//            out.println(message);
         }
         stop();
     }
