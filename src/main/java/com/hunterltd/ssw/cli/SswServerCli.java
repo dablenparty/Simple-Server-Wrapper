@@ -64,6 +64,18 @@ public class SswServerCli {
         serverCli.stop();
     }
 
+    private void printfToServerAndClient(String formatString, Object... args) {
+        // prevents formatting twice
+        String message = String.format(formatString, args);
+        System.out.print(message);
+        this.out.print(message);
+    }
+
+    private void printlnToServerAndClient(String message) {
+        System.out.println(message);
+        this.out.println(message);
+    }
+
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         clientSocket = serverSocket.accept();
