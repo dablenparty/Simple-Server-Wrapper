@@ -3,6 +3,7 @@ package com.hunterltd.ssw.cli;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
+import com.hunterltd.ssw.utilities.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -66,12 +67,13 @@ public class SswServerCli {
 
     private void printfToServerAndClient(String formatString, Object... args) {
         // prevents formatting twice
-        String message = String.format(formatString, args);
+        String message = ThreadUtils.threadStampString(String.format(formatString, args));
         System.out.print(message);
         this.out.print(message);
     }
 
-    private void printlnToServerAndClient(String message) {
+    private void printlnToServerAndClient(String string) {
+        String message = ThreadUtils.threadStampString(string);
         System.out.println(message);
         this.out.println(message);
     }
@@ -88,6 +90,11 @@ public class SswServerCli {
         while ((message = in.readLine()) != null) {
             System.out.printf("[Client %s:%s] %s%n",
                     clientSocket.getInetAddress(), clientSocket.getPort(), message);
+            switch (message) {
+                case "start":
+                    printlnToServerAndClient("Starting server...");
+                    break;
+            }
             if (message.equals("close")) {
                 out.println("Closing SSW server...");
                 break;
