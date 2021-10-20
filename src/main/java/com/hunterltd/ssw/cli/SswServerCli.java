@@ -26,7 +26,7 @@ public class SswServerCli {
     SswServerCli(int port, File serverFile) {
         this.port = port;
         minecraftServer = new MinecraftServer(serverFile, MinecraftServerSettings.getSettingsFromDefaultPath(serverFile));
-        minecraftServer.on("data", objects -> printlnToServerAndClient((String) objects[0]));
+        minecraftServer.on("data", objects -> out.println((String) objects[0]));
         minecraftServer.on("exiting", objects -> printlnToServerAndClient("Stopping server..."));
         minecraftServer.on("exit", objects -> printlnToServerAndClient("Server successfully stopped!"));
     }
