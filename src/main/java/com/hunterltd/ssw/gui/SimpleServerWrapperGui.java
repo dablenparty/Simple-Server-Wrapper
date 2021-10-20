@@ -31,11 +31,7 @@ public class SimpleServerWrapperGui {
                                 JOptionPane.YES_NO_OPTION
                         );
                         if (result == JOptionPane.YES_OPTION) {
-                            try {
-                                wrapperGUI.getServer().stop(10L, TimeUnit.SECONDS);
-                            } catch (IOException ioException) {
-                                ioException.printStackTrace();
-                            }
+                            wrapperGUI.getServer().stop(10L, TimeUnit.SECONDS);
                             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                         }
                     } else {

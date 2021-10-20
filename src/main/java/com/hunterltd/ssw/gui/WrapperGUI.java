@@ -191,12 +191,7 @@ public class WrapperGUI extends JFrame {
         final SwingWorker<Void, Void> shutdownServerWorker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
-                try {
-                    server.stop(10L, TimeUnit.SECONDS);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    firePropertyChange("error", null, e);
-                }
+                server.stop(10L, TimeUnit.SECONDS);
                 return null;
             }
 
