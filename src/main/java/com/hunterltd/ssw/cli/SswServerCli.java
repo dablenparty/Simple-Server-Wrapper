@@ -157,43 +157,59 @@ public class SswServerCli {
                 startAllServices();
 //            MinecraftServer minecraftServer = getMinecraftServer();
 
-            String message;
-            mainLoop:
-            while ((message = in.readLine()) != null) {
-                System.out.printf("[Client %s:%s] %s%n",
-                        clientSocket.getInetAddress(), clientSocket.getPort(), message);
-                switch (message) {
-                    case "start" -> {
-                        // running is handled in AliveStateCheckTask
-                        if (!minecraftServer.isRunning()) {
-                            printlnToServerAndClient("Starting server...");
-                            minecraftServer.setShouldBeRunning(true);
-                        } else
-                            printlnToServerAndClient("Server is already running");
-                    }
-                    case "stop" -> {
-                        if (minecraftServer.isRunning()) {
-                            printlnToServerAndClient("Stopping server...");
-                            minecraftServer.setShouldBeRunning(false);
-                        } else
-                            printlnToServerAndClient("No server is running");
-                    }
-                    case "close" -> {
-                        printlnToServerAndClient("Closing client connection...");
-                        break mainLoop;
-                    }
-                    default -> {
-                        if (minecraftServer.isRunning())
-                            minecraftServer.sendCommand(message.trim());
-                        else
-                            printfToServerAndClient("Unknown command: %s%n", message);
+                String message;
+                mainLoop:
+                while ((message = in.readLine()) != null) {
+                    System.out.printf("[Client %s:%s] %s%n",
+                            clientSocket.getInetAddress(), clientSocket.getPort(), message);
+                    switch (message) {
+                        case "start" -> {
+                            // running is handled in AliveStateCheckTask
+                            if (!minecraftServer.isRunning()) {
+                                printlnToServerAndClient("Starting server...");
+                                minecraftServer.setShouldBeRunning(true);
+                            } else
+                                printlnToServerAndClient("Server is already running");}
+                        case "stop" -> {
+                            if (minecraftServer.isRunning()) {
+                                printlnToServerAndClient("Stopping server...");
+                                minecraftServer.setShouldBeRunning(false);
+                            } else
+                                printlnToServerAndClient("No server is running");
+                        }
+                        case "close" -> {
+                            printlnToServerAndClient("Closing client connection...");
+                            if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
+                                cancel = true;
+                            }
+                            break mainLoop;
+                        }
+                        case "logout" -> {
+                            printlnToServerAndClient("Closing client connection...");
+                            break mainLoop;
+                        }
+                        default -> {
+                            if (minecraftServer.isRunning())
+                                minecraftServer.sendCommand(message.trim());
+                            else
+                                printfToServerAndClient("Unknown command: %s%n", message);
+                        }
                     }
                 }
-            }
             } catch (IOException e) {
                 System.err.println(e.getLocalizedMessage());
                 minecraftServer.setShouldBeRunning(false);
+            } finally {
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        }
+
+        public boolean isClosed() {
+            return clientSocket.isClosed();
         }
     }
 }
