@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.cli;
 
 import com.hunterltd.ssw.utilities.MavenUtils;
+import com.hunterltd.ssw.utilities.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -14,11 +15,15 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SswClientCli {
     private Socket clientSocket;
     private BufferedReader in;
     private PrintWriter out;
+    private ExecutorService readService;
+    private boolean cancel = false;
 
     public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
@@ -60,6 +65,8 @@ public class SswClientCli {
             response = clientCli.sendToServer(message);
             System.out.printf("[Server] %s%n", response);
         }
+        response = clientCli.sendToServer(message);
+        System.out.printf("[Server] %s%n", response);
         userInputScanner.close();
         clientCli.closeConnection();
     }
@@ -68,9 +75,25 @@ public class SswClientCli {
         clientSocket = new Socket(targetIp, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        // this is awful, please change this at some point to use a custom Runnable
+        readService = Executors.newSingleThreadExecutor();
+        readService.submit(() -> {
+            String line = "\n";
+            while (!cancel && line != null) {
+                try {
+                    line = in.readLine();
+                    System.out.println(line);
+                } catch (IOException e) {
+                    System.err.println(e.getLocalizedMessage());
+                    break;
+                }
+            }
+        });
     }
 
     public void closeConnection() throws IOException {
+        cancel = true;
+        ThreadUtils.tryShutdownExecutorService(readService);
         in.close();
         out.close();
         clientSocket.close();
