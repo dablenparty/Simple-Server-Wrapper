@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.cli;
 
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
+import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
@@ -101,45 +102,45 @@ public class SswServerCli {
 
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
-        clientSocket = serverSocket.accept();
-        System.out.printf("Connection accepted from %s on port %d%n",
-                clientSocket.getInetAddress(), clientSocket.getPort());
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        startAllServices();
-
-        String message;
-        mainLoop: while ((message = in.readLine()) != null) {
-            System.out.printf("[Client %s:%s] %s%n",
-                    clientSocket.getInetAddress(), clientSocket.getPort(), message);
-            switch (message) {
-                case "start" -> {
-                    // running is handled in AliveStateCheckTask
-                    if (!minecraftServer.isRunning()) {
-                        printlnToServerAndClient("Starting server...");
-                        minecraftServer.setShouldBeRunning(true);
-                    } else
-                        printlnToServerAndClient("Server is already running");
-                }
-                case "stop" -> {
-                    if (minecraftServer.isRunning()) {
-                        printlnToServerAndClient("Stopping server...");
-                        minecraftServer.setShouldBeRunning(false);
-                    } else
-                        printlnToServerAndClient("No server is running");
-                }
-                case "close" -> {
-                    printlnToServerAndClient("Closing client connection...");
-                    break mainLoop;
-                }
-                default -> {
-                    if (minecraftServer.isRunning())
-                        minecraftServer.sendCommand(message.trim());
-                    else
-                        printfToServerAndClient("Unknown command: %s%n", message);
-                }
-            }
-        }
+//        clientSocket = serverSocket.accept();
+//        System.out.printf("Connection accepted from %s on port %d%n",
+//                clientSocket.getInetAddress(), clientSocket.getPort());
+//        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//        out = new PrintWriter(clientSocket.getOutputStream(), true);
+//        startAllServices();
+//
+//        String message;
+//        mainLoop: while ((message = in.readLine()) != null) {
+//            System.out.printf("[Client %s:%s] %s%n",
+//                    clientSocket.getInetAddress(), clientSocket.getPort(), message);
+//            switch (message) {
+//                case "start" -> {
+//                    // running is handled in AliveStateCheckTask
+//                    if (!minecraftServer.isRunning()) {
+//                        printlnToServerAndClient("Starting server...");
+//                        minecraftServer.setShouldBeRunning(true);
+//                    } else
+//                        printlnToServerAndClient("Server is already running");
+//                }
+//                case "stop" -> {
+//                    if (minecraftServer.isRunning()) {
+//                        printlnToServerAndClient("Stopping server...");
+//                        minecraftServer.setShouldBeRunning(false);
+//                    } else
+//                        printlnToServerAndClient("No server is running");
+//                }
+//                case "close" -> {
+//                    printlnToServerAndClient("Closing client connection...");
+//                    break mainLoop;
+//                }
+//                default -> {
+//                    if (minecraftServer.isRunning())
+//                        minecraftServer.sendCommand(message.trim());
+//                    else
+//                        printfToServerAndClient("Unknown command: %s%n", message);
+//                }
+//            }
+//        }
         stop();
     }
 
@@ -149,5 +150,21 @@ public class SswServerCli {
         clientSocket.close();
         serverSocket.close();
         serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
+    }
+
+    private static class SswClientHandler extends ServerBasedRunnable {
+        private Socket clientSocket;
+        private PrintWriter out;
+        private BufferedReader in;
+
+        protected SswClientHandler(Socket socket, MinecraftServer minecraftServer) {
+            super(minecraftServer);
+            clientSocket = socket;
+        }
+
+        @Override
+        public void run() {
+
+        }
     }
 }
