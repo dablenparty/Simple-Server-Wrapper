@@ -58,6 +58,12 @@ public class ThreadUtils {
         stream.println(threadStampString(string));
     }
 
+    /**
+     * Adds a timestamp and current thread name to a string
+     *
+     * @param string String to stamp
+     * @return Stamped string
+     */
     public static String threadStampString(String string) {
         return String.format("[%s] [ssw/%s]: %s", SIMPLE_TIME_FORMAT.format(System.currentTimeMillis()), Thread.currentThread().getName(), string);
     }
