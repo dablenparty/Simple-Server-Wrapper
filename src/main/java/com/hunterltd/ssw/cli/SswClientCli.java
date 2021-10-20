@@ -59,14 +59,11 @@ public class SswClientCli {
             System.err.println(connectException.getLocalizedMessage());
             return;
         }
-        String message, response;
+        String message;
         Scanner userInputScanner = new Scanner(System.in);
-        while (!(message = userInputScanner.nextLine()).equals("close")) {
-            response = clientCli.sendToServer(message);
-            System.out.printf("[Server] %s%n", response);
-        }
-        response = clientCli.sendToServer(message);
-        System.out.printf("[Server] %s%n", response);
+        while (!(message = userInputScanner.nextLine()).equals("close"))
+            clientCli.sendToServer(message);
+        clientCli.sendToServer(message);
         userInputScanner.close();
         clientCli.closeConnection();
     }
@@ -99,9 +96,10 @@ public class SswClientCli {
         clientSocket.close();
     }
 
-    public String sendToServer(String message) throws IOException {
+    public void sendToServer(String message) {
         out.println(message);
-        return in.readLine();
+        // previously returned the response. that will now be handled by a separate thread
+//        return in.readLine();
     }
 
 }
