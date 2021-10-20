@@ -15,9 +15,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,7 +25,9 @@ public class SswServerCli {
     private final int port;
     private final MinecraftServer minecraftServer;
     private final List<ExecutorService> serviceList = new ArrayList<>();
+    private final Map<SswClientHandler, ExecutorService> clientHandlerToExecutorMap = new HashMap<>();
     private ServerSocket serverSocket;
+    private volatile boolean cancel = false;
 //    private Socket clientSocket;
 //    private PrintWriter out;
 //    private BufferedReader in;
@@ -102,8 +102,28 @@ public class SswServerCli {
         aliveService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
     }
 
+    private void pruneClientHandlers() {
+        Iterator<SswClientHandler> iterator = clientHandlerToExecutorMap.keySet().iterator();
+        while (iterator.hasNext()) {
+            SswClientHandler clientHandler = iterator.next();
+            ExecutorService executorService = clientHandlerToExecutorMap.get(clientHandler);
+            if (clientHandler.isClosed())
+                ThreadUtils.tryShutdownExecutorService(executorService);
+            clientHandlerToExecutorMap.remove(clientHandler);
+        }
+    }
+
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
+        while (!cancel) {
+            SswClientHandler clientHandler = new SswClientHandler(serverSocket.accept(), minecraftServer);
+            // prunes client handler services
+            pruneClientHandlers();
+            // maybe extract this to a separate thread made just for pruning handlers...
+            ExecutorService clientService = Executors.newSingleThreadExecutor(ThreadUtils.newNamedThreadFactory(String.format("ClientService#%d", clientHandlerToExecutorMap.size() + 1)));
+            clientHandlerToExecutorMap.put(clientHandler, clientService);
+            clientService.submit(clientHandler);
+        }
         stop();
     }
 
@@ -113,6 +133,8 @@ public class SswServerCli {
 //        clientSocket.close();
         serverSocket.close();
         serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
+        // these should all be closed at this point, but it's good to clean up anyways
+        clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownExecutorService(executorService));
     }
 
     private class SswClientHandler extends ServerBasedRunnable {
@@ -132,7 +154,7 @@ public class SswServerCli {
 
             try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                  BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-            startAllServices();
+                startAllServices();
 //            MinecraftServer minecraftServer = getMinecraftServer();
 
             String message;
