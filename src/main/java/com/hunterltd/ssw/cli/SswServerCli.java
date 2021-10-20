@@ -94,6 +94,14 @@ public class SswServerCli {
                 case "start":
                     printlnToServerAndClient("Starting server...");
                     break;
+                case "stop":
+                    // this requires a special case so a separate thread can stop the server
+                    printlnToServerAndClient("Stopping server...");
+                    break;
+                case "close":
+                    break;
+                default:
+                    break;
             }
             if (message.equals("close")) {
                 out.println("Closing SSW server...");
