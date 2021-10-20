@@ -28,9 +28,9 @@ public class SswServerCli {
     private final MinecraftServer minecraftServer;
     private final List<ExecutorService> serviceList = new ArrayList<>();
     private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+//    private Socket clientSocket;
+//    private PrintWriter out;
+//    private BufferedReader in;
 
     SswServerCli(int port, File serverFile) {
         this.port = port;
@@ -81,7 +81,8 @@ public class SswServerCli {
         // prevents formatting twice
         String message = ThreadUtils.threadStampString(String.format(formatString, args));
         System.out.print(message);
-        this.out.print(message);
+        // replace with loop
+//        this.out.print(message);
     }
 
     private void printlnToServerAndClient(String string) {
@@ -91,7 +92,8 @@ public class SswServerCli {
 
     private void printlnToServerAndClientRaw(String message) {
         System.out.println(message);
-        this.out.println(message);
+        // replace with loop
+//        this.out.println(message);
     }
 
     private void startAllServices() {
@@ -102,60 +104,21 @@ public class SswServerCli {
 
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
-//        clientSocket = serverSocket.accept();
-//        System.out.printf("Connection accepted from %s on port %d%n",
-//                clientSocket.getInetAddress(), clientSocket.getPort());
-//        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//        out = new PrintWriter(clientSocket.getOutputStream(), true);
-//        startAllServices();
-//
-//        String message;
-//        mainLoop: while ((message = in.readLine()) != null) {
-//            System.out.printf("[Client %s:%s] %s%n",
-//                    clientSocket.getInetAddress(), clientSocket.getPort(), message);
-//            switch (message) {
-//                case "start" -> {
-//                    // running is handled in AliveStateCheckTask
-//                    if (!minecraftServer.isRunning()) {
-//                        printlnToServerAndClient("Starting server...");
-//                        minecraftServer.setShouldBeRunning(true);
-//                    } else
-//                        printlnToServerAndClient("Server is already running");
-//                }
-//                case "stop" -> {
-//                    if (minecraftServer.isRunning()) {
-//                        printlnToServerAndClient("Stopping server...");
-//                        minecraftServer.setShouldBeRunning(false);
-//                    } else
-//                        printlnToServerAndClient("No server is running");
-//                }
-//                case "close" -> {
-//                    printlnToServerAndClient("Closing client connection...");
-//                    break mainLoop;
-//                }
-//                default -> {
-//                    if (minecraftServer.isRunning())
-//                        minecraftServer.sendCommand(message.trim());
-//                    else
-//                        printfToServerAndClient("Unknown command: %s%n", message);
-//                }
-//            }
-//        }
         stop();
     }
 
     public void stop() throws IOException {
-        in.close();
-        out.close();
-        clientSocket.close();
+//        in.close();
+//        out.close();
+//        clientSocket.close();
         serverSocket.close();
         serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
     }
 
-    private static class SswClientHandler extends ServerBasedRunnable {
-        private Socket clientSocket;
-        private PrintWriter out;
-        private BufferedReader in;
+    private class SswClientHandler extends ServerBasedRunnable {
+        private final Socket clientSocket;
+//        private PrintWriter out;
+//        private BufferedReader in;
 
         protected SswClientHandler(Socket socket, MinecraftServer minecraftServer) {
             super(minecraftServer);
@@ -164,7 +127,51 @@ public class SswServerCli {
 
         @Override
         public void run() {
+            System.out.printf("Connection accepted from %s on port %d%n",
+                    clientSocket.getInetAddress(), clientSocket.getPort());
 
+            try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+            startAllServices();
+//            MinecraftServer minecraftServer = getMinecraftServer();
+
+            String message;
+            mainLoop:
+            while ((message = in.readLine()) != null) {
+                System.out.printf("[Client %s:%s] %s%n",
+                        clientSocket.getInetAddress(), clientSocket.getPort(), message);
+                switch (message) {
+                    case "start" -> {
+                        // running is handled in AliveStateCheckTask
+                        if (!minecraftServer.isRunning()) {
+                            printlnToServerAndClient("Starting server...");
+                            minecraftServer.setShouldBeRunning(true);
+                        } else
+                            printlnToServerAndClient("Server is already running");
+                    }
+                    case "stop" -> {
+                        if (minecraftServer.isRunning()) {
+                            printlnToServerAndClient("Stopping server...");
+                            minecraftServer.setShouldBeRunning(false);
+                        } else
+                            printlnToServerAndClient("No server is running");
+                    }
+                    case "close" -> {
+                        printlnToServerAndClient("Closing client connection...");
+                        break mainLoop;
+                    }
+                    default -> {
+                        if (minecraftServer.isRunning())
+                            minecraftServer.sendCommand(message.trim());
+                        else
+                            printfToServerAndClient("Unknown command: %s%n", message);
+                    }
+                }
+            }
+            } catch (IOException e) {
+                System.err.println(e.getLocalizedMessage());
+                minecraftServer.setShouldBeRunning(false);
+            }
         }
     }
 }
