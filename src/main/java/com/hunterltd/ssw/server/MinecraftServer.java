@@ -132,14 +132,13 @@ public class MinecraftServer extends EventEmitter {
 
     /**
      * Sends the stop command to the server
-     *
-     * @throws IOException if an I/O error occurs writing to the server process
      */
-    public void stop() throws IOException {
+    public void stop() {
         stop(5L, TimeUnit.SECONDS);
     }
 
-    public void stop(long timeout, TimeUnit timeUnit) throws IOException {
+    public void stop(long timeout, TimeUnit timeUnit) {
+        shuttingDown = true;
         emit("exiting");
         try {
             sendCommand("stop");
@@ -149,9 +148,19 @@ public class MinecraftServer extends EventEmitter {
         } finally {
             ThreadUtils.tryShutdownExecutorService(inputService);
             ThreadUtils.tryShutdownExecutorService(errorService);
-            serverProcess.getInputStream().close();
-            serverProcess.getErrorStream().close();
-            serverProcess.getOutputStream().close();
+            for (Closeable stream :
+                    new Closeable[]{
+                            serverProcess.getInputStream(),
+                            serverProcess.getErrorStream(),
+                            serverProcess.getOutputStream()
+                    }) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    System.err.println(e.getLocalizedMessage());
+                }
+            }
+            shuttingDown = false;
         }
 
     }
@@ -250,7 +259,7 @@ public class MinecraftServer extends EventEmitter {
         try {
             properties = new ServerProperties(Paths.get(String.valueOf(serverPath.getParent()), "server.properties").toFile());
             propsExists = true;
-            port = (int) properties.get("server-port");
+            port = (int)properties.get("server-port");
             return true;
         } catch (FileNotFoundException e) {
             propsExists = false;
