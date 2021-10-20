@@ -1,29 +1,25 @@
 package com.hunterltd.ssw.cli;
 
 import com.hunterltd.ssw.utilities.MavenUtils;
+import com.hunterltd.ssw.utilities.StreamGobbler;
 import com.hunterltd.ssw.utilities.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class SswClientCli {
     private Socket clientSocket;
-    private BufferedReader in;
+//    private BufferedReader in;
     private PrintWriter out;
     private ExecutorService readService;
-    private boolean cancel = false;
 
     public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
@@ -71,27 +67,14 @@ public class SswClientCli {
     public void connect(String targetIp, int port) throws IOException {
         clientSocket = new Socket(targetIp, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        // this is awful, please change this at some point to use a custom Runnable
-        readService = Executors.newSingleThreadExecutor();
-        readService.submit(() -> {
-            String line = "\n";
-            while (!cancel && line != null) {
-                try {
-                    line = in.readLine();
-                    System.out.println(line);
-                } catch (IOException e) {
-                    System.err.println(e.getLocalizedMessage());
-                    break;
-                }
-            }
-        });
+        InputStream socketInputStream = clientSocket.getInputStream();
+//        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        readService = StreamGobbler.execute(socketInputStream, System.out::println, "Socket Read Service");
     }
 
     public void closeConnection() throws IOException {
-        cancel = true;
         ThreadUtils.tryShutdownExecutorService(readService);
-        in.close();
+//        in.close();
         out.close();
         clientSocket.close();
     }
