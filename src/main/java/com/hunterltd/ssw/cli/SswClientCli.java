@@ -57,8 +57,10 @@ public class SswClientCli {
         }
         String message;
         Scanner userInputScanner = new Scanner(System.in);
-        while (!(message = userInputScanner.nextLine()).equals("close"))
+        while (!(message = userInputScanner.nextLine()).equals("close")) {
             clientCli.sendToServer(message);
+            if (message.equals("logout")) break;
+        }
         clientCli.sendToServer(message);
         userInputScanner.close();
         clientCli.closeConnection();
