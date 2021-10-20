@@ -1,7 +1,5 @@
 package com.hunterltd.ssw.utilities;
 
-import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +23,7 @@ public record StreamGobbler(InputStream inputStream,
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             reader.lines().forEach(consumer);
         } catch (IOException e) {
-            e.printStackTrace();
-            new InternalErrorDialog(e);
+            System.err.println(e.getLocalizedMessage());
         }
     }
 }
