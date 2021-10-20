@@ -114,15 +114,21 @@ public class SswServerCli {
                     clientSocket.getInetAddress(), clientSocket.getPort(), message);
             switch (message) {
                 case "start" -> {
-                    printlnToServerAndClient("Starting server...");
                     // running is handled in AliveStateCheckTask
-                    minecraftServer.setShouldBeRunning(true);
+                    if (!minecraftServer.isRunning()) {
+                        printlnToServerAndClient("Starting server...");
+                        minecraftServer.setShouldBeRunning(true);
+                    } else
+                        printlnToServerAndClient("Server is already running");
                 }
                 case "stop" -> {
-                    printlnToServerAndClient("Stopping server...");
-                    minecraftServer.setShouldBeRunning(false);
+                    if (minecraftServer.isRunning()) {
+                        printlnToServerAndClient("Stopping server...");
+                        minecraftServer.setShouldBeRunning(false);
+                    } else
+                        printlnToServerAndClient("No server is running");
                 }
-                case "close" -> printlnToServerAndClient("Closing client connection");
+                case "close" -> printlnToServerAndClient("Closing client connection...");
                 default -> {
                     if (minecraftServer.isRunning())
                         minecraftServer.sendCommand(message.trim());
