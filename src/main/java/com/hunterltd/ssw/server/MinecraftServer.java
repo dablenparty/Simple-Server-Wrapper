@@ -33,7 +33,7 @@ public class MinecraftServer extends EventEmitter {
     private ServerProperties properties = null;
     private boolean propsExists;
     private int port = 25565;
-    private volatile boolean shouldBeRunning;
+    private volatile boolean shouldBeRunning = false;
     private volatile boolean shouldRestart = false;
     private volatile boolean shuttingDown = false;
     private volatile ExecutorService inputService, errorService;
