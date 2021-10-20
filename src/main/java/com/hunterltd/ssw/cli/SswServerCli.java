@@ -112,13 +112,15 @@ public class SswServerCli {
                 default -> {
                     if (minecraftServer.isRunning())
                         minecraftServer.sendCommand(message.trim());
+                    else
+                        printfToServerAndClient("Unknown command: %s%n", message);
                 }
             }
             if (message.equals("close")) {
                 out.println("Closing SSW server...");
                 break;
             }
-            out.println(message);
+//            out.println(message);
         }
         stop();
     }
