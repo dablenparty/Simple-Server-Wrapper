@@ -110,6 +110,7 @@ public class SswServerCli {
                     printlnToServerAndClient("Stopping server...");
                     break;
                 case "close":
+                    printlnToServerAndClient("Closing client connection");
                     break;
                 default:
                     break;
