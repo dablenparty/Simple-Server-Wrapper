@@ -1,7 +1,8 @@
 package com.hunterltd.ssw.cli;
 
+import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
-import com.hunterltd.ssw.utilities.PasswordHasher;
+import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -11,12 +12,11 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Objects;
 import java.util.Properties;
 
 public class SswServerCli {
     private final int port;
-    private final File serverFile;
+    private final MinecraftServer minecraftServer;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
@@ -24,7 +24,7 @@ public class SswServerCli {
 
     SswServerCli(int port, File serverFile) {
         this.port = port;
-        this.serverFile = serverFile;
+        minecraftServer = new MinecraftServer(serverFile, MinecraftServerSettings.getSettingsFromDefaultPath(serverFile));
     }
 
     public static Namespace parseArgs(String[] args) {
