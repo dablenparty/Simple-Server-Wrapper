@@ -94,7 +94,7 @@ public class SswServerCli {
             System.out.printf("[Client %s:%s] %s%n",
                     clientSocket.getInetAddress(), clientSocket.getPort(), message);
             switch (message) {
-                case "start":
+                case "start" -> {
                     printlnToServerAndClient("Starting server...");
                     minecraftServer.setShouldBeRunning(true);
                     try {
@@ -104,16 +104,13 @@ public class SswServerCli {
                         printfToServerAndClient("There was an error starting the server: %s%n", e.getLocalizedMessage());
                         minecraftServer.setShouldBeRunning(false);
                     }
-                    break;
-                case "stop":
-                    // this requires a special case so a separate thread can stop the server
-                    printlnToServerAndClient("Stopping server...");
-                    break;
-                case "close":
-                    printlnToServerAndClient("Closing client connection");
-                    break;
-                default:
-                    break;
+                }
+                case "stop" ->
+                        // this requires a special case so a separate thread can stop the server
+                        printlnToServerAndClient("Stopping server...");
+                case "close" -> printlnToServerAndClient("Closing client connection");
+                default -> {
+                }
             }
             if (message.equals("close")) {
                 out.println("Closing SSW server...");
