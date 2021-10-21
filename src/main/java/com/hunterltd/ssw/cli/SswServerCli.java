@@ -162,7 +162,8 @@ public class SswServerCli {
                                 printlnToServerAndClient("Starting server...");
                                 minecraftServer.setShouldBeRunning(true);
                             } else
-                                printlnToServerAndClient("Server is already running");}
+                                printlnToServerAndClient("Server is already running");
+                        }
                         case "stop" -> {
                             if (minecraftServer.isRunning()) {
                                 printlnToServerAndClient("Stopping server...");
@@ -172,8 +173,11 @@ public class SswServerCli {
                         }
                         case "close" -> {
                             System.out.println("Closing client connection...");
-                            if (clientHandlerToExecutorMap.size() == 1 && !cancel)
+                            if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
                                 cancel = true;
+                                if (minecraftServer.isRunning())
+                                    minecraftServer.setShouldBeRunning(false);
+                            }
                             break mainLoop;
                         }
                         case "log", "backlog", "printlog" -> {
