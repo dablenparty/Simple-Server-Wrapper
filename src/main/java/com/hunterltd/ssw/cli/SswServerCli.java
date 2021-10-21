@@ -148,6 +148,12 @@ public class SswServerCli {
         clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownExecutorService(executorService));
     }
 
+    private void printErrorToOut(Exception e) {
+        String threadStampString = ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage()));
+        System.out.println(threadStampString);
+        e.printStackTrace();
+    }
+
     /**
      * Client handler running on its own thread
      */
@@ -284,11 +290,5 @@ public class SswServerCli {
         public boolean isClosed() {
             return clientSocket.isClosed();
         }
-    }
-
-    private void printErrorToOut(Exception e) {
-        String threadStampString = ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage()));
-        System.out.println(threadStampString);
-        e.printStackTrace();
     }
 }
