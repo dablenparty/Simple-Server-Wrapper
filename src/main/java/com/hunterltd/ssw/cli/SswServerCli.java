@@ -78,6 +78,10 @@ public class SswServerCli {
         serverCli.stop();
     }
 
+    /**
+     * Finds all client handlers whose sockets are closed and terminates their corresponding ExecutorService, then
+     * removes them from the map of handlers & services
+     */
     private void pruneClientHandlers() {
         Set<SswClientHandler> clientHandlerSet = clientHandlerToExecutorMap.keySet();
         Iterator<SswClientHandler> iterator = clientHandlerSet.iterator();
@@ -92,12 +96,21 @@ public class SswServerCli {
         }
     }
 
+    /**
+     * Starts all background services used by the SSW server and adds them to the {@link SswServerCli#serviceList}
+     */
     private void startAllServices() {
         ScheduledExecutorService aliveService = Executors.newSingleThreadScheduledExecutor();
         serviceList.add(aliveService);
         aliveService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
     }
 
+    /**
+     * Starts the SSW server
+     *
+     * @throws IOException if an I/O exception occurs while opening the socket, setting the timeout, or waiting for a
+     * connection
+     */
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         serverSocket.setSoTimeout(5000);
@@ -112,7 +125,6 @@ public class SswServerCli {
             }
             SswClientHandler clientHandler = new SswClientHandler(socket, minecraftServer);
             // prunes client handler services
-            // maybe extract this to a separate thread made just for pruning handlers...
             ExecutorService clientService = Executors.newSingleThreadExecutor(ThreadUtils.newNamedThreadFactory(String.format("ClientService#%d", clientId++)));
             clientHandlerToExecutorMap.put(clientHandler, clientService);
             clientService.submit(clientHandler);
@@ -120,13 +132,23 @@ public class SswServerCli {
         stop();
     }
 
-    public void stop() throws IOException {
-        serverSocket.close();
+    /**
+     * Stops the SSW server, closing all remaining client handlers, all services in use, and the socket.
+     */
+    public void stop() {
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            System.out.println(ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage())));
+        }
         serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
         // these should all be closed at this point, but it's good to clean up anyways
         clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownExecutorService(executorService));
     }
 
+    /**
+     * Client handler running on its own thread
+     */
     private class SswClientHandler extends ServerBasedRunnable {
         private final Socket clientSocket;
         private PrintWriter out;
@@ -200,7 +222,7 @@ public class SswServerCli {
                             if (minecraftServer.isRunning())
                                 minecraftServer.sendCommand(message.trim());
                             else
-                                printfToServerAndClient("Unknown command: %s", message);
+                                printfToServerAndClient("Unknown command: %s%n", message);
                         }
                     }
                 }
@@ -220,25 +242,48 @@ public class SswServerCli {
             }
         }
 
+        /**
+         * Calls printf on both {@link System#out} and this.out. This method also thread-stamps the message.
+         *
+         * For more detailed documentation, see {@link PrintStream#printf}
+         *
+         * @param formatString Format string
+         * @param args Arguments for format string
+         * @see PrintStream#printf
+         */
         private void printfToServerAndClient(String formatString, Object... args) {
             // removes %n from the end since this method uses println
-            if (formatString.endsWith("%n"))
-                formatString = formatString.substring(0, formatString.length() - 2);
-            String message = ThreadUtils.threadStampString(String.format(formatString, args));
-            System.out.println(message);
-            this.out.println(message);
+//            if (formatString.endsWith("%n"))
+//                formatString = formatString.substring(0, formatString.length() - 2);
+//            String message = ThreadUtils.threadStampString(String.format(formatString, args));
+            System.out.printf(formatString, args);
+            this.out.printf(formatString, args);
         }
 
+        /**
+         * Calls println on both {@link System#out} and this.out. This method also thread-stamps the message.
+         * @param string String to print
+         */
         private void printlnToServerAndClient(String string) {
             String message = ThreadUtils.threadStampString(string);
             printlnToServerAndClientRaw(message);
         }
 
+        /**
+         * Calls println on both {@link System#out} and this.out.
+         *
+         * @param message String to print
+         */
         private void printlnToServerAndClientRaw(String message) {
             System.out.println(message);
             this.out.println(message);
         }
 
+        /**
+         * Checks if the client socket is closed or not
+         *
+         * @return {@link Socket#isClosed}
+         */
         public boolean isClosed() {
             return clientSocket.isClosed();
         }
