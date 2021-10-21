@@ -5,6 +5,7 @@ import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
+import com.hunterltd.ssw.utilities.NamedExecutorService;
 import com.hunterltd.ssw.utilities.StreamGobbler;
 import com.hunterltd.ssw.utilities.ThreadUtils;
 
@@ -36,7 +37,7 @@ public class MinecraftServer extends EventEmitter {
     private volatile boolean shouldBeRunning = false;
     private volatile boolean shouldRestart = false;
     private volatile boolean shuttingDown = false;
-    private volatile ExecutorService inputService, errorService;
+    private volatile NamedExecutorService namedInputService, namedErrorService;
 
     /**
      * Creates a class from an archive file and settings class
@@ -118,16 +119,18 @@ public class MinecraftServer extends EventEmitter {
         serverProcess.onExit().thenApply(process -> emit("exit", process)); // emits "exit" when the process exits
         emit("start", serverProcess);
         Consumer<String> gobblerConsumer = text -> emit("data", text);
-        inputService = StreamGobbler.execute(
+        ExecutorService inputExecutorService = StreamGobbler.execute(
                 serverProcess.getInputStream(),
                 gobblerConsumer,
                 "Server Input Stream"
         );
-        errorService = StreamGobbler.execute(
+        namedInputService = new NamedExecutorService("MinecraftServer Input Service", inputExecutorService);
+        ExecutorService errorExecutorService = StreamGobbler.execute(
                 serverProcess.getErrorStream(),
                 gobblerConsumer,
                 "Server Error Stream"
         );
+        namedErrorService = new NamedExecutorService("MinecraftServer Error Service", errorExecutorService);
     }
 
     /**
@@ -146,8 +149,8 @@ public class MinecraftServer extends EventEmitter {
         } catch (InterruptedException | IOException e) {
             serverProcess.destroy();
         } finally {
-            ThreadUtils.tryShutdownExecutorService(inputService);
-            ThreadUtils.tryShutdownExecutorService(errorService);
+            ThreadUtils.tryShutdownNamedExecutorService(namedInputService);
+            ThreadUtils.tryShutdownNamedExecutorService(namedErrorService);
             for (Closeable stream :
                     new Closeable[]{
                             serverProcess.getInputStream(),
@@ -259,7 +262,7 @@ public class MinecraftServer extends EventEmitter {
         try {
             properties = new ServerProperties(Paths.get(String.valueOf(serverPath.getParent()), "server.properties").toFile());
             propsExists = true;
-            port = (int)properties.get("server-port");
+            port = (int) properties.get("server-port");
             return true;
         } catch (FileNotFoundException e) {
             propsExists = false;

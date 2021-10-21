@@ -6,6 +6,7 @@ import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
+import com.hunterltd.ssw.utilities.NamedExecutorService;
 import com.hunterltd.ssw.utilities.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -28,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 public class SswServerCli {
     private final int port;
     private final MinecraftServer minecraftServer;
-    private final List<ExecutorService> serviceList = new ArrayList<>();
-    private final Map<SswClientHandler, ExecutorService> clientHandlerToExecutorMap = new HashMap<>();
+    private final List<NamedExecutorService> serviceList = new ArrayList<>();
+    private final Map<SswClientHandler, NamedExecutorService> clientHandlerToExecutorMap = new HashMap<>();
     private ServerSocket serverSocket;
     private volatile boolean cancel = false;
     private int clientId = 0;
@@ -90,9 +91,9 @@ public class SswServerCli {
         // using foreach will produce a ConcurrentModificationException
         while (iterator.hasNext()) {
             SswClientHandler clientHandler = iterator.next();
-            ExecutorService executorService = clientHandlerToExecutorMap.get(clientHandler);
+            NamedExecutorService executorService = clientHandlerToExecutorMap.get(clientHandler);
             if (clientHandler.isClosed()) {
-                ThreadUtils.tryShutdownExecutorService(executorService);
+                ThreadUtils.tryShutdownNamedExecutorService(executorService);
                 iterator.remove();
             }
         }
@@ -102,9 +103,10 @@ public class SswServerCli {
      * Starts all background services used by the SSW server and adds them to the {@link SswServerCli#serviceList}
      */
     private void startAllServices() {
-        ScheduledExecutorService aliveService = Executors.newSingleThreadScheduledExecutor();
-        serviceList.add(aliveService);
-        aliveService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
+        ScheduledExecutorService aliveScheduledService = Executors.newSingleThreadScheduledExecutor();
+        NamedExecutorService aliveNamedService = new NamedExecutorService("Alive State Check", aliveScheduledService);
+        serviceList.add(aliveNamedService);
+        aliveScheduledService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
     }
 
     /**
@@ -127,8 +129,10 @@ public class SswServerCli {
             }
             SswClientHandler clientHandler = new SswClientHandler(socket, minecraftServer);
             // prunes client handler services
-            ExecutorService clientService = Executors.newSingleThreadExecutor(ThreadUtils.newNamedThreadFactory(String.format("ClientService#%d", clientId++)));
-            clientHandlerToExecutorMap.put(clientHandler, clientService);
+            String clientServiceName = String.format("ClientService#%d", clientId++);
+            ExecutorService clientService = Executors.newSingleThreadExecutor(ThreadUtils.newNamedThreadFactory(clientServiceName));
+            NamedExecutorService namedClientService = new NamedExecutorService(clientServiceName, clientService);
+            clientHandlerToExecutorMap.put(clientHandler, namedClientService);
             clientService.submit(clientHandler);
         }
         stop();
@@ -143,9 +147,9 @@ public class SswServerCli {
         } catch (IOException e) {
             printErrorToOut(e);
         }
-        serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
+        serviceList.forEach(ThreadUtils::tryShutdownNamedExecutorService);
         // these should all be closed at this point, but it's good to clean up anyways
-        clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownExecutorService(executorService));
+        clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownNamedExecutorService(executorService));
     }
 
     private void printErrorToOut(Exception e) {

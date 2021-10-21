@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.cli;
 
 import com.hunterltd.ssw.utilities.MavenUtils;
+import com.hunterltd.ssw.utilities.NamedExecutorService;
 import com.hunterltd.ssw.utilities.StreamGobbler;
 import com.hunterltd.ssw.utilities.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -18,7 +19,7 @@ import java.util.concurrent.ExecutorService;
 public class SswClientCli {
     private Socket clientSocket;
     private PrintWriter out;
-    private ExecutorService readService;
+    private NamedExecutorService readService;
 
     public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
@@ -70,11 +71,12 @@ public class SswClientCli {
         clientSocket = new Socket(targetIp, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         InputStream socketInputStream = clientSocket.getInputStream();
-        readService = StreamGobbler.execute(socketInputStream, System.out::println, "Socket Read Service");
+        ExecutorService service = StreamGobbler.execute(socketInputStream, System.out::println, "Socket Read Service");
+        readService = new NamedExecutorService("Socket Read Service", service);
     }
 
     public void closeConnection() throws IOException {
-        ThreadUtils.tryShutdownExecutorService(readService);
+        ThreadUtils.tryShutdownNamedExecutorService(readService);
         out.close();
         clientSocket.close();
     }
