@@ -71,7 +71,9 @@ public class SswServerCli {
         Namespace namespace = parseArgs(args);
         File server = new File(namespace.getString("server")).getAbsoluteFile();
         File logFile = Paths.get(server.getParentFile().toString(), "ssw", "ssw.log").toFile();
-        System.setOut(new PrintStream(logFile));
+        PrintStream logStream = new PrintStream(logFile);
+        System.setOut(logStream);
+        System.setErr(logStream);
         int port = namespace.getInt("port");
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
@@ -139,7 +141,7 @@ public class SswServerCli {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            System.out.println(ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage())));
+            printErrorToOut(e);
         }
         serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
         // these should all be closed at this point, but it's good to clean up anyways
@@ -209,8 +211,7 @@ public class SswServerCli {
                                 reader.lines().forEach(out::println); // send each line to the client
                             } catch (IOException e) {
                                 printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
-                                System.out.println(ThreadUtils.threadStampString("There is more information below:"));
-                                System.out.println(ThreadUtils.threadStampString(e.getLocalizedMessage()));
+                                printErrorToOut(e);
                             }
                         }
                         case "logout", "exit" -> {
@@ -226,13 +227,13 @@ public class SswServerCli {
                     }
                 }
             } catch (IOException e) {
-                System.err.println(e.getLocalizedMessage());
+                printErrorToOut(e);
                 minecraftServer.setShouldBeRunning(false);
             } finally {
                 try {
                     clientSocket.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    printErrorToOut(e);
                 } finally {
                     minecraftServer.removeListener("data", dataCallback);
                     minecraftServer.removeListener("exiting", exitingCallback);
@@ -283,5 +284,11 @@ public class SswServerCli {
         public boolean isClosed() {
             return clientSocket.isClosed();
         }
+    }
+
+    private void printErrorToOut(Exception e) {
+        String threadStampString = ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage()));
+        System.out.println(threadStampString);
+        e.printStackTrace();
     }
 }
