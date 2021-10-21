@@ -135,10 +135,15 @@ public class SswServerCli {
             System.out.printf("Connection accepted from %s on port %d%n",
                     clientSocket.getInetAddress(), clientSocket.getPort());
 
-            try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-                startAllServices();
-//            MinecraftServer minecraftServer = getMinecraftServer();
+            EventCallback dataCallback = objects -> printlnToServerAndClientRaw((String) objects[0]);
+            EventCallback exitingCallback = objects -> printlnToServerAndClient("Stopping server...");
+            EventCallback exitCallback = objects -> printlnToServerAndClient("Server successfully stopped!");
+            minecraftServer.on("data", dataCallback);
+            minecraftServer.on("exiting", exitingCallback);
+            minecraftServer.on("exit", exitCallback);
+
+            try (PrintWriter writer = out = new PrintWriter(clientSocket.getOutputStream(), true);
+                 BufferedReader reader = in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
                 String message;
                 mainLoop:
@@ -186,6 +191,10 @@ public class SswServerCli {
                     clientSocket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    minecraftServer.removeListener("data", dataCallback);
+                    minecraftServer.removeListener("exiting", exitingCallback);
+                    minecraftServer.removeListener("exit", exitCallback);
                 }
             }
         }
