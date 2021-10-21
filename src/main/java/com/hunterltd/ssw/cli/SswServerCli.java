@@ -153,8 +153,7 @@ public class SswServerCli {
                 String message;
                 mainLoop:
                 while ((message = in.readLine()) != null) {
-                    System.out.printf("[Client %s:%s] %s%n",
-                            clientSocket.getInetAddress(), clientSocket.getPort(), message);
+                    System.out.println(ThreadUtils.threadStampString(message));
                     switch (message) {
                         case "start" -> {
                             // running is handled in AliveStateCheckTask
@@ -172,7 +171,7 @@ public class SswServerCli {
                                 printlnToServerAndClient("No server is running");
                         }
                         case "close" -> {
-                            System.out.println("Closing client connection...");
+                            System.out.println(ThreadUtils.threadStampString("Closing client connection..."));
                             if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
                                 cancel = true;
                                 if (minecraftServer.isRunning())
@@ -192,7 +191,7 @@ public class SswServerCli {
                             }
                         }
                         case "logout", "exit" -> {
-                            System.out.println("Closing client connection...");
+                            System.out.println(ThreadUtils.threadStampString("Closing client connection..."));
                             break mainLoop;
                         }
                         default -> {
