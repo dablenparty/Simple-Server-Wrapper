@@ -191,7 +191,7 @@ public class SswServerCli {
                                 System.out.println(ThreadUtils.threadStampString(e.getLocalizedMessage()));
                             }
                         }
-                        case "logout" -> {
+                        case "logout", "exit" -> {
                             System.out.println("Closing client connection...");
                             break mainLoop;
                         }
