@@ -142,8 +142,8 @@ public class SswServerCli {
             minecraftServer.on("exiting", exitingCallback);
             minecraftServer.on("exit", exitCallback);
 
-            try (PrintWriter writer = out = new PrintWriter(clientSocket.getOutputStream(), true);
-                 BufferedReader reader = in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+            try (PrintWriter ignored = out = new PrintWriter(clientSocket.getOutputStream(), true);
+                 BufferedReader ignored1 = in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
                 String message;
                 mainLoop:
