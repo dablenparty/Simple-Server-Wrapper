@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 
 public class SswClientCli {
     private Socket clientSocket;
-//    private BufferedReader in;
     private PrintWriter out;
     private ExecutorService readService;
 
@@ -71,21 +70,17 @@ public class SswClientCli {
         clientSocket = new Socket(targetIp, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         InputStream socketInputStream = clientSocket.getInputStream();
-//        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         readService = StreamGobbler.execute(socketInputStream, System.out::println, "Socket Read Service");
     }
 
     public void closeConnection() throws IOException {
         ThreadUtils.tryShutdownExecutorService(readService);
-//        in.close();
         out.close();
         clientSocket.close();
     }
 
     public void sendToServer(String message) {
         out.println(message);
-        // previously returned the response. that will now be handled by a separate thread
-//        return in.readLine();
     }
 
 }
