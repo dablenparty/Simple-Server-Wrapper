@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.cli;
 
+import com.dablenparty.jsevents.EventCallback;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.server.MinecraftServer;
@@ -15,6 +16,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,16 +30,11 @@ public class SswServerCli {
     private final Map<SswClientHandler, ExecutorService> clientHandlerToExecutorMap = new HashMap<>();
     private ServerSocket serverSocket;
     private volatile boolean cancel = false;
-//    private Socket clientSocket;
-//    private PrintWriter out;
-//    private BufferedReader in;
+    private int clientId = 0;
 
     SswServerCli(int port, File serverFile) {
         this.port = port;
         minecraftServer = new MinecraftServer(serverFile, MinecraftServerSettings.getSettingsFromDefaultPath(serverFile));
-        minecraftServer.on("data", objects -> printlnToServerAndClientRaw((String) objects[0]));
-        minecraftServer.on("exiting", objects -> printlnToServerAndClient("Stopping server..."));
-        minecraftServer.on("exit", objects -> printlnToServerAndClient("Server successfully stopped!"));
     }
 
     public static Namespace parseArgs(String[] args) {
@@ -77,23 +74,15 @@ public class SswServerCli {
         serverCli.stop();
     }
 
-    private void printfToServerAndClient(String formatString, Object... args) {
-        // prevents formatting twice
-        String message = ThreadUtils.threadStampString(String.format(formatString, args));
-        System.out.print(message);
-        // replace with loop
-//        this.out.print(message);
-    }
-
-    private void printlnToServerAndClient(String string) {
-        String message = ThreadUtils.threadStampString(string);
-        printlnToServerAndClientRaw(message);
-    }
-
-    private void printlnToServerAndClientRaw(String message) {
-        System.out.println(message);
-        // replace with loop
-//        this.out.println(message);
+    private void pruneClientHandlers() {
+        Set<SswClientHandler> clientHandlerSet = clientHandlerToExecutorMap.keySet();
+        for (SswClientHandler clientHandler : clientHandlerSet) {
+            ExecutorService executorService = clientHandlerToExecutorMap.get(clientHandler);
+            if (clientHandler.isClosed()) {
+                ThreadUtils.tryShutdownExecutorService(executorService);
+                clientHandlerToExecutorMap.remove(clientHandler);
+            }
+        }
     }
 
     private void startAllServices() {
@@ -102,25 +91,22 @@ public class SswServerCli {
         aliveService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
     }
 
-    private void pruneClientHandlers() {
-        Iterator<SswClientHandler> iterator = clientHandlerToExecutorMap.keySet().iterator();
-        while (iterator.hasNext()) {
-            SswClientHandler clientHandler = iterator.next();
-            ExecutorService executorService = clientHandlerToExecutorMap.get(clientHandler);
-            if (clientHandler.isClosed())
-                ThreadUtils.tryShutdownExecutorService(executorService);
-            clientHandlerToExecutorMap.remove(clientHandler);
-        }
-    }
-
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
+        serverSocket.setSoTimeout(5000);
+        startAllServices();
         while (!cancel) {
-            SswClientHandler clientHandler = new SswClientHandler(serverSocket.accept(), minecraftServer);
-            // prunes client handler services
             pruneClientHandlers();
+            Socket socket;
+            try {
+                socket = serverSocket.accept();
+            } catch (SocketTimeoutException ignored) {
+                continue;
+            }
+            SswClientHandler clientHandler = new SswClientHandler(socket, minecraftServer);
+            // prunes client handler services
             // maybe extract this to a separate thread made just for pruning handlers...
-            ExecutorService clientService = Executors.newSingleThreadExecutor(ThreadUtils.newNamedThreadFactory(String.format("ClientService#%d", clientHandlerToExecutorMap.size() + 1)));
+            ExecutorService clientService = Executors.newSingleThreadExecutor(ThreadUtils.newNamedThreadFactory(String.format("ClientService#%d", clientId++)));
             clientHandlerToExecutorMap.put(clientHandler, clientService);
             clientService.submit(clientHandler);
         }
@@ -128,9 +114,6 @@ public class SswServerCli {
     }
 
     public void stop() throws IOException {
-//        in.close();
-//        out.close();
-//        clientSocket.close();
         serverSocket.close();
         serviceList.forEach(ThreadUtils::tryShutdownExecutorService);
         // these should all be closed at this point, but it's good to clean up anyways
@@ -139,8 +122,8 @@ public class SswServerCli {
 
     private class SswClientHandler extends ServerBasedRunnable {
         private final Socket clientSocket;
-//        private PrintWriter out;
-//        private BufferedReader in;
+        private PrintWriter out;
+        private BufferedReader in;
 
         protected SswClientHandler(Socket socket, MinecraftServer minecraftServer) {
             super(minecraftServer);
@@ -179,9 +162,8 @@ public class SswServerCli {
                         }
                         case "close" -> {
                             printlnToServerAndClient("Closing client connection...");
-                            if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
+                            if (clientHandlerToExecutorMap.size() == 1 && !cancel)
                                 cancel = true;
-                            }
                             break mainLoop;
                         }
                         case "logout" -> {
