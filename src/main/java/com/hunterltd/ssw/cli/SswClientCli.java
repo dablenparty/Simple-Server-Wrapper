@@ -53,6 +53,7 @@ public class SswClientCli {
             System.out.printf("Connected to %s:%d%n", target, port);
         } catch (ConnectException connectException) {
             System.err.println(connectException.getLocalizedMessage());
+            System.err.println("It is most likely that the SSW server is not running");
             return;
         }
         String message;
