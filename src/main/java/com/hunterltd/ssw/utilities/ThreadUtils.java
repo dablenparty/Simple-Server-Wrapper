@@ -18,11 +18,13 @@ public class ThreadUtils {
     /**
      * Tries to properly shut down an {@link ExecutorService} and forces shutdown if it does not comply
      *
-     * @param service Service to shutdown
+     * @param namedService Service to shutdown
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void tryShutdownExecutorService(ExecutorService service) {
-        printlnWithTimeAndThread(System.out, "Shutting down executor service...");
+    public static void tryShutdownNamedExecutorService(NamedExecutorService namedService) {
+        String name = namedService.name();
+        ExecutorService service = namedService.executorService();
+        printfWithTimeAndThread(System.out, "Shutting down %s service...", name);
         service.shutdown();
         try {
             service.awaitTermination(5L, TimeUnit.SECONDS);
@@ -30,9 +32,9 @@ public class ThreadUtils {
             printlnWithTimeAndThread(System.err, e.getLocalizedMessage());
         } finally {
             if (!service.isTerminated())
-                printlnWithTimeAndThread(System.err, "Service didn't terminate, forcing shutdown");
+                printfWithTimeAndThread(System.err, "%s didn't terminate, forcing shutdown", name);
             service.shutdownNow();
-            printlnWithTimeAndThread(System.out, "Service closed");
+            printfWithTimeAndThread(System.out, "%s closed", name);
         }
     }
 
