@@ -78,11 +78,14 @@ public class SswServerCli {
 
     private void pruneClientHandlers() {
         Set<SswClientHandler> clientHandlerSet = clientHandlerToExecutorMap.keySet();
-        for (SswClientHandler clientHandler : clientHandlerSet) {
+        Iterator<SswClientHandler> iterator = clientHandlerSet.iterator();
+        // using foreach will produce a ConcurrentModificationException
+        while (iterator.hasNext()) {
+            SswClientHandler clientHandler = iterator.next();
             ExecutorService executorService = clientHandlerToExecutorMap.get(clientHandler);
             if (clientHandler.isClosed()) {
                 ThreadUtils.tryShutdownExecutorService(executorService);
-                clientHandlerToExecutorMap.remove(clientHandler);
+                iterator.remove();
             }
         }
     }
