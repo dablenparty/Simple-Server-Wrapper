@@ -208,6 +208,23 @@ public class SswServerCli {
             }
         }
 
+        private void printfToServerAndClient(String formatString, Object... args) {
+            // prevents formatting twice
+            String message = ThreadUtils.threadStampString(String.format(formatString, args));
+            System.out.print(message);
+            this.out.print(message);
+        }
+
+        private void printlnToServerAndClient(String string) {
+            String message = ThreadUtils.threadStampString(string);
+            printlnToServerAndClientRaw(message);
+        }
+
+        private void printlnToServerAndClientRaw(String message) {
+            System.out.println(message);
+            this.out.println(message);
+        }
+
         public boolean isClosed() {
             return clientSocket.isClosed();
         }
