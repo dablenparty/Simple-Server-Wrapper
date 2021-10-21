@@ -24,7 +24,7 @@ public class ThreadUtils {
     public static void tryShutdownNamedExecutorService(NamedExecutorService namedService) {
         String name = namedService.name();
         ExecutorService service = namedService.executorService();
-        printfWithTimeAndThread(System.out, "Shutting down %s service...", name);
+        printfWithTimeAndThread(System.out, "Shutting down '%s' service...", name);
         service.shutdown();
         try {
             service.awaitTermination(5L, TimeUnit.SECONDS);
@@ -32,9 +32,9 @@ public class ThreadUtils {
             printlnWithTimeAndThread(System.err, e.getLocalizedMessage());
         } finally {
             if (!service.isTerminated())
-                printfWithTimeAndThread(System.err, "%s didn't terminate, forcing shutdown", name);
+                printfWithTimeAndThread(System.err, "'%s' service didn't terminate, forcing shutdown", name);
             service.shutdownNow();
-            printfWithTimeAndThread(System.out, "%s closed", name);
+            printfWithTimeAndThread(System.out, "'%s' service closed", name);
         }
     }
 
