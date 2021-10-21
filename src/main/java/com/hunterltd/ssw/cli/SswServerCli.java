@@ -17,6 +17,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -170,6 +172,17 @@ public class SswServerCli {
                             if (clientHandlerToExecutorMap.size() == 1 && !cancel)
                                 cancel = true;
                             break mainLoop;
+                        }
+                        case "log", "backlog", "printlog" -> {
+                            Path serverParentFolder = minecraftServer.getServerPath().getParent();
+                            File logFile = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
+                            try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+                                reader.lines().forEach(out::println); // send each line to the client
+                            } catch (IOException e) {
+                                printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
+                                System.out.println(ThreadUtils.threadStampString("There is more information below:"));
+                                System.out.println(ThreadUtils.threadStampString(e.getLocalizedMessage()));
+                            }
                         }
                         case "logout" -> {
                             System.out.println("Closing client connection...");
