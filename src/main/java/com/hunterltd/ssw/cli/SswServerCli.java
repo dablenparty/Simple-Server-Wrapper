@@ -166,13 +166,13 @@ public class SswServerCli {
                                 printlnToServerAndClient("No server is running");
                         }
                         case "close" -> {
-                            printlnToServerAndClient("Closing client connection...");
+                            System.out.println("Closing client connection...");
                             if (clientHandlerToExecutorMap.size() == 1 && !cancel)
                                 cancel = true;
                             break mainLoop;
                         }
                         case "logout" -> {
-                            printlnToServerAndClient("Closing client connection...");
+                            System.out.println("Closing client connection...");
                             break mainLoop;
                         }
                         default -> {
