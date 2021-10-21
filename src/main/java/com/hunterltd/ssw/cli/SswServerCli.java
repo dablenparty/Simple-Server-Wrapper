@@ -109,7 +109,7 @@ public class SswServerCli {
      * Starts the SSW server
      *
      * @throws IOException if an I/O exception occurs while opening the socket, setting the timeout, or waiting for a
-     * connection
+     *                     connection
      */
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
@@ -244,24 +244,21 @@ public class SswServerCli {
 
         /**
          * Calls printf on both {@link System#out} and this.out. This method also thread-stamps the message.
-         *
+         * <p>
          * For more detailed documentation, see {@link PrintStream#printf}
          *
          * @param formatString Format string
-         * @param args Arguments for format string
+         * @param args         Arguments for format string
          * @see PrintStream#printf
          */
         private void printfToServerAndClient(String formatString, Object... args) {
-            // removes %n from the end since this method uses println
-//            if (formatString.endsWith("%n"))
-//                formatString = formatString.substring(0, formatString.length() - 2);
-//            String message = ThreadUtils.threadStampString(String.format(formatString, args));
             System.out.printf(formatString, args);
             this.out.printf(formatString, args);
         }
 
         /**
          * Calls println on both {@link System#out} and this.out. This method also thread-stamps the message.
+         *
          * @param string String to print
          */
         private void printlnToServerAndClient(String string) {
