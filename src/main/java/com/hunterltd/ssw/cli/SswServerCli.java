@@ -70,6 +70,8 @@ public class SswServerCli {
     public static void main(String[] args) throws IOException {
         Namespace namespace = parseArgs(args);
         File server = new File(namespace.getString("server")).getAbsoluteFile();
+        File logFile = Paths.get(server.getParentFile().toString(), "ssw", "ssw.log").toFile();
+        System.setOut(new PrintStream(logFile));
         int port = namespace.getInt("port");
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
