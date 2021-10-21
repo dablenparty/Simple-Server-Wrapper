@@ -198,7 +198,7 @@ public class SswServerCli {
                             if (minecraftServer.isRunning())
                                 minecraftServer.sendCommand(message.trim());
                             else
-                                printfToServerAndClient("Unknown command: %s%n", message);
+                                printfToServerAndClient("Unknown command: %s", message);
                         }
                     }
                 }
@@ -219,10 +219,12 @@ public class SswServerCli {
         }
 
         private void printfToServerAndClient(String formatString, Object... args) {
-            // prevents formatting twice
+            // removes %n from the end since this method uses println
+            if (formatString.endsWith("%n"))
+                formatString = formatString.substring(0, formatString.length() - 2);
             String message = ThreadUtils.threadStampString(String.format(formatString, args));
-            System.out.print(message);
-            this.out.print(message);
+            System.out.println(message);
+            this.out.println(message);
         }
 
         private void printlnToServerAndClient(String string) {
