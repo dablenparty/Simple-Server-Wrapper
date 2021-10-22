@@ -111,9 +111,14 @@ public class SswServerCli {
         MinecraftServerSettings serverSettings = minecraftServer.getServerSettings();
         if (serverSettings.getShutdown()) {
             System.out.println(ThreadUtils.threadStampString("Auto startup/shutdown is enabled"));
+            // make a new thread
             ScheduledExecutorService pingScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Server Ping Service"));
             ServerPingTask pingTask = new ServerPingTask(minecraftServer);
-            serviceList.add(new NamedExecutorService("Server Ping Service", pingScheduledService));
+            // make the named service and add the ping tasks' child service
+            NamedExecutorService serverPingService = new NamedExecutorService("Server Ping Service", pingScheduledService);
+            serverPingService.addChildService(pingTask.getScheduledShutdownService());
+            serviceList.add(serverPingService);
+            // lastly, schedule the task
             pingScheduledService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
         }
     }
