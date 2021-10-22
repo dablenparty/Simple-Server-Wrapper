@@ -71,8 +71,9 @@ public class CurseCli {
                 System.out.print(message);
                 addon.download(serverFolder.toString());
             } catch (ParseException | IOException e) {
+                // message has to be prefixed with '\n' because the previous lines don't end with one
                 String errorMessage = e instanceof ParseException ?
-                        "\nFailed to parse JSON data for an addon" : "Failed to download an addon";
+                        "\nFailed to parse JSON data for an addon" : "\nFailed to download an addon";
                 printlnWithTimeAndThread(System.err, errorMessage);
             }
         }
