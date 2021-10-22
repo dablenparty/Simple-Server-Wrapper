@@ -29,6 +29,7 @@ hs_err_pid*
 # Project files
 .idea/
 *.iml
+.vscode/
 
 # Test server
 test-server/
