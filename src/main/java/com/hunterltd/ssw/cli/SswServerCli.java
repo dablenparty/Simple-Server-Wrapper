@@ -195,7 +195,10 @@ public class SswServerCli {
 
             EventCallback dataCallback = objects -> printlnToServerAndClientRaw((String) objects[0]);
             EventCallback exitingCallback = objects -> printlnToServerAndClient("Stopping server...");
-            EventCallback exitCallback = objects -> printlnToServerAndClient("Server successfully stopped!");
+            EventCallback exitCallback = objects -> {
+                printlnToServerAndClient("Server successfully stopped!");
+                minecraftServer.setShouldBeRunning(false); // prevents launch loops
+            };
             minecraftServer.on("data", dataCallback);
             minecraftServer.on("exiting", exitingCallback);
             minecraftServer.on("exit", exitCallback);
@@ -227,8 +230,11 @@ public class SswServerCli {
                             System.out.println(ThreadUtils.threadStampString("Closing client connection..."));
                             if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
                                 cancel = true;
-                                if (minecraftServer.isRunning())
+                                if (minecraftServer.isRunning()) {
                                     minecraftServer.setShouldBeRunning(false);
+                                    // prevents the port listener from opening back up automatically
+                                    minecraftServer.getServerSettings().setShutdown(false);
+                                }
                             }
                             break mainLoop;
                         }
