@@ -110,6 +110,7 @@ public class SswServerCli {
         aliveScheduledService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
         MinecraftServerSettings serverSettings = minecraftServer.getServerSettings();
         if (serverSettings.getShutdown()) {
+            System.out.println(ThreadUtils.threadStampString("Auto startup/shutdown is enabled"));
             ScheduledExecutorService pingScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Server Ping Service"));
             ServerPingTask pingTask = new ServerPingTask(minecraftServer);
             serviceList.add(new NamedExecutorService("Server Ping Service", pingScheduledService));
