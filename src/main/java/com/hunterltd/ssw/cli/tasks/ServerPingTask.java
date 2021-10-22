@@ -43,12 +43,12 @@ public class ServerPingTask extends ServerBasedRunnable {
             }
             ScheduledExecutorService executorService = (ScheduledExecutorService) scheduledShutdownService.executorService();
             if (onlinePlayers == 0) {
-                if (shutdownServiceFuture == null || shutdownServiceFuture.isDone()) {
+                if (minecraftServer.shouldBeRunning() && (shutdownServiceFuture == null || shutdownServiceFuture.isDone())) {
                     // shutdown timer begins
                     long delay = minecraftServer.getServerSettings().getShutdownInterval();
                     shutdownServiceFuture = executorService.schedule(() -> minecraftServer.setShouldBeRunning(false), delay, TimeUnit.MINUTES);
                 }
-            } else if (shutdownServiceFuture != null && executorService != null) {
+            } else if (shutdownServiceFuture != null && executorService != null && !shutdownServiceFuture.isDone()) {
                 boolean didShutdown = shutdownServiceFuture.cancel(false);
                 if (!didShutdown && !shutdownServiceFuture.isDone())
                     shutdownServiceFuture.cancel(true);
