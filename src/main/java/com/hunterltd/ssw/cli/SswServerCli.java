@@ -72,10 +72,10 @@ public class SswServerCli {
 
     public static void main(String[] args) throws IOException {
         Namespace namespace = parseArgs(args);
-        File server = new File(namespace.getString("server")).getAbsoluteFile();
+        File server = new File(namespace.getString("server")).getCanonicalFile();
         String modpackPath = namespace.getString("modpack");
         if (modpackPath != null) {
-            File modpack = new File(modpackPath).getAbsoluteFile();
+            File modpack = new File(modpackPath).getCanonicalFile();
             if (modpack.isDirectory() || !modpackPath.toLowerCase().endsWith(".zip")) {
                 System.out.printf("'%s' is not a ZIP archive", modpackPath);
             } else {
