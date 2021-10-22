@@ -18,7 +18,7 @@ public class ServerPingTask extends ServerBasedRunnable {
     private final NamedExecutorService scheduledShutdownService;
     private ScheduledFuture<?> shutdownServiceFuture = null;
 
-    protected ServerPingTask(MinecraftServer minecraftServer) {
+    public ServerPingTask(MinecraftServer minecraftServer) {
         super(minecraftServer);
         pinger.setAddress(new InetSocketAddress(minecraftServer.getPort()));
         String serviceName = "MinecraftServer Shutdown Service";
