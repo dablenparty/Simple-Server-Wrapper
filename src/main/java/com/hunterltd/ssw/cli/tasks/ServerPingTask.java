@@ -26,6 +26,10 @@ public class ServerPingTask extends ServerBasedRunnable {
         scheduledShutdownService = new NamedExecutorService(serviceName, service);
     }
 
+    public NamedExecutorService getScheduledShutdownService() {
+        return scheduledShutdownService;
+    }
+
     @Override
     public void run() {
         MinecraftServer minecraftServer = getMinecraftServer();
