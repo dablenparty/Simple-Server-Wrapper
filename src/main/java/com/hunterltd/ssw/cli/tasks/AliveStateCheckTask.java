@@ -1,10 +1,12 @@
 package com.hunterltd.ssw.cli.tasks;
 
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.utilities.ThreadUtils;
 import com.hunterltd.ssw.utilities.network.PortListener;
 
 import java.io.IOException;
+
+import static com.hunterltd.ssw.utilities.ThreadUtils.printfWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
 
 public class AliveStateCheckTask extends ServerBasedRunnable {
     private final PortListener portListener;
@@ -35,16 +37,15 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
 
     private void startPortListener(MinecraftServer server) {
         if (!server.getServerSettings().getShutdown() || portListener.isOpen()) return;
-        System.out.println(ThreadUtils.threadStampString(String.format("Attempting to open port listener on port %d", server.getPort())));
+        printfWithTimeAndThread(System.out, "Attempting to open port listener on port %d", server.getPort());
         try {
             portListener.start();
             portListener.on("connection", objects -> server.setShouldBeRunning(true));
-//            portListener.on("close", objects -> portListener.stop());
             portListener.on("error", errors -> {
                 for (Object e : errors)
                     ((Exception) e).printStackTrace();
             });
-            portListener.on("stop", objects -> System.out.println(ThreadUtils.threadStampString("Port listener closed")));
+            portListener.on("stop", objects -> printlnWithTimeAndThread(System.out, "Port listener closed"));
         } catch (IOException e) {
             e.printStackTrace();
         }

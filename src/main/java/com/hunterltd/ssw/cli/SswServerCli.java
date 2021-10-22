@@ -27,6 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
+
 public class SswServerCli {
     private final int port;
     private final MinecraftServer minecraftServer;
@@ -74,8 +76,8 @@ public class SswServerCli {
         File server = new File(namespace.getString("server")).getAbsoluteFile();
         File logFile = Paths.get(server.getParentFile().toString(), "ssw", "ssw.log").toFile();
         PrintStream logStream = new PrintStream(logFile);
-        System.setOut(logStream);
-        System.setErr(logStream);
+//        System.setOut(logStream);
+//        System.setErr(logStream);
         int port = namespace.getInt("port");
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
@@ -110,7 +112,7 @@ public class SswServerCli {
         aliveScheduledService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
         MinecraftServerSettings serverSettings = minecraftServer.getServerSettings();
         if (serverSettings.getShutdown()) {
-            System.out.println(ThreadUtils.threadStampString("Auto startup/shutdown is enabled"));
+            printlnWithTimeAndThread(System.out, "Auto startup/shutdown is enabled");
             // make a new thread
             ScheduledExecutorService pingScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Server Ping Service"));
             ServerPingTask pingTask = new ServerPingTask(minecraftServer);
@@ -209,7 +211,7 @@ public class SswServerCli {
                 String message;
                 mainLoop:
                 while ((message = in.readLine()) != null) {
-                    System.out.println(ThreadUtils.threadStampString(message));
+                    printlnWithTimeAndThread(System.out, message);
                     switch (message) {
                         case "start" -> {
                             // running is handled in AliveStateCheckTask
@@ -227,7 +229,7 @@ public class SswServerCli {
                                 printlnToServerAndClient("No server is running");
                         }
                         case "close" -> {
-                            System.out.println(ThreadUtils.threadStampString("Closing client connection..."));
+                            printlnWithTimeAndThread(System.out, "Closing client connection...");
                             if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
                                 cancel = true;
                                 if (minecraftServer.isRunning()) {
@@ -249,7 +251,7 @@ public class SswServerCli {
                             }
                         }
                         case "logout", "exit" -> {
-                            System.out.println(ThreadUtils.threadStampString("Closing client connection..."));
+                            printlnWithTimeAndThread(System.out, "Closing client connection...");
                             break mainLoop;
                         }
                         default -> {
