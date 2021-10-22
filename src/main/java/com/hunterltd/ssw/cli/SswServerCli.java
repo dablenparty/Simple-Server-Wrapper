@@ -46,24 +46,22 @@ public class SswServerCli {
 
     public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
-        ArgumentParser parser = ArgumentParsers.newFor("Simple Server Wrapper Server CLI").build()
+        ArgumentParser parser = ArgumentParsers.newFor("ssw-server").build()
                 .defaultHelp(true)
                 .version(String.format("${prog} v%s", mavenProperties.getProperty("version")))
                 .description("Server-side commandline interface for running and interacting with a Minecraft server." +
                         " This also allows for remote or local connections from the client-side counterpart to this program");
         parser.addArgument("-v", "--version")
                 .action(Arguments.version());
-
         parser.addArgument("server")
                 .action(Arguments.store())
                 .metavar("SERVER_PATH")
+                .required(true)
                 .help("path to server jar file");
-
         parser.addArgument("-m", "--modpack")
                 .action(Arguments.store())
                 .required(false)
                 .help("CurseForge modpack zip file to install to server");
-
         parser.addArgument("-p", "--port")
                 .action(Arguments.store())
                 .setDefault(9609)

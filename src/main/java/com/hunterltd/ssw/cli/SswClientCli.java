@@ -25,22 +25,21 @@ public class SswClientCli {
 
     public static Namespace parseArgs(String[] args) {
         Properties mavenProperties = MavenUtils.getMavenProperties();
-        ArgumentParser parser = ArgumentParsers.newFor("Simple Server Wrapper Client CLI").build()
+        ArgumentParser parser = ArgumentParsers.newFor("ssw-client").build()
                 .defaultHelp(true)
                 .version(String.format("${prog} v%s", mavenProperties.getProperty("version")))
                 .description("Client-side commandline interface for connecting to and interacting with either local " +
                         "or remote instances of this programs server-side counterpart.");
         parser.addArgument("-v", "--version").action(Arguments.version());
-
         parser.addArgument("-p", "--port")
                 .action(Arguments.store())
                 .setDefault(9609)
                 .help("port number to connect on");
-
         parser.addArgument("-t", "--target")
                 .action(Arguments.store())
                 .setDefault("127.0.0.1")
                 .help("target address, defaults to 127.0.0.1");
+
         return parser.parseArgsOrFail(args);
     }
 
