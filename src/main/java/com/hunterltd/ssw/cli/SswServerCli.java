@@ -85,6 +85,10 @@ public class SswServerCli {
         }
 
         File logFile = Paths.get(server.getParentFile().toString(), "ssw", "ssw.log").toFile();
+        // make the parent directory
+        //noinspection ResultOfMethodCallIgnored
+        logFile.getParentFile().mkdir();
+
         PrintStream logStream = new PrintStream(logFile);
         System.setOut(logStream);
         System.setErr(logStream);
