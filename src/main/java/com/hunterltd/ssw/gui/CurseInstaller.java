@@ -163,6 +163,15 @@ public class CurseInstaller extends JFrame {
                     return null;
                 }
 
+                @Override
+                protected void done() {
+                    installProgressBar.setString("Done!");
+                    installProgressBar.setValue(100);
+                    setComponentsEnabled(true);
+                    installing = false;
+                    installButton.setText("Install");
+                }
+
                 private boolean overwriteModsFolder(File modsFolder) throws IOException {
                     if (Objects.requireNonNull(modsFolder.listFiles()).length != 0) {
                         int result = JOptionPane.showConfirmDialog(null,
@@ -192,15 +201,6 @@ public class CurseInstaller extends JFrame {
                         curseModpack.extractAll();
                     }
                 }
-
-                @Override
-                protected void done() {
-                    installProgressBar.setString("Done!");
-                    installProgressBar.setValue(100);
-                    setComponentsEnabled(true);
-                    installing = false;
-                    installButton.setText("Install");
-                }
             };
 
             worker.addPropertyChangeListener(evt -> {
@@ -229,11 +229,10 @@ public class CurseInstaller extends JFrame {
         CurseInstaller installer = new CurseInstaller();
         installer.pack();
         installer.setVisible(true);
-//        installer.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
     private void setComponentsEnabled(boolean b) {
-        JComponent[] components = {modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField};
+        JComponent[] components = { modpackFileButton, serverPathButton, zipPathTextField, serverPathTextField };
         for (JComponent comp :
                 components) {
             comp.setEnabled(b);

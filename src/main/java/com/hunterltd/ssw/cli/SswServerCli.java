@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.hunterltd.ssw.utilities.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
 
 public class SswServerCli {
@@ -95,6 +94,17 @@ public class SswServerCli {
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
         serverCli.stop();
+    }
+
+    /**
+     * Thread stamps and prints an exception message to standard out, then prints the stack trace
+     *
+     * @param e Exception to print
+     */
+    public static void printExceptionToOut(Exception e) {
+        String threadStampString = ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage()));
+        System.out.println(threadStampString);
+        e.printStackTrace();
     }
 
     /**
@@ -179,16 +189,6 @@ public class SswServerCli {
         serviceList.forEach(NamedExecutorService::shutdown);
         // these should all be closed at this point, but it's good to clean up anyways
         clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownNamedExecutorService(executorService));
-    }
-
-    /**
-     * Thread stamps and prints an exception message to standard out, then prints the stack trace
-     * @param e Exception to print
-     */
-    public static void printExceptionToOut(Exception e) {
-        String threadStampString = ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage()));
-        System.out.println(threadStampString);
-        e.printStackTrace();
     }
 
     /**
