@@ -41,6 +41,10 @@ public class PortListener extends EventEmitter {
         });
     }
 
+    public boolean isOpen() {
+        return socketChannel != null && socketChannel.isOpen();
+    }
+
     public void stop() {
         try {
             socketChannel.close();
