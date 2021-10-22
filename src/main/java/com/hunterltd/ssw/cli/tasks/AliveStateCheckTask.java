@@ -20,7 +20,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                 server.run();
             } catch (IOException e) {
                 // an error occurred starting the process
-                System.err.println(e.getLocalizedMessage());
+                e.printStackTrace();
                 server.setShouldBeRunning(false);
             }
         }
