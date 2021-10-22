@@ -8,6 +8,7 @@ import com.hunterltd.ssw.utilities.network.ServerListPing;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -39,10 +40,10 @@ public class ServerPingTask extends ServerBasedRunnable {
             try {
                 response = pinger.fetchData();
                 onlinePlayers = response.getPlayers().getOnline();
+            } catch (NullPointerException | SocketException ignored) {
+                return;
             } catch (IOException e) {
                 SswServerCli.printExceptionToOut(e);
-                return;
-            } catch (NullPointerException ignored) {
                 return;
             }
             ScheduledExecutorService executorService = (ScheduledExecutorService) scheduledShutdownService.service();
