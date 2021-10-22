@@ -30,14 +30,17 @@ public class ServerPingTask extends ServerBasedRunnable {
     public void run() {
         MinecraftServer minecraftServer = getMinecraftServer();
         if (minecraftServer.shouldBeRunning() && minecraftServer.isRunning() && !minecraftServer.isShuttingDown()) {
-            ServerListPing.StatusResponse response = null;
+            ServerListPing.StatusResponse response;
+            int onlinePlayers;
             try {
                 response = pinger.fetchData();
+                onlinePlayers = response.getPlayers().getOnline();
             } catch (IOException e) {
                 SswServerCli.printExceptionToOut(e);
+                return;
+            } catch (NullPointerException ignored) {
+                return;
             }
-            if (response == null) return;
-            int onlinePlayers = response.getPlayers().getOnline();
             ScheduledExecutorService executorService = (ScheduledExecutorService) scheduledShutdownService.executorService();
             if (onlinePlayers == 0) {
                 if (shutdownServiceFuture == null || shutdownServiceFuture.isDone()) {
