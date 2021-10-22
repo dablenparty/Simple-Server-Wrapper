@@ -35,10 +35,6 @@ public class SswClientCli {
                 .action(Arguments.store())
                 .setDefault(9609)
                 .help("port number to connect on");
-        parser.addArgument("-t", "--target")
-                .action(Arguments.store())
-                .setDefault("127.0.0.1")
-                .help("target address, defaults to 127.0.0.1");
 
         return parser.parseArgsOrFail(args);
     }
