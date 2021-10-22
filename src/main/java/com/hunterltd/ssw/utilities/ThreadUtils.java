@@ -23,7 +23,7 @@ public class ThreadUtils {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void tryShutdownNamedExecutorService(NamedExecutorService namedService) {
         String name = namedService.name();
-        ExecutorService service = namedService.executorService();
+        ExecutorService service = namedService.service();
         printfWithTimeAndThread(System.out, "Shutting down '%s' service...", name);
         service.shutdown();
         try {

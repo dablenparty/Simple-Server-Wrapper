@@ -41,7 +41,7 @@ public class ServerPingTask extends ServerBasedRunnable {
             } catch (NullPointerException ignored) {
                 return;
             }
-            ScheduledExecutorService executorService = (ScheduledExecutorService) scheduledShutdownService.executorService();
+            ScheduledExecutorService executorService = (ScheduledExecutorService) scheduledShutdownService.service();
             if (onlinePlayers == 0) {
                 if (minecraftServer.shouldBeRunning() && (shutdownServiceFuture == null || shutdownServiceFuture.isDone())) {
                     // shutdown timer begins
