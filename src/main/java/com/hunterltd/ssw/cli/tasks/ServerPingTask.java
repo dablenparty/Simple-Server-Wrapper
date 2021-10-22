@@ -22,7 +22,7 @@ public class ServerPingTask extends ServerBasedRunnable {
         super(minecraftServer);
         pinger.setAddress(new InetSocketAddress(minecraftServer.getPort()));
         String serviceName = "MinecraftServer Shutdown Service";
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(1, ThreadUtils.newNamedThreadFactory(serviceName));
+        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory(serviceName));
         scheduledShutdownService = new NamedExecutorService(serviceName, service);
     }
 
