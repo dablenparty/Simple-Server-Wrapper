@@ -4,6 +4,7 @@ import com.dablenparty.jsevents.EventCallback;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
+import com.hunterltd.ssw.curse.CurseCli;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
@@ -27,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.hunterltd.ssw.utilities.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
 
 public class SswServerCli {
@@ -74,10 +76,21 @@ public class SswServerCli {
     public static void main(String[] args) throws IOException {
         Namespace namespace = parseArgs(args);
         File server = new File(namespace.getString("server")).getAbsoluteFile();
+        String modpackPath = namespace.getString("modpack");
+        if (modpackPath != null) {
+            File modpack = new File(modpackPath).getAbsoluteFile();
+            if (modpack.isDirectory() || !modpackPath.toLowerCase().endsWith(".zip")) {
+                System.out.printf("'%s' is not a ZIP archive", modpackPath);
+            } else {
+                new CurseCli(modpack, server).run();
+            }
+            return;
+        }
+
         File logFile = Paths.get(server.getParentFile().toString(), "ssw", "ssw.log").toFile();
         PrintStream logStream = new PrintStream(logFile);
-//        System.setOut(logStream);
-//        System.setErr(logStream);
+        System.setOut(logStream);
+        System.setErr(logStream);
         int port = namespace.getInt("port");
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
