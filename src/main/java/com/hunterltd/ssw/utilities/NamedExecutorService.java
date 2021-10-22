@@ -26,6 +26,22 @@ public final class NamedExecutorService {
         return executorService;
     }
 
+    public void addChildService(NamedExecutorService namedExecutorService) {
+        childServices.add(namedExecutorService);
+    }
+
+    public void shutdownAllChildServices() {
+        childServices.forEach(namedService -> {
+            if (namedService.hasChildServices())
+                namedService.shutdownAllChildServices();
+            ThreadUtils.tryShutdownNamedExecutorService(namedService);
+        });
+    }
+
+    public boolean hasChildServices() {
+        return childServices.size() > 0;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
