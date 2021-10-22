@@ -37,7 +37,7 @@ public class CurseCli {
             exception.printStackTrace();
         }
 
-        printlnWithTimeAndThread(System.out,"Reading manifest...");
+        printlnWithTimeAndThread(System.out, "Reading manifest...");
         CurseManifestFileEntry[] files = curseModpack.getManifest().getFiles();
         File modsFolder = Paths.get(serverFolder.toString(), "mods").toFile();
         try {
@@ -50,8 +50,8 @@ public class CurseCli {
         } catch (IOException e) {
             e.printStackTrace();
             return;
-        } catch (NullPointerException ignored) {}
-        finally {
+        } catch (NullPointerException ignored) {
+        } finally {
             scanner.close();
         }
 
@@ -67,21 +67,23 @@ public class CurseCli {
             try {
                 JSONObject responseData = (JSONObject) new JSONParser().parse(response.readEntity(String.class));
                 CurseAddon addon = new CurseAddon(responseData);
-                printfWithTimeAndThread(System.out, "Downloading mod %d of %d: %s%n", i + 1, filesLength, addon);
+                String message = String.format("\r\u001B[2KDownloading mod %d of %d: %s", i + 1, filesLength, addon);
+                System.out.print(message);
                 addon.download(serverFolder.toString());
             } catch (ParseException | IOException e) {
                 String errorMessage = e instanceof ParseException ?
-                        "Failed to parse JSON data for an addon" : "Failed to download an addon";
+                        "\nFailed to parse JSON data for an addon" : "Failed to download an addon";
                 printlnWithTimeAndThread(System.err, errorMessage);
             }
         }
-        printlnWithTimeAndThread(System.out, "Copying overrides...");
+        System.out.println();
         File overrideFolder = Paths.get(curseModpack.getExtractFolder().toString(), "overrides").toFile();
         File[] overrides = overrideFolder.listFiles();
         if (overrides != null) {
-            for (File file :
-                    overrides) {
+            for (int i = 0, overridesLength = overrides.length; i < overridesLength; i++) {
+                File file = overrides[i];
                 try {
+                    System.out.printf("\r\u001B[2KCopying override %d of %d: %s", i + 1, overridesLength, file);
                     File copyTo;
                     if (file.isDirectory()) {
                         copyTo = Paths.get(serverFolder.toString(), file.getName()).toFile();
@@ -94,6 +96,7 @@ public class CurseCli {
                     exception.printStackTrace();
                 }
             }
+            System.out.println();
         }
         try {
             FileUtils.deleteDirectory(curseModpack.getExtractFolder());
@@ -104,7 +107,7 @@ public class CurseCli {
 
     private void extractModpack(Scanner inputScanner) throws IOException, ParseException {
         if (curseModpack.isExtracted()) {
-            System.out.printf("%s has already been extracted, overwrite? (y/N): ",  new File(String.valueOf(curseModpack)).getName());
+            System.out.printf("%s has already been extracted, overwrite? (y/N): ", new File(String.valueOf(curseModpack)).getName());
             if (!inputScanner.next().startsWith("y")) {
                 curseModpack.getManifest().load();
                 return;
