@@ -38,6 +38,11 @@ public final class NamedExecutorService {
         });
     }
 
+    public void shutdown() {
+        shutdownAllChildServices();
+        ThreadUtils.tryShutdownNamedExecutorService(this);
+    }
+
     public boolean hasChildServices() {
         return childServices.size() > 0;
     }
