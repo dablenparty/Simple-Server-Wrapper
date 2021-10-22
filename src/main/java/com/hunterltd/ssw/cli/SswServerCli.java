@@ -156,7 +156,7 @@ public class SswServerCli {
         } catch (IOException e) {
             printExceptionToOut(e);
         }
-        serviceList.forEach(ThreadUtils::tryShutdownNamedExecutorService);
+        serviceList.forEach(NamedExecutorService::shutdown);
         // these should all be closed at this point, but it's good to clean up anyways
         clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownNamedExecutorService(executorService));
     }
