@@ -3,6 +3,7 @@ package com.hunterltd.ssw.cli;
 import com.dablenparty.jsevents.EventCallback;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
+import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
@@ -103,10 +104,17 @@ public class SswServerCli {
      * Starts all background services used by the SSW server and adds them to the {@link SswServerCli#serviceList}
      */
     private void startAllServices() {
-        ScheduledExecutorService aliveScheduledService = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService aliveScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Alive State Check"));
         NamedExecutorService aliveNamedService = new NamedExecutorService("Alive State Check", aliveScheduledService);
         serviceList.add(aliveNamedService);
         aliveScheduledService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
+        MinecraftServerSettings serverSettings = minecraftServer.getServerSettings();
+        if (serverSettings.getShutdown()) {
+            ScheduledExecutorService pingScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Server Ping Service"));
+            ServerPingTask pingTask = new ServerPingTask(minecraftServer);
+            serviceList.add(new NamedExecutorService("Server Ping Service", pingScheduledService));
+            pingScheduledService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
+        }
     }
 
     /**
