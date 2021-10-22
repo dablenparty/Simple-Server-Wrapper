@@ -145,14 +145,18 @@ public class SswServerCli {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            printErrorToOut(e);
+            printExceptionToOut(e);
         }
         serviceList.forEach(ThreadUtils::tryShutdownNamedExecutorService);
         // these should all be closed at this point, but it's good to clean up anyways
         clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownNamedExecutorService(executorService));
     }
 
-    private void printErrorToOut(Exception e) {
+    /**
+     * Thread stamps and prints an exception message to standard out, then prints the stack trace
+     * @param e Exception to print
+     */
+    public static void printExceptionToOut(Exception e) {
         String threadStampString = ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage()));
         System.out.println(threadStampString);
         e.printStackTrace();
@@ -221,7 +225,7 @@ public class SswServerCli {
                                 reader.lines().forEach(out::println); // send each line to the client
                             } catch (IOException e) {
                                 printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
-                                printErrorToOut(e);
+                                printExceptionToOut(e);
                             }
                         }
                         case "logout", "exit" -> {
@@ -237,13 +241,13 @@ public class SswServerCli {
                     }
                 }
             } catch (IOException e) {
-                printErrorToOut(e);
+                printExceptionToOut(e);
                 minecraftServer.setShouldBeRunning(false);
             } finally {
                 try {
                     clientSocket.close();
                 } catch (IOException e) {
-                    printErrorToOut(e);
+                    printExceptionToOut(e);
                 } finally {
                     minecraftServer.removeListener("data", dataCallback);
                     minecraftServer.removeListener("exiting", exitingCallback);
