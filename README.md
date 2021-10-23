@@ -22,7 +22,7 @@ Features currently included in SSW
 
 * Support for any version or type of Minecraft server (Vanilla, Spigot, Forge, etc.)
 
-* GUI or CLI
+* GUI & CLI
 
 * Per-server settings
 
@@ -34,7 +34,7 @@ Features currently included in SSW
 
 * Extra server arguments (memory allocation is coded in already)
 
-* Batch file (launch.bat) generation (text file on macOSX/Linux)
+* Batch file (launch.bat) generation (.sh file on macOSX/Linux)
 
 * CurseForge Modpack installation into an existing server
 
@@ -42,19 +42,18 @@ Features currently included in SSW
 
 ### Future
 
-These are features I want to add but either haven't gotten to them yet or don't have the capabilities right now
-
-* [x] ~~Edit server.properties~~
+These are features I want to add but either haven't gotten to them yet or don't have the capabilities right now. Crossed
+off items have been added.
 
 * [ ] Mod/plugin list for supported server types
 
+* [x] ~~Edit server.properties~~
+
 * [x] ~~Batch file (launch.bat) generation~~
 
-* [ ] Realtime player data (either through mod or server)
+* [x] ~~Realtime player data (either through mod or server)~~
 
 * [x] ~~Automatically close/reopen a server when nobody is on~~
-
-* [ ] "Hub" of sorts for adding/removing/managing servers (*I want everything else done before I even start this*)
 
 I'm sure I'll think of more
 
@@ -83,20 +82,21 @@ Otherwise, use this guide:
 * `shutdownInterval`: How long (in minutes) the server should remain without players before shutting down.
 
 Note: don't move it out of the "ssw" folder or rename it. The wrapper looks to that specific folder for that specific
-file. If it doesn't find the correct file in there, it WILL create a new one and use that instead
+file. If it doesn't find the correct file in there, it will create a new one and use that instead
 
 ### Server won't close when application does
 
-If a server is running when you try to close this application, it will warn you, and it can close the server before
-closing itself. **There are rare cases I have found where this does not work as intended.** Most of these cases I've
-accounted for, and the server process is destroyed by the wrapper. If that still doesn't work, use Task Manager
-(Windows), Activity Monitor (macOSX), or the terminal (Linux) to kill the server process yourself. Most likely, the
-issue was not my application, but the log would give more info.
+If a server is running when you try to close the GUI application, it will warn you, and it can close the server before
+closing itself. The CLI will just shut off the server. **There are rare cases I have found where this does not work as
+intended.** Most of these cases I've accounted for, and the server process is destroyed by the wrapper. If that still
+doesn't work, use Task Manager (Windows), Activity Monitor (macOSX), or the terminal (Linux) to kill the server process
+yourself. Most likely, the issue was not my application, but the log would give more info.
 
 ### Internal Errors/Forge errors
 
 In my experience, these are heavily correlated. It is *almost always* caused by a bad Java version. Forge servers are
 made on **Java 8** and for whatever reason get pissy when they're not run with such. If you don't know what version you
-have, run the command `java -version` in a terminal, and ensure the version number begins with `1.8`. So far, this has
-solved the issue every single time. If you're using Forge on Minecraft 1.17 or later and have this issue, I have no
-clue. I haven't used that myself, and you probably shouldn't be either. Use Fabric.
+have, run the command `java -version` in a terminal, and ensure the version number begins with `1.8`. If it doesn't,
+look up how to change it and try running the server again. So far, this has solved the issue every single time. If
+you're using Forge on Minecraft 1.17 or later and have this issue, I have no clue. I haven't used that myself and
+encourage you to use Fabric instead.
