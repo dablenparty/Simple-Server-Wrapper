@@ -21,7 +21,7 @@ public class InfoDialog extends JDialog {
     public InfoDialog(String title, String infoText, String okButtonText) {
         add(contentPane);
         setContentPane(contentPane);
-        setModalityType(ModalityType.MODELESS);
+        setModalityType(ModalityType.APPLICATION_MODAL);
         getRootPane().setDefaultButton(buttonOK);
         setTitle(title);
 
