@@ -43,7 +43,6 @@ public class SettingsDialog extends JDialog {
 
         minecraftServerSettings = server.getServerSettings();
         setContentPane(rootPanel);
-        setModal(true);
         setModalityType(ModalityType.APPLICATION_MODAL);
         getRootPane().setDefaultButton(buttonSave);
         setTitle("Server MinecraftServerSettings - " + server.getServerPath().getFileName());
@@ -55,7 +54,7 @@ public class SettingsDialog extends JDialog {
         for (int i = 1; i <= 24; i++) restartIntervalComboBox.addItem(i);
         for (int i = 5; i <= 60; i += 5) shutdownIntervalComboBox.addItem(i);
 
-        final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "txt";
+        final String ext = System.getProperty("os.name").toLowerCase().contains("win") ? "bat" : "sh";
         batchFileButton.addActionListener(e -> server.generateBatch(ext));
         openPropsInEditorButton.addActionListener(e -> {
             try {
