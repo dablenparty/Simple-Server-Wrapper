@@ -149,23 +149,27 @@ public class MinecraftServer extends EventEmitter {
         } catch (InterruptedException | IOException e) {
             serverProcess.destroy();
         } finally {
-            ThreadUtils.tryShutdownNamedExecutorService(namedInputService);
-            ThreadUtils.tryShutdownNamedExecutorService(namedErrorService);
-            for (Closeable stream :
-                    new Closeable[]{
-                            serverProcess.getInputStream(),
-                            serverProcess.getErrorStream(),
-                            serverProcess.getOutputStream()
-                    }) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    System.err.println(e.getLocalizedMessage());
-                }
-            }
+//            shutdownReadServices();
             shuttingDown = false;
         }
 
+    }
+
+    private void shutdownReadServices() {
+        ThreadUtils.tryShutdownNamedExecutorService(namedInputService);
+        ThreadUtils.tryShutdownNamedExecutorService(namedErrorService);
+        for (Closeable stream :
+                new Closeable[]{
+                        serverProcess.getInputStream(),
+                        serverProcess.getErrorStream(),
+                        serverProcess.getOutputStream()
+                }) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                System.err.println(e.getLocalizedMessage());
+            }
+        }
     }
 
     /**
