@@ -43,7 +43,7 @@ public class SswClientCli {
         Namespace namespace = parseArgs(args);
         SswClientCli clientCli = new SswClientCli();
         int port = namespace.getInt("port");
-        String target = namespace.getString("target");
+        String target = "127.0.0.1";
 
         try {
             clientCli.connect(target, port);
