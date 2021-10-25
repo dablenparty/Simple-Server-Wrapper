@@ -5,8 +5,8 @@ import com.hunterltd.ssw.utilities.network.PortListener;
 
 import java.io.IOException;
 
-import static com.hunterltd.ssw.utilities.ThreadUtils.printfWithTimeAndThread;
-import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printfWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 public class AliveStateCheckTask extends ServerBasedRunnable {
     private final PortListener portListener;

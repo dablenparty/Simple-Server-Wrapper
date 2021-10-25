@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Scanner;
 
-import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 public class CurseCli {
     private final CurseModpack curseModpack;

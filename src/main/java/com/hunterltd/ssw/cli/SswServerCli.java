@@ -8,8 +8,8 @@ import com.hunterltd.ssw.curse.CurseCli;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.MinecraftServerSettings;
-import com.hunterltd.ssw.utilities.NamedExecutorService;
-import com.hunterltd.ssw.utilities.ThreadUtils;
+import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
+import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.hunterltd.ssw.utilities.ThreadUtils.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 public class SswServerCli {
     private final int port;
