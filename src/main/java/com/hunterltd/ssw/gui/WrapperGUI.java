@@ -4,7 +4,6 @@ import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.gui.dialogs.SettingsDialog;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import com.hunterltd.ssw.utilities.SmartScroller;
 import com.hunterltd.ssw.utilities.network.PortListener;
 import com.hunterltd.ssw.utilities.network.ServerListPing;
@@ -47,7 +46,7 @@ public class WrapperGUI extends JFrame {
     private JTextField serverPathTextField;
     private MinecraftServer server;
     private ActionListener settingsOpen, openInFolder;
-    private MinecraftServerSettings serverSettings;
+    private MinecraftServer.ServerSettings serverSettings;
     private ServerListPing serverPinger;
     private int historyLocation = 0;
 
@@ -244,7 +243,7 @@ public class WrapperGUI extends JFrame {
             settingsDialog.setVisible(true);
         };
         try {
-            serverSettings = new MinecraftServerSettings(Paths.get(serverFileInfo.getSelectedFile().getParent(),
+            serverSettings = new MinecraftServer.ServerSettings(Paths.get(serverFileInfo.getSelectedFile().getParent(),
                     "ssw",
                     "wrapperSettings.json"));
         } catch (IOException e) {

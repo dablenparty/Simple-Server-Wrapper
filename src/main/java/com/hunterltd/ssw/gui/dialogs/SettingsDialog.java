@@ -2,14 +2,13 @@ package com.hunterltd.ssw.gui.dialogs;
 
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.server.properties.PropertiesTableModel;
-import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 
 import javax.swing.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class SettingsDialog extends JDialog {
-    private final MinecraftServerSettings minecraftServerSettings;
+    private final MinecraftServer.ServerSettings serverSettings;
     private final MinecraftServer server;
     private JPanel rootPanel;
     private JButton buttonSave;
@@ -41,7 +40,7 @@ public class SettingsDialog extends JDialog {
 
         add(rootPanel);
 
-        minecraftServerSettings = server.getServerSettings();
+        serverSettings = server.getServerSettings();
         setContentPane(rootPanel);
         setModalityType(ModalityType.APPLICATION_MODAL);
         getRootPane().setDefaultButton(buttonSave);
@@ -79,12 +78,12 @@ public class SettingsDialog extends JDialog {
                 new JComponent[]{shutdownIntervalLabel, shutdownIntervalSlider, shutdownIntervalComboBox}));
 
         // Set components based on UserSettings
-        memoryComboBox.setSelectedIndex(((minecraftServerSettings.getMemory() * 2) / 1024) - 1); // converts between raw number and index
-        automaticRestartCheckBox.setSelected(minecraftServerSettings.getRestart());
-        restartIntervalComboBox.setSelectedIndex(minecraftServerSettings.getRestartInterval() - 1);
-        automaticShutdownCheckBox.setSelected(minecraftServerSettings.getShutdown());
-        shutdownIntervalComboBox.setSelectedIndex((minecraftServerSettings.getShutdownInterval() / 5) - 1);
-        extraArgsTextField.setText(String.join(" ", minecraftServerSettings.getExtraArgs()));
+        memoryComboBox.setSelectedIndex(((serverSettings.getMemory() * 2) / 1024) - 1); // converts between raw number and index
+        automaticRestartCheckBox.setSelected(serverSettings.getRestart());
+        restartIntervalComboBox.setSelectedIndex(serverSettings.getRestartInterval() - 1);
+        automaticShutdownCheckBox.setSelected(serverSettings.getShutdown());
+        shutdownIntervalComboBox.setSelectedIndex((serverSettings.getShutdownInterval() / 5) - 1);
+        extraArgsTextField.setText(String.join(" ", serverSettings.getExtraArgs()));
         if (server.propertiesExists() || server.updateProperties())
             propsTable.setModel(new PropertiesTableModel(server.getProperties()));
         else settingsTabs.removeTabAt(2); // remove properties tab
@@ -92,23 +91,23 @@ public class SettingsDialog extends JDialog {
 
     @SuppressWarnings("unchecked")
     private void onSave() {
-        minecraftServerSettings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
-        if ((automaticRestartCheckBox.isSelected() && !minecraftServerSettings.getRestart())
-                || (automaticShutdownCheckBox.isSelected() && !minecraftServerSettings.getShutdown())) {
+        serverSettings.setMemory((int) ((memorySlider.getValue() / 2.0) * 1024));
+        if ((automaticRestartCheckBox.isSelected() && !serverSettings.getRestart())
+                || (automaticShutdownCheckBox.isSelected() && !serverSettings.getShutdown())) {
             InfoDialog dialog = new InfoDialog("Restart",
                     "The server must be restarted if it is running in order for these changes to take effect");
             dialog.pack();
             dialog.setVisible(true);
         }
-        minecraftServerSettings.setRestart(automaticRestartCheckBox.isSelected());
-        minecraftServerSettings.setRestartInterval(restartIntervalSlider.getValue());
-        minecraftServerSettings.setShutdown(automaticShutdownCheckBox.isSelected());
-        minecraftServerSettings.setShutdownInterval(shutdownIntervalSlider.getValue() * 5);
+        serverSettings.setRestart(automaticRestartCheckBox.isSelected());
+        serverSettings.setRestartInterval(restartIntervalSlider.getValue());
+        serverSettings.setShutdown(automaticShutdownCheckBox.isSelected());
+        serverSettings.setShutdownInterval(shutdownIntervalSlider.getValue() * 5);
 
-        minecraftServerSettings.setExtraArgs(extraArgsTextField.getText().split(" "));
+        serverSettings.setExtraArgs(extraArgsTextField.getText().split(" "));
 
         try {
-            minecraftServerSettings.writeData();
+            serverSettings.writeData();
         } catch (FileNotFoundException e) {
             new InternalErrorDialog(e);
         }

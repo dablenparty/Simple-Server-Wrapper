@@ -7,7 +7,6 @@ import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.curse.CurseCli;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
-import com.hunterltd.ssw.utilities.MinecraftServerSettings;
 import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -41,7 +40,7 @@ public class SswServerCli {
 
     SswServerCli(int port, File serverFile) {
         this.port = port;
-        minecraftServer = new MinecraftServer(serverFile, MinecraftServerSettings.getSettingsFromDefaultPath(serverFile));
+        minecraftServer = new MinecraftServer(serverFile, MinecraftServer.ServerSettings.getSettingsFromDefaultPath(serverFile));
     }
 
     public static Namespace parseArgs(String[] args) {
@@ -135,7 +134,7 @@ public class SswServerCli {
         NamedExecutorService aliveNamedService = new NamedExecutorService("Alive State Check", aliveScheduledService);
         serviceList.add(aliveNamedService);
         aliveScheduledService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
-        MinecraftServerSettings serverSettings = minecraftServer.getServerSettings();
+        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         if (serverSettings.getShutdown()) {
             printlnWithTimeAndThread(System.out, "Auto startup/shutdown is enabled");
             // make a new thread
