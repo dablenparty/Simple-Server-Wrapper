@@ -59,6 +59,20 @@ I'm sure I'll think of more
 
 ---
 
+## CLI Commands
+
+A list of commands currently provided by the CLI
+
+* `start`: Starts the Minecraft server.
+* `logout`: Disconnect the client from the server.
+* `exit`: Alias for `logout`.
+* `log`: Prints out the most recent log from the Minecraft server.
+* `backlog`: Alias for `log`.
+* `printlog`: Alias for `log`.
+* `close`: Disconnects the client from the server and closes the server (if there are no other clients connected).
+
+---
+
 ## Troubleshooting
 
 ### Settings file
