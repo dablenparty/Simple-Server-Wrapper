@@ -91,6 +91,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
             boolean sendMessage = false;
             // every hour
             if (secondsPassed == delayInSeconds) {
+                server.setShouldRestart(true);
                 server.setShouldBeRunning(false);
                 return;
             }
