@@ -341,4 +341,8 @@ public class SswServerCli {
             return clientSocket.isClosed();
         }
     }
+
+    private interface SswCliCommand {
+        void runCommand(SswClientHandler client);
+    }
 }
