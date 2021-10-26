@@ -115,12 +115,12 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                 server.setShouldBeRunning(false);
                 return;
             }
+            long difference = delayInSeconds - secondsPassed;
             // every hour
             if (secondsPassed % 3600 == 0) {
-                message = String.format(message, secondsPassed / 60 / 60, "hours");
+                message = String.format(message, difference / 60 / 60, "hours");
                 sendMessage = true;
             } else {
-                long difference = delayInSeconds - secondsPassed;
                 switch ((int) difference) {
                     case 1800, 900, 600, 300 -> {
                         message = String.format(message, difference / 60, "minutes");
