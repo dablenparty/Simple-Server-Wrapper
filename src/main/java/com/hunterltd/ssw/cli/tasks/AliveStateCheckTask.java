@@ -46,9 +46,8 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
             try {
                 server.run();
                 if (server.getServerSettings().getRestart()) {
-                    long delay = server.getServerSettings().getRestartInterval();
                     ScheduledExecutorService service = (ScheduledExecutorService) scheduledRestartService.service();
-                    restartServiceFuture = service.schedule(new RestartService(server, delay), 1L, TimeUnit.SECONDS);
+                    restartServiceFuture = service.schedule(new RestartService(server), 1L, TimeUnit.SECONDS);
                 }
             } catch (IOException e) {
                 // an error occurred starting the process
@@ -80,7 +79,8 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
 
         private RestartService(MinecraftServer minecraftServer, long delay) {
             super(minecraftServer);
-            delayInSeconds = TimeUnit.HOURS.toSeconds(delay);
+            long restartInterval = minecraftServer.getServerSettings().getRestartInterval();
+            delayInSeconds = TimeUnit.HOURS.toSeconds(restartInterval);
         }
 
         @Override
