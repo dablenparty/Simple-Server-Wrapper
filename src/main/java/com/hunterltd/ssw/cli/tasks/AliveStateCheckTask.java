@@ -89,12 +89,12 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
             MinecraftServer server = getMinecraftServer();
             String message = "me is restarting in %d %s";
             boolean sendMessage = false;
-            // every hour
             if (secondsPassed == delayInSeconds) {
                 server.setShouldRestart(true);
                 server.setShouldBeRunning(false);
                 return;
             }
+            // every hour
             if (secondsPassed % 3600 == 0) {
                 message = String.format(message, secondsPassed / 60 / 60, "hours");
                 sendMessage = true;
