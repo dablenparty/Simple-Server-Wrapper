@@ -25,10 +25,7 @@ public class ServerPingTask extends ServerBasedRunnable {
         String serviceName = "MinecraftServer Shutdown Service";
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory(serviceName));
         scheduledShutdownService = new NamedExecutorService(serviceName, service);
-    }
-
-    public NamedExecutorService getScheduledShutdownService() {
-        return scheduledShutdownService;
+        addChildService(scheduledShutdownService);
     }
 
     @Override

@@ -34,10 +34,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
         String serviceName = "MinecraftServer Restart Service";
         ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory(serviceName));
         scheduledRestartService = new NamedExecutorService(serviceName, service);
-    }
-
-    public NamedExecutorService getScheduledRestartService() {
-        return scheduledRestartService;
+        addChildService(scheduledRestartService);
     }
 
     @Override

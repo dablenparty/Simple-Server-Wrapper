@@ -135,7 +135,7 @@ public class SswServerCli {
         serviceList.add(aliveNamedService);
         AliveStateCheckTask stateCheckTask = new AliveStateCheckTask(minecraftServer);
         aliveScheduledService.scheduleWithFixedDelay(stateCheckTask, 1L, 1L, TimeUnit.SECONDS);
-        aliveNamedService.addChildService(stateCheckTask.getScheduledRestartService());
+        stateCheckTask.getChildServices().forEach(aliveNamedService::addChildService);
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         if (serverSettings.getShutdown()) {
             printlnWithTimeAndThread(System.out, "Auto startup/shutdown is enabled");
@@ -144,7 +144,7 @@ public class SswServerCli {
             ServerPingTask pingTask = new ServerPingTask(minecraftServer);
             // make the named service and add the ping tasks' child service
             NamedExecutorService serverPingService = new NamedExecutorService("Server Ping Service", pingScheduledService);
-            serverPingService.addChildService(pingTask.getScheduledShutdownService());
+            pingTask.getChildServices().forEach(serverPingService::addChildService);
             serviceList.add(serverPingService);
             // lastly, schedule the task
             pingScheduledService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
