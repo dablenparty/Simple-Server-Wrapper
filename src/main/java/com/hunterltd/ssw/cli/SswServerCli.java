@@ -133,7 +133,9 @@ public class SswServerCli {
         ScheduledExecutorService aliveScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Alive State Check"));
         NamedExecutorService aliveNamedService = new NamedExecutorService("Alive State Check", aliveScheduledService);
         serviceList.add(aliveNamedService);
-        aliveScheduledService.scheduleWithFixedDelay(new AliveStateCheckTask(minecraftServer), 1L, 1L, TimeUnit.SECONDS);
+        AliveStateCheckTask stateCheckTask = new AliveStateCheckTask(minecraftServer);
+        aliveScheduledService.scheduleWithFixedDelay(stateCheckTask, 1L, 1L, TimeUnit.SECONDS);
+        aliveNamedService.addChildService(stateCheckTask.getScheduledRestartService());
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         if (serverSettings.getShutdown()) {
             printlnWithTimeAndThread(System.out, "Auto startup/shutdown is enabled");
