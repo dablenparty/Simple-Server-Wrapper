@@ -34,7 +34,7 @@ public class SswServerCli {
     private final MinecraftServer minecraftServer;
     private final List<NamedExecutorService> serviceList = new ArrayList<>();
     private final Map<SswClientHandler, NamedExecutorService> clientHandlerToExecutorMap = new HashMap<>();
-    private final Map<String, SswCliCommand> commandMap = new HashMap<>();
+    private final Map<String, BooleanSswCliCommand> commandMap = new HashMap<>();
     private ServerSocket serverSocket;
     private volatile boolean cancel = false;
     private int clientId = 0;
@@ -110,7 +110,7 @@ public class SswServerCli {
     }
 
     private void registerCliCommands() {
-        commandMap.put("start", client -> {
+        SswCliCommand startCommand = client -> {
             // running is handled in AliveStateCheckTask
             if (!minecraftServer.isRunning()) {
                 client.printlnToServerAndClient("Starting server...");
@@ -118,17 +118,19 @@ public class SswServerCli {
             } else
                 client.printlnToServerAndClient("Server is already running");
 
-        });
+        };
+        commandMap.put("start", new BooleanSswCliCommand(startCommand, false));
 
-        commandMap.put("stop", client -> {
+        SswCliCommand stopCommand = client -> {
             if (minecraftServer.isRunning()) {
                 client.printlnToServerAndClient("Stopping server...");
                 minecraftServer.setShouldBeRunning(false);
             } else
                 client.printlnToServerAndClient("No server is running");
-        });
+        };
+        commandMap.put("stop", new BooleanSswCliCommand(stopCommand, false));
 
-        commandMap.put("close", client -> {
+        SswCliCommand closeCommand = client -> {
             printlnWithTimeAndThread(System.out, "Closing client connection...");
             if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
                 cancel = true;
@@ -138,9 +140,10 @@ public class SswServerCli {
                     minecraftServer.getServerSettings().setShutdown(false);
                 }
             }
-        });
+        };
+        commandMap.put("close", new BooleanSswCliCommand(closeCommand, true));
 
-        SswCliCommand logCommand = client -> {
+        BooleanSswCliCommand logCommand = new BooleanSswCliCommand(client -> {
             Path serverParentFolder = minecraftServer.getServerPath().getParent();
             File logFile = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
             try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
@@ -149,14 +152,14 @@ public class SswServerCli {
                 client.printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
                 printExceptionToOut(e);
             }
-        };
-
+        }, false);
         commandMap.put("log", logCommand);
         commandMap.put("backlog", logCommand);
         commandMap.put("printlog", logCommand);
 
-        SswCliCommand logoutCommand = client -> printlnWithTimeAndThread(System.out, "Closing client connection...");
-
+        BooleanSswCliCommand logoutCommand = new BooleanSswCliCommand(client ->
+                printlnWithTimeAndThread(System.out, "Closing client connection..."),
+                true);
         commandMap.put("logout", logoutCommand);
         commandMap.put("exit", logoutCommand);
     }
@@ -214,6 +217,7 @@ public class SswServerCli {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         serverSocket.setSoTimeout(5000);
         startAllServices();
+        registerCliCommands();
         while (!cancel) {
             pruneClientHandlers();
             Socket socket;
@@ -245,6 +249,16 @@ public class SswServerCli {
         serviceList.forEach(NamedExecutorService::shutdown);
         // these should all be closed at this point, but it's good to clean up anyways
         clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownNamedExecutorService(executorService));
+    }
+
+    private interface SswCliCommand {
+        void runCommand(SswClientHandler client);
+    }
+
+    private record BooleanSswCliCommand(SswCliCommand command, boolean shouldBreak) {
+        public void runCommand(SswClientHandler client) {
+            command.runCommand(client);
+        }
     }
 
     /**
@@ -282,58 +296,18 @@ public class SswServerCli {
                  BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
                 String message;
-                mainLoop:
                 while ((message = in.readLine()) != null) {
                     printlnWithTimeAndThread(System.out, message);
-                    switch (message) {
-                        case "start" -> {
-                            // running is handled in AliveStateCheckTask
-                            if (!minecraftServer.isRunning()) {
-                                printlnToServerAndClient("Starting server...");
-                                minecraftServer.setShouldBeRunning(true);
-                            } else
-                                printlnToServerAndClient("Server is already running");
-                        }
-                        case "stop" -> {
-                            if (minecraftServer.isRunning()) {
-                                printlnToServerAndClient("Stopping server...");
-                                minecraftServer.setShouldBeRunning(false);
-                            } else
-                                printlnToServerAndClient("No server is running");
-                        }
-                        case "close" -> {
-                            printlnWithTimeAndThread(System.out, "Closing client connection...");
-                            if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
-                                cancel = true;
-                                if (minecraftServer.isRunning()) {
-                                    minecraftServer.setShouldBeRunning(false);
-                                    // prevents the port listener from opening back up automatically
-                                    minecraftServer.getServerSettings().setShutdown(false);
-                                }
-                            }
-                            break mainLoop;
-                        }
-                        case "log", "backlog", "printlog" -> {
-                            Path serverParentFolder = minecraftServer.getServerPath().getParent();
-                            File logFile = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
-                            try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
-                                reader.lines().forEach(out::println); // send each line to the client
-                            } catch (IOException e) {
-                                printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
-                                printExceptionToOut(e);
-                            }
-                        }
-                        case "logout", "exit" -> {
-                            printlnWithTimeAndThread(System.out, "Closing client connection...");
-                            break mainLoop;
-                        }
-                        default -> {
-                            if (minecraftServer.isRunning())
-                                minecraftServer.sendCommand(message.trim());
-                            else
-                                printfToServerAndClient("Unknown command: %s%n", message);
-                        }
+                    BooleanSswCliCommand command = commandMap.get(message);
+                    if (command == null) {
+                        if (minecraftServer.isRunning())
+                            minecraftServer.sendCommand(message.trim());
+                        else
+                            printfToServerAndClient("Unknown command: %s%n", message);
+                        continue;
                     }
+                    command.runCommand(this);
+                    if (command.shouldBreak()) break;
                 }
             } catch (IOException e) {
                 printExceptionToOut(e);
@@ -393,9 +367,5 @@ public class SswServerCli {
         public boolean isClosed() {
             return clientSocket.isClosed();
         }
-    }
-
-    private interface SswCliCommand {
-        void runCommand(SswClientHandler client);
     }
 }
