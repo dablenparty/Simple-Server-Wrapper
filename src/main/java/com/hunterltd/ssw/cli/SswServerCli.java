@@ -34,6 +34,7 @@ public class SswServerCli {
     private final MinecraftServer minecraftServer;
     private final List<NamedExecutorService> serviceList = new ArrayList<>();
     private final Map<SswClientHandler, NamedExecutorService> clientHandlerToExecutorMap = new HashMap<>();
+    private final Map<String, SswCliCommand> commandMap = new HashMap<>();
     private ServerSocket serverSocket;
     private volatile boolean cancel = false;
     private int clientId = 0;
@@ -106,6 +107,58 @@ public class SswServerCli {
         String threadStampString = ThreadUtils.threadStampString(String.format("Error: %s", e.getLocalizedMessage()));
         System.out.println(threadStampString);
         e.printStackTrace();
+    }
+
+    private void registerCliCommands() {
+        commandMap.put("start", client -> {
+            // running is handled in AliveStateCheckTask
+            if (!minecraftServer.isRunning()) {
+                client.printlnToServerAndClient("Starting server...");
+                minecraftServer.setShouldBeRunning(true);
+            } else
+                client.printlnToServerAndClient("Server is already running");
+
+        });
+
+        commandMap.put("stop", client -> {
+            if (minecraftServer.isRunning()) {
+                client.printlnToServerAndClient("Stopping server...");
+                minecraftServer.setShouldBeRunning(false);
+            } else
+                client.printlnToServerAndClient("No server is running");
+        });
+
+        commandMap.put("close", client -> {
+            printlnWithTimeAndThread(System.out, "Closing client connection...");
+            if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
+                cancel = true;
+                if (minecraftServer.isRunning()) {
+                    minecraftServer.setShouldBeRunning(false);
+                    // prevents the port listener from opening back up automatically
+                    minecraftServer.getServerSettings().setShutdown(false);
+                }
+            }
+        });
+
+        SswCliCommand logCommand = client -> {
+            Path serverParentFolder = minecraftServer.getServerPath().getParent();
+            File logFile = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+                reader.lines().forEach(client.out::println); // send each line to the client
+            } catch (IOException e) {
+                client.printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
+                printExceptionToOut(e);
+            }
+        };
+
+        commandMap.put("log", logCommand);
+        commandMap.put("backlog", logCommand);
+        commandMap.put("printlog", logCommand);
+
+        SswCliCommand logoutCommand = client -> printlnWithTimeAndThread(System.out, "Closing client connection...");
+
+        commandMap.put("logout", logoutCommand);
+        commandMap.put("exit", logoutCommand);
     }
 
     /**
