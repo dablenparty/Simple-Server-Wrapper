@@ -74,8 +74,8 @@ Otherwise, use this guide:
   the wrapper. I recommend using those referenced in
   [this reddit post](https://www.reddit.com/r/feedthebeast/comments/5jhuk9/modded_mc_and_memory_usage_a_history_with_a/)
   .
-* `autoRestart`: Eventually I'm going to deprecate this (the CLI doesn't even support it) but this defines whether the
-  wrapper should automatically restart after a given interval.
+* `autoRestart`: I wanted to deprecate this but forgot my friends have no life and grind the game for hours, so this
+  defines whether the wrapper should automatically restart after a given interval.
 * `restartInterval`: How long (in hours) the server should run before the wrapper automatically restarts it.
 * `autoShutdown`: Whether the server should automatically shut down the server. This is also what determines whether the
   wrapper will automatically start the server again when someone tries to connect on its port.
