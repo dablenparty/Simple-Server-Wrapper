@@ -7,10 +7,7 @@ import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
 import com.hunterltd.ssw.utilities.network.PortListener;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printlnWithTimeAndThread;
@@ -28,18 +25,31 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
         scheduledRestartService = new NamedExecutorService(serviceName, service);
     }
 
+    public NamedExecutorService getScheduledRestartService() {
+        return scheduledRestartService;
+    }
+
     @Override
     public void run() {
         MinecraftServer server = getMinecraftServer();
         if (!server.shouldBeRunning() && server.isRunning() && !server.isShuttingDown()) {
             server.stop();
             startPortListener(server);
+            if (restartServiceFuture != null && !restartServiceFuture.isDone()) {
+                if (!restartServiceFuture.cancel(false))
+                    restartServiceFuture.cancel(true);
 
+            }
         } else if (server.shouldBeRunning() && !server.isRunning()) {
             if (portListener.isOpen())
                 portListener.stop();
             try {
                 server.run();
+                if (server.getServerSettings().getRestart()) {
+                    long delay = server.getServerSettings().getRestartInterval();
+                    ScheduledExecutorService service = (ScheduledExecutorService) scheduledRestartService.service();
+                    restartServiceFuture = service.schedule(new RestartService(server, delay), 1L, TimeUnit.SECONDS);
+                }
             } catch (IOException e) {
                 // an error occurred starting the process
                 e.printStackTrace();
