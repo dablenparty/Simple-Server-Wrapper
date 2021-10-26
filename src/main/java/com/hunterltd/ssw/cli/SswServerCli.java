@@ -216,6 +216,10 @@ public class SswServerCli {
             EventCallback exitCallback = objects -> {
                 printlnToServerAndClient("Server successfully stopped!");
                 minecraftServer.setShouldBeRunning(false); // prevents launch loops
+                if (minecraftServer.shouldRestart()) {
+                    minecraftServer.setShouldBeRunning(true);
+                    minecraftServer.setShouldRestart(false);
+                }
             };
             minecraftServer.on("data", dataCallback);
             minecraftServer.on("exiting", exitingCallback);
