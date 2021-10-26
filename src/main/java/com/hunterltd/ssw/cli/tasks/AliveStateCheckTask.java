@@ -7,16 +7,27 @@ import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
 import com.hunterltd.ssw.utilities.network.PortListener;
 
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
+/**
+ * Handles starting and stopping the server process
+ */
 public class AliveStateCheckTask extends ServerBasedRunnable {
     private final PortListener portListener;
     private final NamedExecutorService scheduledRestartService;
     private ScheduledFuture<?> restartServiceFuture = null;
 
+    /**
+     * Creates a new instance of this class
+     *
+     * @param minecraftServer Server object to monitor
+     */
     public AliveStateCheckTask(MinecraftServer minecraftServer) {
         super(minecraftServer);
         portListener = new PortListener(minecraftServer.getPort());
@@ -34,7 +45,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
         MinecraftServer server = getMinecraftServer();
         if (!server.shouldBeRunning() && server.isRunning() && !server.isShuttingDown()) {
             server.stop();
-            startPortListener(server);
+            tryStartPortListener(server);
             if (restartServiceFuture != null && !restartServiceFuture.isDone()) {
                 if (!restartServiceFuture.cancel(false))
                     restartServiceFuture.cancel(true);
@@ -57,7 +68,12 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
         }
     }
 
-    private void startPortListener(MinecraftServer server) {
+    /**
+     * Tries to start a {@link PortListener} on the port specified in {@code server}.
+     *
+     * @param server Server to listen for connection to
+     */
+    private void tryStartPortListener(MinecraftServer server) {
         if (!server.getServerSettings().getShutdown() || portListener.isOpen()) return;
         printfWithTimeAndThread(System.out, "Attempting to open port listener on port %d", server.getPort());
         try {
@@ -73,11 +89,19 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
         }
     }
 
+    /**
+     * Inner runnable for restarting server after it's interval
+     */
     private class RestartService extends ServerBasedRunnable {
-        private long secondsPassed = 0;
         private final long delayInSeconds;
+        private long secondsPassed = 0;
 
-        private RestartService(MinecraftServer minecraftServer, long delay) {
+        /**
+         * Creates a new instance of this class
+         *
+         * @param minecraftServer Server to restart
+         */
+        private RestartService(MinecraftServer minecraftServer) {
             super(minecraftServer);
             long restartInterval = minecraftServer.getServerSettings().getRestartInterval();
             delayInSeconds = TimeUnit.HOURS.toSeconds(restartInterval);
@@ -98,8 +122,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
             if (secondsPassed % 3600 == 0) {
                 message = String.format(message, secondsPassed / 60 / 60, "hours");
                 sendMessage = true;
-            }
-            else {
+            } else {
                 long difference = delayInSeconds - secondsPassed;
                 switch ((int) difference) {
                     case 1800, 900, 600, 300 -> {
