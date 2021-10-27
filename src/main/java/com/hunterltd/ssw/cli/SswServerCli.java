@@ -124,6 +124,8 @@ public class SswServerCli {
         SswCliCommand stopCommand = client -> {
             if (minecraftServer.isRunning()) {
                 client.printlnToServerAndClient("Stopping server...");
+                // don't allow a restart when manually stopping
+                minecraftServer.setShouldRestart(false);
                 minecraftServer.setShouldBeRunning(false);
             } else
                 client.printlnToServerAndClient("No server is running");
