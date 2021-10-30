@@ -27,7 +27,7 @@ public class SswClientCli {
         Properties mavenProperties = MavenUtils.getMavenProperties();
         ArgumentParser parser = ArgumentParsers.newFor("ssw-client").build()
                 .defaultHelp(true)
-                .version(String.format("${prog} v%s", mavenProperties.getProperty("version")))
+                .version("${prog} v" + mavenProperties.getProperty("version"))
                 .description("Client-side commandline interface for connecting to and interacting with either local " +
                         "or remote instances of this programs server-side counterpart.");
         parser.addArgument("-v", "--version").action(Arguments.version());
