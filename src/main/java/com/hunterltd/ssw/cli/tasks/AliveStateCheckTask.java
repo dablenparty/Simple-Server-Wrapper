@@ -53,7 +53,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                 portListener.stop();
             try {
                 server.run();
-                if (server.getServerSettings().getRestart()) {
+                if (server.getServerSettings().getRestart() && restartServiceFuture == null) {
                     ScheduledExecutorService service = (ScheduledExecutorService) scheduledRestartService.service();
                     restartServiceFuture = service.schedule(new RestartService(server), 1L, TimeUnit.SECONDS);
                 }
@@ -71,7 +71,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
      * @param server Server to listen for connection to
      */
     private void tryStartPortListener(MinecraftServer server) {
-        if (!server.getServerSettings().getShutdown() || portListener.isOpen()) return;
+        if (!server.getServerSettings().getShutdown() || server.shouldRestart() || portListener.isOpen()) return;
         printfWithTimeAndThread(System.out, "Attempting to open port listener on port %d", server.getPort());
         try {
             portListener.start();
@@ -108,6 +108,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
         public void run() {
             secondsPassed++;
             MinecraftServer server = getMinecraftServer();
+            if (!server.isRunning()) return;
             String message = "me is restarting in %d %s";
             boolean sendMessage = false;
             if (secondsPassed == delayInSeconds) {
