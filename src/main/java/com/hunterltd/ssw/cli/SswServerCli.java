@@ -34,7 +34,7 @@ public class SswServerCli {
     private final MinecraftServer minecraftServer;
     private final List<NamedExecutorService> serviceList = new ArrayList<>();
     private final Map<SswClientHandler, NamedExecutorService> clientHandlerToExecutorMap = new HashMap<>();
-    private final Map<String, BooleanSswCliCommand> commandMap = new HashMap<>();
+    private final Map<String, SswCliCommand> commandMap = new HashMap<>();
     private ServerSocket serverSocket;
     private volatile boolean cancel = false;
     private int clientId = 0;
@@ -110,7 +110,7 @@ public class SswServerCli {
     }
 
     private void registerCliCommands() {
-        SswCliCommand startCommand = client -> {
+        SswCommandRunnable startCommand = client -> {
             // running is handled in AliveStateCheckTask
             if (!minecraftServer.isRunning()) {
                 client.printlnToServerAndClient("Starting server...");
@@ -119,9 +119,9 @@ public class SswServerCli {
                 client.printlnToServerAndClient("Server is already running");
 
         };
-        commandMap.put("start", new BooleanSswCliCommand(startCommand, false));
+        commandMap.put("start", new SswCliCommand(startCommand, false));
 
-        SswCliCommand stopCommand = client -> {
+        SswCommandRunnable stopCommand = client -> {
             if (minecraftServer.isRunning()) {
                 client.printlnToServerAndClient("Stopping server...");
                 // don't allow a restart when manually stopping
@@ -130,9 +130,9 @@ public class SswServerCli {
             } else
                 client.printlnToServerAndClient("No server is running");
         };
-        commandMap.put("stop", new BooleanSswCliCommand(stopCommand, false));
+        commandMap.put("stop", new SswCliCommand(stopCommand, false));
 
-        SswCliCommand closeCommand = client -> {
+        SswCommandRunnable closeCommand = client -> {
             printlnWithTimeAndThread(System.out, "Closing client connection...");
             if (clientHandlerToExecutorMap.size() == 1 && !cancel) {
                 cancel = true;
@@ -143,9 +143,9 @@ public class SswServerCli {
                 }
             }
         };
-        commandMap.put("close", new BooleanSswCliCommand(closeCommand, true));
+        commandMap.put("close", new SswCliCommand(closeCommand, true));
 
-        BooleanSswCliCommand logCommand = new BooleanSswCliCommand(client -> {
+        SswCliCommand logCommand = new SswCliCommand(client -> {
             Path serverParentFolder = minecraftServer.getServerPath().getParent();
             File logFile = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
             try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
@@ -159,7 +159,7 @@ public class SswServerCli {
         commandMap.put("backlog", logCommand);
         commandMap.put("printlog", logCommand);
 
-        BooleanSswCliCommand logoutCommand = new BooleanSswCliCommand(client ->
+        SswCliCommand logoutCommand = new SswCliCommand(client ->
                 printlnWithTimeAndThread(System.out, "Closing client connection..."),
                 true);
         commandMap.put("logout", logoutCommand);
@@ -253,11 +253,11 @@ public class SswServerCli {
         clientHandlerToExecutorMap.forEach((sswClientHandler, executorService) -> ThreadUtils.tryShutdownNamedExecutorService(executorService));
     }
 
-    private interface SswCliCommand {
+    private interface SswCommandRunnable {
         void runCommand(SswClientHandler client);
     }
 
-    private record BooleanSswCliCommand(SswCliCommand command, boolean shouldBreak) {
+    private record SswCliCommand(SswCommandRunnable command, boolean shouldBreak) {
         public void runCommand(SswClientHandler client) {
             command.runCommand(client);
         }
@@ -300,7 +300,7 @@ public class SswServerCli {
                 String message;
                 while ((message = in.readLine()) != null) {
                     printlnWithTimeAndThread(System.out, message);
-                    BooleanSswCliCommand command = commandMap.get(message);
+                    SswCliCommand command = commandMap.get(message);
                     if (command == null) {
                         if (minecraftServer.isRunning())
                             minecraftServer.sendCommand(message.trim());
