@@ -145,16 +145,8 @@ public class SswServerCli {
         };
         commandMap.put("close", new SswCliCommand(closeCommand, true));
 
-        SswCliCommand logCommand = new SswCliCommand(client -> {
-            Path serverParentFolder = minecraftServer.getServerPath().getParent();
-            File logFile = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
-            try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
-                reader.lines().forEach(client.out::println); // send each line to the client
-            } catch (IOException e) {
-                client.printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
-                printExceptionToOut(e);
-            }
-        }, false);
+        Path serverParentFolder = minecraftServer.getServerPath().getParent();
+        SswCliCommand logCommand = new SswCliCommand(client -> sendLogToClient(client, Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile()), false);
         commandMap.put("log", logCommand);
         commandMap.put("backlog", logCommand);
         commandMap.put("printlog", logCommand);
@@ -164,6 +156,15 @@ public class SswServerCli {
                 true);
         commandMap.put("logout", logoutCommand);
         commandMap.put("exit", logoutCommand);
+    }
+
+    private void sendLogToClient(SswClientHandler client, File logFile) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+            reader.lines().forEach(client.out::println); // send each line to the client
+        } catch (IOException e) {
+            client.printfToServerAndClient("There was an error reading the log file at '%s'%n", logFile);
+            printExceptionToOut(e);
+        }
     }
 
     /**
