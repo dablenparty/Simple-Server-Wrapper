@@ -114,6 +114,9 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                 server.setShouldRestart(true);
                 server.setShouldBeRunning(false);
                 return;
+            } else if (secondsPassed > delayInSeconds) {
+                // waiting to restart
+                return;
             }
             long difference = delayInSeconds - secondsPassed;
             // every hour
