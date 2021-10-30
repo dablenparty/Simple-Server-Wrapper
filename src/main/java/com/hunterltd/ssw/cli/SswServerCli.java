@@ -147,10 +147,16 @@ public class SswServerCli {
         commandMap.put("close", new SswCliCommand(closeCommand, true));
 
         Path serverParentFolder = minecraftServer.getServerPath().getParent();
-        SswCliCommand logCommand = new SswCliCommand(client -> sendLogToClient(client, Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile()), false);
+        File minecraftLog = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
+        SswCliCommand logCommand = new SswCliCommand(client -> sendLogToClient(client, minecraftLog), false);
         commandMap.put("log", logCommand);
         commandMap.put("backlog", logCommand);
         commandMap.put("printlog", logCommand);
+
+        SswCliCommand debugLogCommand = new SswCliCommand(client -> sendLogToClient(client, logFile), false);
+        commandMap.put("debug", debugLogCommand);
+        commandMap.put("debuglog", debugLogCommand);
+        commandMap.put("wrapperlog", debugLogCommand);
 
         SswCliCommand logoutCommand = new SswCliCommand(client ->
                 printlnWithTimeAndThread(System.out, "Closing client connection..."),
