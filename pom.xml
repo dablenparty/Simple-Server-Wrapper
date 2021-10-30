@@ -6,7 +6,7 @@
 
     <groupId>com.hunterltd.ssw</groupId>
     <artifactId>Simple-Server-Wrapper</artifactId>
-    <version>1.7.4</version>
+    <version>1.7.5</version>
     <dependencies>
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
