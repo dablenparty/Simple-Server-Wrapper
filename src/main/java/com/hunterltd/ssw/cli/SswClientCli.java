@@ -9,16 +9,15 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Properties;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 
 public class SswClientCli {
+    private static final String[] EXIT_COMMANDS = new String[]{ "logout", "exit", "close" };
     private Socket clientSocket;
     private PrintWriter out;
     private NamedExecutorService readService;
@@ -53,14 +52,13 @@ public class SswClientCli {
             System.err.println("It is most likely that the SSW server is not running");
             return;
         }
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
         String message;
-        Scanner userInputScanner = new Scanner(System.in);
-        while (!(message = userInputScanner.nextLine()).equals("close")) {
+        do {
+            message = inputReader.readLine();
             clientCli.sendToServer(message);
-            if (message.equals("logout") || message.equals("exit")) break;
-        }
-        clientCli.sendToServer(message);
-        userInputScanner.close();
+        } while (Arrays.stream(EXIT_COMMANDS).noneMatch(message::equals));
+        inputReader.close();
         clientCli.closeConnection();
     }
 
