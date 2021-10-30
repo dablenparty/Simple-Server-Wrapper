@@ -46,7 +46,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
             if (restartServiceFuture != null && !restartServiceFuture.isDone()) {
                 if (!restartServiceFuture.cancel(false))
                     restartServiceFuture.cancel(true);
-
+                restartServiceFuture = null;
             }
         } else if (server.shouldBeRunning() && !server.isRunning()) {
             if (portListener.isOpen())
