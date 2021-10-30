@@ -35,13 +35,22 @@ public class SswServerCli {
     private final List<NamedExecutorService> serviceList = new ArrayList<>();
     private final Map<SswClientHandler, NamedExecutorService> clientHandlerToExecutorMap = new HashMap<>();
     private final Map<String, SswCliCommand> commandMap = new HashMap<>();
+    private final File logFile;
     private ServerSocket serverSocket;
     private volatile boolean cancel = false;
     private int clientId = 0;
 
-    SswServerCli(int port, File serverFile) {
+    SswServerCli(int port, File serverFile) throws FileNotFoundException {
         this.port = port;
         minecraftServer = new MinecraftServer(serverFile, MinecraftServer.ServerSettings.getSettingsFromDefaultPath(serverFile));
+        logFile = Paths.get(minecraftServer.getServerPath().getParent().toString(), "ssw", "ssw.log").toFile();
+        // make the parent directory
+        //noinspection ResultOfMethodCallIgnored
+        logFile.getParentFile().mkdir();
+
+        PrintStream logStream = new PrintStream(logFile);
+        System.setOut(logStream);
+        System.setErr(logStream);
     }
 
     public static Namespace parseArgs(String[] args) {
@@ -84,14 +93,6 @@ public class SswServerCli {
             return;
         }
 
-        File logFile = Paths.get(server.getParentFile().toString(), "ssw", "ssw.log").toFile();
-        // make the parent directory
-        //noinspection ResultOfMethodCallIgnored
-        logFile.getParentFile().mkdir();
-
-        PrintStream logStream = new PrintStream(logFile);
-        System.setOut(logStream);
-        System.setErr(logStream);
         int port = namespace.getInt("port");
         SswServerCli serverCli = new SswServerCli(port, server);
         serverCli.start();
