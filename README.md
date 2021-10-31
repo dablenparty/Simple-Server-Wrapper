@@ -45,8 +45,6 @@ Features currently included in SSW
 These are features I want to add but either haven't gotten to them yet or don't have the capabilities right now. Crossed
 off items have been added.
 
-* [ ] Mod/plugin list for supported server types
-
 * [x] ~~Edit server.properties~~
 
 * [x] ~~Batch file (launch.bat) generation~~
