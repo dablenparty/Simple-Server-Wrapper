@@ -7,10 +7,9 @@ A native Java wrapper for Minecraft servers. Works on Windows, Linux (tested on 
 ## About
 
 I host Minecraft servers off of a second PC (or cloud VM) for my friends and I to play on. More often than not, they're
-very heavily modded and require manual restarting or other tasks that are annoying to do. To help with that, I created
-this. I'm aware there are other wrappers out there with way more features, but I just needed a very basic feature-set
-that was portable between versions, types, and even multiple servers. A few weeks later, out pops a releasable version
-of Simple Server Wrapper
+very heavily modded and require restarting and other tasks that are annoying to do. I get that there are other wrappers
+out there that are better made and have more features, but I wanted a project with a practical use case that I could
+also use as an introduction to GUI programming (and Java in general).
 
 ---
 
