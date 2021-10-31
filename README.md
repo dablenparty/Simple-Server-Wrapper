@@ -71,6 +71,14 @@ Any commands not immediately recognized by the wrapper are passed on to the Mine
 
 ---
 
+## Notice for those building themselves
+
+Since I used this project as an introduction to GUI programming, I made the questionable decision to use IntelliJ's
+Swing Form Designer. As such, this project can only be built using [IntelliJ](https://www.jetbrains.com/idea/). At some
+point, I might migrate to JavaFX, but this is not guaranteed.
+
+---
+
 ## Troubleshooting
 
 ### Settings file
