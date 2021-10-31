@@ -65,9 +65,10 @@ A list of commands currently provided by the CLI
 * `logout`: Disconnect the client from the server.
 * `exit`: Alias for `logout`.
 * `log`: Prints out the most recent log from the Minecraft server.
-* `backlog`: Alias for `log`.
-* `printlog`: Alias for `log`.
+* `debuglog`: Prints out the SSW debug log.
 * `close`: Disconnects the client from the server and closes the server (if there are no other clients connected).
+
+Any commands not immediately recognized by the wrapper are passed on to the Minecraft server (if it's running).
 
 ---
 
