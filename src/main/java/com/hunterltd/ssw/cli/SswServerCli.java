@@ -4,7 +4,6 @@ import com.dablenparty.jsevents.EventCallback;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
-import com.hunterltd.ssw.curse.CurseCli;
 import com.hunterltd.ssw.server.MinecraftServer;
 import com.hunterltd.ssw.utilities.MavenUtils;
 import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
@@ -88,7 +87,7 @@ public class SswServerCli {
             if (modpack.isDirectory() || !modpackPath.toLowerCase().endsWith(".zip")) {
                 System.out.printf("'%s' is not a ZIP archive", modpackPath);
             } else {
-                new CurseCli(modpack, server).run();
+//                new CurseCli(modpack, server).run();
             }
             return;
         }

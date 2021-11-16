@@ -2,8 +2,6 @@ package com.hunterltd.ssw.server;
 
 import com.dablenparty.jsevents.EventEmitter;
 import com.google.gson.Gson;
-import com.hunterltd.ssw.gui.dialogs.InfoDialog;
-import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
 import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.utilities.concurrency.StreamGobbler;
@@ -203,12 +201,7 @@ public class MinecraftServer extends EventEmitter {
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            new InternalErrorDialog(e);
-        } finally {
-            InfoDialog dialog = new InfoDialog("File created",
-                    String.format("\"%s\" was successfully created in the server folder", launchBatch.getName()));
-            dialog.pack();
-            dialog.setVisible(true);
+            emit("error", e);
         }
     }
 
@@ -279,7 +272,7 @@ public class MinecraftServer extends EventEmitter {
             return false;
         } catch (IOException e) {
             e.printStackTrace();
-            new InternalErrorDialog(e);
+            emit("error", e);
             return false;
         }
     }
