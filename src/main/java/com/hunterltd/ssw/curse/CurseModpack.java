@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.RandomStringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,10 @@ public class CurseModpack implements AutoCloseable {
     }
 
     public static CurseModpack createCurseModpack(ZipFile modpackZip) throws IOException {
-        Path extracted = Paths.get(modpackZip.getFile().getParent(), FilenameUtils.getBaseName(modpackZip.toString()));
+        // extracts to a randomly named folder
+        // use letters + numbers
+        String folderName = RandomStringUtils.random(16, true, true);
+        Path extracted = Paths.get(modpackZip.getFile().getParent(), folderName);
         modpackZip.extractAll(extracted.toString());
         Path manifest = Paths.get(extracted.toString(), "manifest.json");
         String jsonString = Files.readString(manifest);
