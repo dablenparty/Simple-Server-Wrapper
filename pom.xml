@@ -50,6 +50,12 @@
             <scope>system</scope>
             <systemPath>${basedir}/local-dependencies/JsEvents.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <properties>
