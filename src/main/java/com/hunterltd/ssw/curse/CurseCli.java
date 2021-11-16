@@ -101,58 +101,6 @@ public class CurseCli {
             e.printStackTrace();
             return false;
         }
-
-
-//        Client client = ClientBuilder.newClient();
-//        int filesLength = files.length;
-//
-//        for (int i = 0; i < filesLength; i++) {
-//            CurseMod mod = files[i];
-//            String target = String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
-//                    mod.getProjectID(),
-//                    mod.getFileID());
-//            Response response = client.target(target).request(MediaType.APPLICATION_JSON).get();
-//            try {
-//                JSONObject responseData = (JSONObject) new JSONParser().parse(response.readEntity(String.class));
-//                CurseAddon addon = new CurseAddon(responseData);
-//                String message = String.format("\r\u001B[2KDownloading mod %d of %d: %s", i + 1, filesLength, addon);
-//                System.out.print(message);
-//                addon.download(serverFolderString);
-//            } catch (ParseException | IOException e) {
-//                // message has to be prefixed with '\n' because the previous lines don't end with one
-//                String errorMessage = e instanceof ParseException ?
-//                        "\nFailed to parse JSON data for an addon" : "\nFailed to download an addon";
-//                printlnWithTimeAndThread(System.err, errorMessage);
-//            }
-//        }
-//        System.out.println();
-//        File overrideFolder = Paths.get(curseModpack.getExtractFolder().toString(), "overrides").toFile();
-//        File[] overrides = overrideFolder.listFiles();
-//        if (overrides != null) {
-//            for (int i = 0, overridesLength = overrides.length; i < overridesLength; i++) {
-//                File file = overrides[i];
-//                try {
-//                    System.out.printf("\r\u001B[2KCopying override %d of %d: %s", i + 1, overridesLength, file);
-//                    File copyTo;
-//                    if (file.isDirectory()) {
-//                        copyTo = Paths.get(serverFolderString, file.getName()).toFile();
-//                        FileUtils.copyDirectory(file, copyTo);
-//                    } else {
-//                        copyTo = serverFolder;
-//                        FileUtils.copyFileToDirectory(file, copyTo);
-//                    }
-//                } catch (IOException exception) {
-//                    exception.printStackTrace();
-//                }
-//            }
-//            System.out.println();
-//        }
-//        try {
-//            FileUtils.deleteDirectory(curseModpack.getExtractFolder());
-//        } catch (IOException e) {
-//            printlnWithTimeAndThread(System.err, "Error occurred cleaning up modpack files");
-//        }
         return true;
     }
-
 }
