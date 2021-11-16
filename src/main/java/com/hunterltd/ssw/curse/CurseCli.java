@@ -36,7 +36,7 @@ public class CurseCli {
             String serverFolderString = serverFolder.toString();
 
             Scanner scanner = new Scanner(System.in);
-            String[] foldersToCheck = new String[]{ "mods", "resourcepacks" };
+            String[] foldersToCheck = new String[]{ "mods", "resourcepacks", "config" };
             for (String folderName : foldersToCheck) {
                 File folder = Paths.get(serverFolderString, folderName).toFile();
                 try {
