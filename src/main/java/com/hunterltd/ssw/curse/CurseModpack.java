@@ -1,120 +1,111 @@
 package com.hunterltd.ssw.curse;
 
-import com.hunterltd.ssw.curse.data.CurseManifest;
-import com.hunterltd.ssw.curse.data.CurseManifestFileEntry;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * Wrapper class for a CurseForge modpack
- */
-public class CurseModpack extends ZipFile {
-    private final File extractPath;
-    private final CurseManifest manifest;
+public class CurseModpack {
+    private MinecraftOptions minecraft;
+    private String manifestType;
+    private int manifestVersion;
+    private String name;
+    private String version;
+    private String author;
+    private CurseMod[] files;
+    private String overrides;
+    private final Path extractedPath;
+
+    public CurseModpack(Path extractedPath) {
+        this.extractedPath = extractedPath;
+    }
+
+
+    public static CurseModpack createCurseModpack(ZipFile modpackZip) throws IOException {
+        File zipFile = modpackZip.getFile();
+        Path extracted = Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(modpackZip.toString()));
+        modpackZip.extractAll(extracted.toString());
+        Path manifest = Paths.get(extracted.toString(), "manifest.json");
+        String jsonString = Files.readString(manifest);
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(
+                CurseModpack.class,
+                new CurseModpackInstanceCreator(extracted)
+        );
+        Gson gson = gsonBuilder.create();
+        return gson.fromJson(jsonString, CurseModpack.class);
+    }
+
+    @Override
+    public String toString() {
+        return name + " on " + minecraft.version + " (" + files.length + " mods)";
+    }
 
     /**
-     * Instantiates the wrapper class with the given ZIP archive
+     * Cleans up the extracted files
      *
-     * @param zipFile ZIP archive containing modpack data
+     * @throws IOException If an I/O error occurs deleting the extracted files
      */
-    public CurseModpack(File zipFile) {
-        super(zipFile);
-        extractPath = Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(zipFile.getName())).toFile();
-        manifest = new CurseManifest(Paths.get(String.valueOf(extractPath), "manifest.json").toFile());
+    public void cleanUpExtractedFiles() throws IOException {
+        FileUtils.deleteDirectory(extractedPath.toFile());
     }
 
-    public static void main(String[] args) {
-        CurseModpack pack = new CurseModpack(Paths.get(System.getProperty("user.home"), "Downloads", "Minecraft Enhanced-v1.6.zip").toFile());
-        try {
-            pack.extractAll();
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
+    public String getManifestType() {
+        return manifestType;
+    }
+
+    public int getManifestVersion() {
+        return manifestVersion;
+    }
+
+    public String getOverrides() {
+        return overrides;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public CurseMod[] getFiles() {
+        return files;
+    }
+
+    public String getMinecraftVersion() {
+        return minecraft.version;
+    }
+
+    public ModLoader[] getMinecraftModLoader() {
+        return minecraft.modLoaders;
+    }
+
+    private record MinecraftOptions(String version, ModLoader[] modLoaders) {
+    }
+
+    public record ModLoader(String id, boolean primary) {
+    }
+
+    private record CurseModpackInstanceCreator(Path extractedPath) implements InstanceCreator<CurseModpack> {
+
+        @Override
+        public CurseModpack createInstance(Type type) {
+            return new CurseModpack(extractedPath);
         }
-        String message = !pack.install(pack.getExtractFolder().toString()) ? "Done!" : "Error(s) occurred, see above";
-        System.out.println(message);
-    }
-
-    /**
-     * Extracts the modpack in-place and loads the manifest
-     *
-     * @throws IOException    if an I/O error occurs loading the manifest
-     * @throws ParseException if a parsing error occurs loading the manifest
-     */
-    public void extractAll() throws IOException, ParseException {
-        this.extractAll(extractPath.toString());
-        manifest.load();
-    }
-
-    /**
-     * @return Boolean on whether the extracted folder exists
-     */
-    public boolean isExtracted() {
-        return extractPath.exists();
-    }
-
-    /**
-     * @return Extract folder as a File object
-     */
-    public File getExtractFolder() {
-        return extractPath;
-    }
-
-    /**
-     * @return Wrapper for the packs manifest.json
-     */
-    public CurseManifest getManifest() {
-        return manifest;
-    }
-
-    /**
-     * Installs the modpack in the specified folder
-     *
-     * @param folder Install location
-     * @return Boolean representing if an error occurs or not
-     */
-    public boolean install(String folder) {
-        // this will return a boolean if an error occurs because one file having an error shouldn't block all files from
-        // downloading/installing
-        boolean error = false;
-        Client client = ClientBuilder.newClient();
-        for (CurseManifestFileEntry manifestEntry :
-                manifest.getFiles()) {
-            // for every mod found in the manifest, makes a call to the Curse API to get the download link
-            Response response = client.target(
-                    String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
-                            manifestEntry.getProjectID(),
-                            manifestEntry.getFileID())
-            ).request(MediaType.APPLICATION_JSON).get();
-            try {
-                CurseAddon addon = new CurseAddon((JSONObject) new JSONParser().parse(response.readEntity(String.class)));
-                addon.download(folder);
-            } catch (ParseException | IOException e) {
-                e.printStackTrace();
-                error = true;
-            }
-        }
-
-        // copies over the override files from the Curse modpack
-        File overrides = Paths.get(extractPath.toString(), "overrides", "mods").toFile();
-        try {
-            FileUtils.copyDirectory(overrides, Paths.get(folder, "mods").toFile());
-        } catch (IOException e) {
-            e.printStackTrace();
-            error = true;
-        }
-
-        return error;
     }
 }
