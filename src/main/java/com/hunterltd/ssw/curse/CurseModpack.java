@@ -125,6 +125,10 @@ public class CurseModpack implements AutoCloseable {
     }
 
     public boolean install(Path serverFolder) {
+        return install(serverFolder, false);
+    }
+
+    public boolean install(Path serverFolder, boolean prettyPrint) {
         CurseMod[] files = getFiles();
         String serverFolderString = serverFolder.toString();
 
@@ -151,24 +155,34 @@ public class CurseModpack implements AutoCloseable {
         scanner.close();
 
         Client client = ClientBuilder.newClient();
-        int filesLength = files.length;
 
-        for (int i = 0; i < filesLength; i++) {
+        for (int i = 0, filesLength = files.length; i < filesLength; i++) {
             CurseMod mod = files[i];
             String target = String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d",
                     mod.getProjectID(),
                     mod.getFileID());
             Response response = client.target(target).request(MediaType.APPLICATION_JSON).get();
             CurseAddon addon = CurseAddon.newCurseAddon(response.readEntity(String.class));
-            System.out.printf("\r\u001B[2KDownloading mod %d of %d: %s", i + 1, filesLength, addon);
+            String formatString = "%sDownloading mod %d of %d: %s";
+            String prefix;
+            if (prettyPrint)
+                prefix = "\r\u001B[2K";
+            else {
+                prefix = "";
+                formatString += "%n";
+            }
+            System.out.printf(formatString, prefix, i + 1, filesLength, addon);
             try {
                 addon.download(serverFolderString);
             } catch (IOException e) {
+                if (prettyPrint)
+                    System.out.println();
                 printfWithTimeAndThread(System.err, "There was an error downloading mod #%d '%s':%n", i + 1, addon);
                 e.printStackTrace();
             }
         }
-        System.out.println();
+        if (prettyPrint)
+            System.out.println();
         Path overrideFolder = Paths.get(getExtractedPath().toString(), "overrides");
         try {
             Files.list(overrideFolder).map(Path::toFile).forEach(file -> {
