@@ -13,8 +13,10 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class CurseModpack {
+    private final Path extractedPath;
     private MinecraftOptions minecraft;
     private String manifestType;
     private int manifestVersion;
@@ -23,7 +25,6 @@ public class CurseModpack {
     private String author;
     private CurseMod[] files;
     private String overrides;
-    private final Path extractedPath;
 
     public CurseModpack(Path extractedPath) {
         this.extractedPath = extractedPath;
@@ -43,6 +44,11 @@ public class CurseModpack {
         );
         Gson gson = gsonBuilder.create();
         return gson.fromJson(jsonString, CurseModpack.class);
+    }
+
+    public static void main(String[] args) throws IOException {
+        CurseModpack modpack = createCurseModpack(new ZipFile(new File("C:\\Users\\Hunter\\Documents\\Calm+Craft+v4.1-v4.1.zip")));
+        System.out.println(modpack.toString());
     }
 
     @Override
@@ -138,7 +144,6 @@ public class CurseModpack {
     }
 
     private record CurseModpackInstanceCreator(Path extractedPath) implements InstanceCreator<CurseModpack> {
-
         @Override
         public CurseModpack createInstance(Type type) {
             return new CurseModpack(extractedPath);
