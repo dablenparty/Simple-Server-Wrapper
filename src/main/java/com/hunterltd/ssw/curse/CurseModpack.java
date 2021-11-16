@@ -26,7 +26,7 @@ public class CurseModpack implements AutoCloseable {
     private CurseMod[] files;
     private String overrides;
 
-    public CurseModpack(Path extractedPath) {
+    private CurseModpack(Path extractedPath) {
         this.extractedPath = extractedPath;
     }
 
