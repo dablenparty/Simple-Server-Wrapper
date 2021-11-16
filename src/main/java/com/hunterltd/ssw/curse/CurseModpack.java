@@ -32,8 +32,7 @@ public class CurseModpack {
 
 
     public static CurseModpack createCurseModpack(ZipFile modpackZip) throws IOException {
-        File zipFile = modpackZip.getFile();
-        Path extracted = Paths.get(zipFile.getParent(), FilenameUtils.getBaseName(modpackZip.toString()));
+        Path extracted = Paths.get(modpackZip.getFile().getParent(), FilenameUtils.getBaseName(modpackZip.toString()));
         modpackZip.extractAll(extracted.toString());
         Path manifest = Paths.get(extracted.toString(), "manifest.json");
         String jsonString = Files.readString(manifest);
