@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-public class CurseModpack {
+public class CurseModpack implements AutoCloseable {
     private final Path extractedPath;
     private MinecraftOptions minecraft;
     private String manifestType;
@@ -29,7 +29,6 @@ public class CurseModpack {
     public CurseModpack(Path extractedPath) {
         this.extractedPath = extractedPath;
     }
-
 
     public static CurseModpack createCurseModpack(ZipFile modpackZip) throws IOException {
         Path extracted = Paths.get(modpackZip.getFile().getParent(), FilenameUtils.getBaseName(modpackZip.toString()));
@@ -45,9 +44,12 @@ public class CurseModpack {
         return gson.fromJson(jsonString, CurseModpack.class);
     }
 
-    public static void main(String[] args) throws IOException {
-        CurseModpack modpack = createCurseModpack(new ZipFile(new File("C:\\Users\\Hunter\\Documents\\Calm+Craft+v4.1-v4.1.zip")));
-        System.out.println(modpack.toString());
+    public static void main(String[] args) {
+        try (CurseModpack modpack = createCurseModpack(new ZipFile(new File("C:\\Users\\Hunter\\Documents\\Calm+Craft+v4.1-v4.1.zip")))) {
+            System.out.println(modpack.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -98,6 +100,11 @@ public class CurseModpack {
 
     public ModLoader[] getMinecraftModLoader() {
         return minecraft.modLoaders;
+    }
+
+    @Override
+    public void close() throws IOException {
+        cleanUpExtractedFiles();
     }
 
     private static final class MinecraftOptions {
