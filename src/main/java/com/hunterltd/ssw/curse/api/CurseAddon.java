@@ -1,0 +1,26 @@
+package com.hunterltd.ssw.curse.api;
+
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
+
+public class CurseAddon {
+    private static final int CONNECTION_TIMEOUT = 10000;
+    private String displayName;
+    private URL downloadUrl;
+    private String fileName;
+
+    @Override
+    public String toString() {
+        return displayName;
+    }
+
+    public void download(String destinationPath) throws IOException {
+        String folderName = fileName.endsWith(".zip") ? "resourcepacks" :"mods";
+        File destinationFile = Paths.get(destinationPath, folderName, fileName).toFile();
+        FileUtils.copyURLToFile(downloadUrl, destinationFile, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT);
+    }
+}
