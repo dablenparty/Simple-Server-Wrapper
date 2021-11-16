@@ -6,6 +6,7 @@ import com.hunterltd.ssw.server.properties.PropertiesTableModel;
 import javax.swing.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 public class SettingsDialog extends JDialog {
     private final MinecraftServer.ServerSettings serverSettings;
@@ -104,11 +105,11 @@ public class SettingsDialog extends JDialog {
         serverSettings.setShutdown(automaticShutdownCheckBox.isSelected());
         serverSettings.setShutdownInterval(shutdownIntervalSlider.getValue() * 5);
 
-        serverSettings.setExtraArgs(extraArgsTextField.getText().split(" "));
+        serverSettings.setExtraArgs(List.of(extraArgsTextField.getText().split(" ")));
 
         try {
             serverSettings.writeData();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             new InternalErrorDialog(e);
         }
 
