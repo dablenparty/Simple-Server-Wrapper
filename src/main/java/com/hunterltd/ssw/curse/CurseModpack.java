@@ -20,8 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Scanner;
 
 import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printfWithTimeAndThread;
 
@@ -132,27 +130,19 @@ public class CurseModpack implements AutoCloseable {
         CurseMod[] files = getFiles();
         String serverFolderString = serverFolder.toString();
 
-        Scanner scanner = new Scanner(System.in);
-        String[] foldersToCheck = new String[]{ "mods", "resourcepacks", "config" };
-        for (String folderName : foldersToCheck) {
-            File folder = Paths.get(serverFolderString, folderName).toFile();
-            try {
-                if (folder.exists() && Objects.requireNonNull(folder.listFiles()).length != 0) {
-                    System.out.printf("The '%s' folder is not empty, would you like to overwrite it? (y/N): ", folderName);
-                    if (scanner.next().startsWith("y")) {
-                        FileUtils.deleteDirectory(folder);
-                        scanner.nextLine();
-                    } else
-                        return false;
-                }
-            } catch (NullPointerException ignored) {
-                // file is not a directory, can continue
-            } catch (IOException e) {
-                System.err.printf("An error occurred deleting '%s'%n", folder);
-                e.printStackTrace();
-            }
-        }
-        scanner.close();
+        Arrays.stream(new String[]{ "mods", "resourcepacks", "config" })
+                .map(s -> Paths.get(serverFolderString, s).toFile())
+                .forEach(directory -> {
+                    if (!directory.exists())
+                        return;
+                    System.out.printf("Deleting old '%s' folder%n", FilenameUtils.getBaseName(directory.toString()));
+                    try {
+                        FileUtils.deleteDirectory(directory);
+                    } catch (IOException e) {
+                        System.err.println("There was an error deleting " + directory);
+                        e.printStackTrace();
+                    }
+                });
 
         Client client = ClientBuilder.newClient();
 
