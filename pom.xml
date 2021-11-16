@@ -44,13 +44,6 @@
             <version>1.1.1</version>
         </dependency>
         <dependency>
-            <groupId>com.dablenparty.jsondata</groupId>
-            <artifactId>JSONData</artifactId>
-            <version>1.1</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/local-dependencies/JSONData.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>com.dablenparty.jsevents</groupId>
             <artifactId>JsEvents</artifactId>
             <version>1.0</version>
