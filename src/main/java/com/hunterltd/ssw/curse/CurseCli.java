@@ -1,15 +1,7 @@
 package com.hunterltd.ssw.curse;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,29 +25,29 @@ public class CurseCli {
         printlnWithTimeAndThread(System.out, "Extracting modpack...");
         try (CurseModpack modpack = CurseModpack.createCurseModpack(modpackZip)) {
             CurseMod[] files = modpack.getFiles();
-        String serverFolderString = serverFolder.toString();
+            String serverFolderString = serverFolder.toString();
 
-        Scanner scanner = new Scanner(System.in);
-        String[] foldersToCheck = new String[]{ "mods", "resourcepacks" };
-        for (String folderName : foldersToCheck) {
-            File folder = Paths.get(serverFolderString, folderName).toFile();
-            try {
-                if (folder.exists() && Objects.requireNonNull(folder.listFiles()).length != 0) {
-                    System.out.printf("The '%s' folder is not empty, would you like to overwrite it? (y/N): ", folderName);
-                    if (scanner.next().startsWith("y")) {
-                        FileUtils.deleteDirectory(folder);
-                        scanner.nextLine();
-                    } else
-                        return false;
+            Scanner scanner = new Scanner(System.in);
+            String[] foldersToCheck = new String[]{ "mods", "resourcepacks" };
+            for (String folderName : foldersToCheck) {
+                File folder = Paths.get(serverFolderString, folderName).toFile();
+                try {
+                    if (folder.exists() && Objects.requireNonNull(folder.listFiles()).length != 0) {
+                        System.out.printf("The '%s' folder is not empty, would you like to overwrite it? (y/N): ", folderName);
+                        if (scanner.next().startsWith("y")) {
+                            FileUtils.deleteDirectory(folder);
+                            scanner.nextLine();
+                        } else
+                            return false;
+                    }
+                } catch (NullPointerException ignored) {
+                    // file is not a directory, can continue
+                } catch (IOException e) {
+                    System.err.printf("An error occurred deleting '%s'%n", folder);
+                    e.printStackTrace();
                 }
-            } catch (NullPointerException ignored) {
-                // file is not a directory, can continue
-            } catch (IOException e) {
-                System.err.printf("An error occurred deleting '%s'%n", folder);
-                e.printStackTrace();
             }
-        }
-        scanner.close();
+            scanner.close();
         } catch (IOException e) {
             e.printStackTrace();
             return false;
