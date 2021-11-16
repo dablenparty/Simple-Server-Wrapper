@@ -95,10 +95,46 @@ public class CurseModpack {
         return minecraft.modLoaders;
     }
 
-    private record MinecraftOptions(String version, ModLoader[] modLoaders) {
+    private static final class MinecraftOptions {
+        private String version;
+        private ModLoader[] modLoaders;
+
+        public String getVersion() {
+            return version;
+        }
+
+        public ModLoader[] getModLoaders() {
+            return modLoaders;
+        }
+
+        @Override
+        public String toString() {
+            return "MinecraftOptions{" +
+                    "version='" + version + '\'' +
+                    ", modLoaders=" + Arrays.toString(modLoaders) +
+                    '}';
+        }
     }
 
-    public record ModLoader(String id, boolean primary) {
+    public static final class ModLoader {
+        private String id;
+        private boolean primary;
+
+        public String getId() {
+            return id;
+        }
+
+        public boolean isPrimary() {
+            return primary;
+        }
+
+        @Override
+        public String toString() {
+            return "ModLoader{" +
+                    "id='" + id + '\'' +
+                    ", primary=" + primary +
+                    '}';
+        }
     }
 
     private record CurseModpackInstanceCreator(Path extractedPath) implements InstanceCreator<CurseModpack> {
