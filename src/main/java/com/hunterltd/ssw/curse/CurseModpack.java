@@ -69,6 +69,10 @@ public class CurseModpack implements AutoCloseable {
         FileUtils.deleteDirectory(extractedPath.toFile());
     }
 
+    public Path getExtractedPath() {
+        return extractedPath;
+    }
+
     public String getManifestType() {
         return manifestType;
     }
