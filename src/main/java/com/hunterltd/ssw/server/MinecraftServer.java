@@ -1,22 +1,23 @@
 package com.hunterltd.ssw.server;
 
 import com.dablenparty.jsevents.EventEmitter;
-import com.dablenparty.jsondata.UserDataObject;
+import com.google.gson.Gson;
 import com.hunterltd.ssw.gui.dialogs.InfoDialog;
 import com.hunterltd.ssw.gui.dialogs.InternalErrorDialog;
 import com.hunterltd.ssw.server.properties.ServerProperties;
 import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.utilities.concurrency.StreamGobbler;
 import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
-import org.json.simple.JSONArray;
 
 import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -321,7 +322,7 @@ public class MinecraftServer extends EventEmitter {
     }
 
     /**
-     * @param idx Index ti retrieve
+     * @param idx Index to retrieve
      * @return Command from history
      */
     public String getCommandFromHistory(int idx) {
@@ -358,14 +359,23 @@ public class MinecraftServer extends EventEmitter {
         this.shuttingDown = shuttingDown;
     }
 
-    @SuppressWarnings("unchecked")
-    public static class ServerSettings extends UserDataObject {
-        public ServerSettings(String appName) throws IOException {
-            super(appName);
-        }
+    public static class ServerSettings {
+        private final Path settingsPath;
+        private int memory;
+        private List<String> extraArgs;
+        private boolean autoRestart;
+        private int restartInterval;
+        private boolean autoShutdown;
+        private int shutdownInterval;
 
-        public ServerSettings(Path settingsPath) throws IOException {
-            super(settingsPath);
+        public ServerSettings(Path settingsPath) throws UnsupportedOperationException {
+            memory = 1024;
+            extraArgs = new ArrayList<>();
+            autoRestart = false;
+            restartInterval = 6;
+            autoShutdown = false;
+            shutdownInterval = 15;
+            this.settingsPath = settingsPath;
         }
 
         /**
@@ -376,94 +386,83 @@ public class MinecraftServer extends EventEmitter {
          */
         public static ServerSettings getSettingsFromDefaultPath(File serverFile) {
             Path settingsPath = Paths.get(serverFile.getParent(), "ssw", "wrapperSettings.json");
+            if (Files.exists(settingsPath)) {
+                Gson gson = new Gson();
+                String jsonString;
+                try {
+                    jsonString = Files.readString(settingsPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                return gson.fromJson(jsonString, ServerSettings.class);
+            }
             try {
-                return new ServerSettings(settingsPath);
-            } catch (IOException exception) {
-                exception.printStackTrace();
+                ServerSettings settings = new ServerSettings(settingsPath);
+                settings.writeData();
+                return settings;
+            } catch (IOException e) {
+                e.printStackTrace();
                 return null;
             }
         }
 
-        @Override
-        public void populateDefaults() {
-            // Tab 1
-            this.put("memory", 1024);
-            this.put("extraArgs", new JSONArray());
-
-            //Tab 2
-            this.put("autoRestart", false);
-            this.put("restartInterval", 1); // hours
-            this.put("autoShutdown", false);
-            this.put("shutdownInterval", 30); // minutes, defaults to 1 minecraft day
+        public void writeData() throws IOException {
+            Gson gson = new Gson();
+            String writeString = gson.toJson(this);
+            Files.writeString(settingsPath, writeString);
         }
 
         public int getMemory() {
-            try {
-                return ((Long) this.get("memory")).intValue();
-            } catch (ClassCastException e) {
-                return (int) this.get("memory");
-            }
+            return memory;
         }
 
-        public void setMemory(int value) {
-            this.replace("memory", value);
-        }
-
-        public boolean getRestart() {
-            return (boolean) this.get("autoRestart");
-        }
-
-        public void setRestart(boolean value) {
-            this.replace("autoRestart", value);
-        }
-
-        public boolean getShutdown() {
-            return (boolean) this.get("autoShutdown");
-        }
-
-        public void setShutdown(boolean value) {
-            this.replace("autoShutdown", value);
+        public void setMemory(int memory) {
+            this.memory = memory;
         }
 
         public List<String> getExtraArgs() {
-            return (List<String>) this.get("extraArgs");
+            return extraArgs;
         }
 
-        public void setExtraArgs(String[] newArgs) {
-            JSONArray args = new JSONArray();
-            args.addAll(Arrays.asList(newArgs));
-            this.replace("extraArgs", args);
+        public void setExtraArgs(Collection<String> extraArgs) {
+            this.extraArgs = new ArrayList<>(extraArgs);
         }
 
         public boolean hasExtraArgs() {
-            List<String> list = ((List<String>) this.get("extraArgs"));
-            return list.size() > 0 && !list.get(0).equalsIgnoreCase("");
+            return extraArgs.size() != 0;
+        }
+
+        public boolean getRestart() {
+            return autoRestart;
+        }
+
+        public void setRestart(boolean autoRestart) {
+            this.autoRestart = autoRestart;
         }
 
         public int getRestartInterval() {
-            // Sometimes it parses as a Long, sometimes it parses as an Integer
-            // I haven't found a pattern to identify which it chooses (yet)
-            try {
-                return ((Long) this.get("restartInterval")).intValue();
-            } catch (ClassCastException e) {
-                return (int) this.get("restartInterval");
-            }
+            return restartInterval;
         }
 
-        public void setRestartInterval(int value) {
-            this.replace("restartInterval", value);
+        public void setRestartInterval(int restartInterval) {
+            this.restartInterval = restartInterval;
+        }
+
+        public boolean getShutdown() {
+            return autoShutdown;
+        }
+
+        public void setShutdown(boolean autoShutdown) {
+            this.autoShutdown = autoShutdown;
         }
 
         public int getShutdownInterval() {
-            try {
-                return ((Long) this.get("shutdownInterval")).intValue();
-            } catch (ClassCastException e) {
-                return (int) this.get("shutdownInterval");
-            }
+            return shutdownInterval;
         }
 
-        public void setShutdownInterval(int value) {
-            this.replace("shutdownInterval", value);
+        public void setShutdownInterval(int shutdownInterval) {
+            this.shutdownInterval = shutdownInterval;
         }
     }
 }
