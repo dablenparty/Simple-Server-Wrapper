@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.utilities;
+package com.hunterltd.ssw.util;
 
 import com.hunterltd.ssw.cli.SswClientCli;
 

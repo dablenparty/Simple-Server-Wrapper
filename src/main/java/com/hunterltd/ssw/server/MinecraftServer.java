@@ -1,11 +1,11 @@
 package com.hunterltd.ssw.server;
 
-import com.hunterltd.ssw.utilities.events.EventEmitter;
+import com.hunterltd.ssw.util.events.EventEmitter;
 import com.google.gson.Gson;
 import com.hunterltd.ssw.server.properties.ServerProperties;
-import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
-import com.hunterltd.ssw.utilities.concurrency.StreamGobbler;
-import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
+import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
+import com.hunterltd.ssw.util.concurrency.StreamGobbler;
+import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 
 import javax.swing.*;
 import java.io.*;

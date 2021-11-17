@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.utilities;
+package com.hunterltd.ssw.util;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;

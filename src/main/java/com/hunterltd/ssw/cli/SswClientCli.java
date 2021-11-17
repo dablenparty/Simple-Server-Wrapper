@@ -1,9 +1,9 @@
 package com.hunterltd.ssw.cli;
 
-import com.hunterltd.ssw.utilities.MavenUtils;
-import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
-import com.hunterltd.ssw.utilities.concurrency.StreamGobbler;
-import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
+import com.hunterltd.ssw.util.MavenUtils;
+import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
+import com.hunterltd.ssw.util.concurrency.StreamGobbler;
+import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;

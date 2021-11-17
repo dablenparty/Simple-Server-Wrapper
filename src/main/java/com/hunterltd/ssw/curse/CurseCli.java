@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 public class CurseCli {
     private final ZipFile modpackZip;

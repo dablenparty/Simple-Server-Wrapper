@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.utilities.concurrency;
+package com.hunterltd.ssw.util.concurrency;
 
 import java.util.ArrayList;
 import java.util.List;

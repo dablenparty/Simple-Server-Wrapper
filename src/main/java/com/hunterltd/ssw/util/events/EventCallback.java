@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.utilities.events;
+package com.hunterltd.ssw.util.events;
 
 public interface EventCallback {
     void call(Object... args);

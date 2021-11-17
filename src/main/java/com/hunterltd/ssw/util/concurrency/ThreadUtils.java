@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.utilities.concurrency;
+package com.hunterltd.ssw.util.concurrency;
 
 import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
 

@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.utilities.network;
+package com.hunterltd.ssw.util.network;
 
 import com.google.gson.Gson;
 

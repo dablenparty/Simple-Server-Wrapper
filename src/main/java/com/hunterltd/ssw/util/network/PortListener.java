@@ -1,6 +1,6 @@
-package com.hunterltd.ssw.utilities.network;
+package com.hunterltd.ssw.util.network;
 
-import com.hunterltd.ssw.utilities.events.EventEmitter;
+import com.hunterltd.ssw.util.events.EventEmitter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

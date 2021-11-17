@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printfWithTimeAndThread;
+import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
 
 public class CurseModpack implements AutoCloseable {
     private final Path extractedPath;

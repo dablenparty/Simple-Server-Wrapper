@@ -2,9 +2,9 @@ package com.hunterltd.ssw.cli.tasks;
 
 import com.hunterltd.ssw.cli.SswServerCli;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
-import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
-import com.hunterltd.ssw.utilities.network.ServerListPing;
+import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
+import com.hunterltd.ssw.util.concurrency.ThreadUtils;
+import com.hunterltd.ssw.util.network.ServerListPing;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

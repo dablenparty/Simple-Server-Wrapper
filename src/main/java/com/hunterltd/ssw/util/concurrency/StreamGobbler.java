@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.utilities.concurrency;
+package com.hunterltd.ssw.util.concurrency;
 
 import java.io.BufferedReader;
 import java.io.IOException;

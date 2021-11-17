@@ -2,9 +2,9 @@ package com.hunterltd.ssw.cli.tasks;
 
 import com.hunterltd.ssw.cli.SswServerCli;
 import com.hunterltd.ssw.server.MinecraftServer;
-import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;
-import com.hunterltd.ssw.utilities.concurrency.ThreadUtils;
-import com.hunterltd.ssw.utilities.network.PortListener;
+import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
+import com.hunterltd.ssw.util.concurrency.ThreadUtils;
+import com.hunterltd.ssw.util.network.PortListener;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -12,8 +12,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printfWithTimeAndThread;
-import static com.hunterltd.ssw.utilities.concurrency.ThreadUtils.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
+import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 /**
  * Handles starting and stopping the server process
