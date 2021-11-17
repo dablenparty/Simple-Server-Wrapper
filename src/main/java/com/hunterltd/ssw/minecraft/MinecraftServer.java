@@ -359,7 +359,7 @@ public class MinecraftServer extends EventEmitter {
         private boolean autoShutdown;
         private int shutdownInterval;
 
-        public ServerSettings(Path settingsPath) throws UnsupportedOperationException {
+        public ServerSettings(Path settingsPath) {
             memory = 1024;
             extraArgs = new ArrayList<>();
             autoRestart = false;
