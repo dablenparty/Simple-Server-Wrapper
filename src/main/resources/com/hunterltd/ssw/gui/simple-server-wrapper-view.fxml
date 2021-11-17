@@ -12,12 +12,12 @@
         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
     </padding>
 
-    <HBox>
+    <HBox spacing="10.0">
         <TextField fx:id="serverPathTextField" HBox.hgrow="ALWAYS"/>
         <Button fx:id="runButton" text="Run" onAction="#onRunButtonClick"/>
     </HBox>
     <TextArea fx:id="serverOutputTextArea" VBox.vgrow="ALWAYS" editable="false" wrapText="true"/>
-    <HBox>
+    <HBox spacing="10.0">
         <TextField fx:id="commandTextField" HBox.hgrow="ALWAYS"/>
         <Button fx:id="sendCommandButton" text="Send" onAction="#onSendButtonClick"/>
     </HBox>
