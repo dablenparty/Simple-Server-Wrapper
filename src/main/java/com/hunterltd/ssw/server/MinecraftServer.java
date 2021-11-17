@@ -1,6 +1,6 @@
 package com.hunterltd.ssw.server;
 
-import com.dablenparty.jsevents.EventEmitter;
+import com.hunterltd.ssw.utilities.events.EventEmitter;
 import com.google.gson.Gson;
 import com.hunterltd.ssw.server.properties.ServerProperties;
 import com.hunterltd.ssw.utilities.concurrency.NamedExecutorService;

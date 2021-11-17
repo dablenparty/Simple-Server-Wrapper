@@ -1,6 +1,6 @@
 package com.hunterltd.ssw.utilities.network;
 
-import com.dablenparty.jsevents.EventEmitter;
+import com.hunterltd.ssw.utilities.events.EventEmitter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

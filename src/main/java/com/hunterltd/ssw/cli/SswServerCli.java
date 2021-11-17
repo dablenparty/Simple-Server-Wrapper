@@ -1,6 +1,6 @@
 package com.hunterltd.ssw.cli;
 
-import com.dablenparty.jsevents.EventCallback;
+import com.hunterltd.ssw.utilities.events.EventCallback;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
