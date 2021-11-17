@@ -73,19 +73,20 @@ public class EventEmitter {
                 if (listener.isOnce())
                     markedForRemoval.add(listener);
             });
-        }
+        } else
+            return false;
 
         Iterator<EventListener> removalIterator = markedForRemoval.iterator();
         while (removalIterator.hasNext()) {
             EventListener listener = removalIterator.next();
-            (eventListenerMap.get(event)).remove(listener);
+            callbacks.remove(listener);
             removalIterator.remove();
         }
 
-        if (eventListenerMap.get(event).size() == 0)
+        if (callbacks.size() == 0)
             eventListenerMap.remove(event);
 
-        return eventHasListeners;
+        return true;
     }
 
     /**
