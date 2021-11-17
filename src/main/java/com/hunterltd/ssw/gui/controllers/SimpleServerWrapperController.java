@@ -1,7 +1,6 @@
 package com.hunterltd.ssw.gui.controllers;
 
 import com.hunterltd.ssw.minecraft.MinecraftServer;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -34,7 +33,6 @@ public class SimpleServerWrapperController {
         if (!minecraftServer.isRunning()) {
             try {
                 minecraftServer.run();
-                runButton.setText("Stop");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -42,17 +40,19 @@ public class SimpleServerWrapperController {
             runButton.setText("Stopping...");
             minecraftServer.stop();
         }
-
-
-        minecraftServer.on("exit", args -> Platform.runLater(() -> {
-            flipEnabledComponents();
-            runButton.setText("Run");
-        }));
     }
 
     @FXML
     protected void onSendButtonClick() {
-        serverOutputTextArea.appendText("You clicked the button!\n");
+        String command = commandTextField.getText();
+        try {
+            minecraftServer.sendCommand(command);
+        } catch (IOException e) {
+            e.printStackTrace();
+            commandTextField.appendText("Error: %s\n".formatted(e.getMessage()));
+        } finally {
+            commandTextField.clear();
+        }
     }
 
     @FXML
@@ -63,21 +63,34 @@ public class SimpleServerWrapperController {
         File chosen = fileChooser.showOpenDialog(selectFileButton.getScene().getWindow());
         if (chosen == null)
             return;
+        // remove all listeners before reassigning the variable to prevent anything from accidentally firing
+        if (minecraftServer != null)
+            minecraftServer.removeAllListeners();
         minecraftServer = new MinecraftServer(chosen);
-        minecraftServer.on("data", args -> {
-            String text = (String) args[0];
-            if (!text.endsWith("\n"))
-                text += '\n';
-            String finalText = text;
-            runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
-        });
+        minecraftServer.on("start", args -> runOnFxThread(this::enableServerBasedComponents))
+                .on("exit", args -> runOnFxThread(this::disabledServerBasedComponents))
+                .on("data", args -> {
+                    String text = (String) args[0];
+                    if (!text.endsWith("\n"))
+                        text += '\n';
+                    String finalText = text;
+                    runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
+                });
         serverPathTextField.setText(chosen.toString());
-        flipEnabledComponents();
+        runButton.setDisable(false);
     }
 
-    private void flipEnabledComponents() {
-        runButton.setDisable(!runButton.isDisable());
-        sendCommandButton.setDisable(!sendCommandButton.isDisable());
-        commandTextField.setDisable(!commandTextField.isDisable());
+    private void disabledServerBasedComponents() {
+        runButton.setDisable(true);
+        runButton.setText("Run");
+        sendCommandButton.setDisable(true);
+        commandTextField.setDisable(true);
+    }
+
+    private void enableServerBasedComponents() {
+        runButton.setDisable(false);
+        runButton.setText("Stop");
+        sendCommandButton.setDisable(false);
+        commandTextField.setDisable(false);
     }
 }
