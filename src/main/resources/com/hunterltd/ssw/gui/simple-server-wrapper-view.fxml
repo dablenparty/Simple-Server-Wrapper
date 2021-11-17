@@ -13,7 +13,7 @@
     </padding>
 
     <HBox spacing="10.0">
-        <TextField fx:id="serverPathTextField" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="serverPathTextField" HBox.hgrow="ALWAYS" editable="false"/>
         <Button fx:id="selectFileButton" text="..." onAction="#onSelectFileButtonClick" minWidth="30.0"/>
         <Button fx:id="runButton" text="Run" onAction="#onRunButtonClick" disable="true"/>
     </HBox>
