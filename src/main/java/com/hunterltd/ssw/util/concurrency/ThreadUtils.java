@@ -1,5 +1,6 @@
 package com.hunterltd.ssw.util.concurrency;
 
+import javafx.application.Platform;
 import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
 
 import java.io.PrintStream;
@@ -68,5 +69,20 @@ public class ThreadUtils {
      */
     public static String threadStampString(String string) {
         return String.format("[%s] [ssw/%s]: %s", SIMPLE_TIME_FORMAT.format(System.currentTimeMillis()), Thread.currentThread().getName(), string);
+    }
+
+    /**
+     * Executes a runnable on the JavaFX FX thread.
+     * <p>
+     * If this method is called from the FX thread, the runnable is executed immediately. Otherwise, it is passed to
+     * {@link Platform#runLater(Runnable)}
+     *
+     * @param runnable Runnable to execute
+     */
+    public static void runOnFxThread(Runnable runnable) {
+        if (Platform.isFxApplicationThread())
+            runnable.run();
+        else
+            Platform.runLater(runnable);
     }
 }
