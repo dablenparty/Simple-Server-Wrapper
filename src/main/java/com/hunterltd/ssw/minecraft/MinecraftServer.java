@@ -1,12 +1,11 @@
 package com.hunterltd.ssw.minecraft;
 
-import com.hunterltd.ssw.util.events.EventEmitter;
 import com.google.gson.Gson;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
+import com.hunterltd.ssw.util.events.EventEmitter;
 
-import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -183,16 +182,10 @@ public class MinecraftServer extends EventEmitter {
         File launchBatch = Paths.get(String.valueOf(serverPath.getParent()), String.format("launch.%s", ext)).toFile();
 
         try (PrintWriter writer = new PrintWriter(launchBatch)) {
-            if (!launchBatch.createNewFile()) {
-                int result = JOptionPane.showConfirmDialog(null,
-                        "The launch file already exists! Would you like to overwrite it?",
-                        "Overwrite launch file",
-                        JOptionPane.YES_NO_OPTION
-                );
-                if (result == JOptionPane.NO_OPTION) return;
-            }
-
-            if (ext.equals("bat")) command += "\npause";
+            //noinspection ResultOfMethodCallIgnored
+            launchBatch.createNewFile();
+            if (ext.equals("bat"))
+                command += "\npause";
             writer.write(command);
             writer.flush();
         } catch (IOException e) {
@@ -455,7 +448,7 @@ public class MinecraftServer extends EventEmitter {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static class ServerProperties extends HashMap {
         private final File propsFile;
         private final List<String> comments = new ArrayList<>();
