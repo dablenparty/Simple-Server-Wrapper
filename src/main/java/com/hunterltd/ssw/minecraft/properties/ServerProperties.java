@@ -1,4 +1,4 @@
-package com.hunterltd.ssw.server.properties;
+package com.hunterltd.ssw.minecraft.properties;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -36,15 +36,11 @@ public class ServerProperties extends HashMap {
                         this.put(key, Integer.parseInt(value));
                     } catch (NumberFormatException e) {
                         switch (value) {
-                            case "true":
-                                this.put(key, true);
-                                break;
-                            case "false":
-                                this.put(key, false);
-                                break;
-                            default:
-                                // regular string
-                                this.put(key, value);
+                            case "true" -> this.put(key, true);
+                            case "false" -> this.put(key, false);
+                            default ->
+                                    // regular string
+                                    this.put(key, value);
                         }
                     }
                 }

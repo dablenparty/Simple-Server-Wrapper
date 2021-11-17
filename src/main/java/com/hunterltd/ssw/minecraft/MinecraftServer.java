@@ -1,8 +1,8 @@
-package com.hunterltd.ssw.server;
+package com.hunterltd.ssw.minecraft;
 
 import com.hunterltd.ssw.util.events.EventEmitter;
 import com.google.gson.Gson;
-import com.hunterltd.ssw.server.properties.ServerProperties;
+import com.hunterltd.ssw.minecraft.properties.ServerProperties;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;

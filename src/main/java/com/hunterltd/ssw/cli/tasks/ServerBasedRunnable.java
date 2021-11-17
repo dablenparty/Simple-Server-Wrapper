@@ -1,6 +1,6 @@
 package com.hunterltd.ssw.cli.tasks;
 
-import com.hunterltd.ssw.server.MinecraftServer;
+import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 
 import java.util.ArrayList;

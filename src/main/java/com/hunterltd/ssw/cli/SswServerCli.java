@@ -5,7 +5,7 @@ import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.curse.CurseCli;
-import com.hunterltd.ssw.server.MinecraftServer;
+import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.MavenUtils;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
