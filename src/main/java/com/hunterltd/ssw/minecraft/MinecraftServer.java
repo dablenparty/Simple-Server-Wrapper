@@ -2,7 +2,6 @@ package com.hunterltd.ssw.minecraft;
 
 import com.hunterltd.ssw.util.events.EventEmitter;
 import com.google.gson.Gson;
-import com.hunterltd.ssw.minecraft.properties.ServerProperties;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
@@ -13,10 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -456,6 +452,62 @@ public class MinecraftServer extends EventEmitter {
 
         public void setShutdownInterval(int shutdownInterval) {
             this.shutdownInterval = shutdownInterval;
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static class ServerProperties extends HashMap {
+        private final File propsFile;
+        private final List<String> comments = new ArrayList<>();
+
+        public ServerProperties(File propertiesFile) throws IOException {
+            propsFile = propertiesFile;
+            read();
+        }
+
+        public File getPropsFile() {
+            return propsFile;
+        }
+
+        public void read() throws IOException {
+            try (BufferedReader reader = new BufferedReader(new FileReader(propsFile))) {
+                reader.lines().forEach(line -> {
+                    if (line.startsWith("#")) {
+                        comments.add(line);
+                        return; // Ignores commented lines
+                    }
+                    String[] split = line.split("=");
+                    if (split.length == 1) {
+                        // No value for key
+                        this.put(split[0], null);
+                    } else {
+                        String key = split[0], value = split[1];
+                        try {
+                            this.put(key, Integer.parseInt(value));
+                        } catch (NumberFormatException e) {
+                            switch (value) {
+                                case "true" -> this.put(key, true);
+                                case "false" -> this.put(key, false);
+                                default ->
+                                        // regular string
+                                        this.put(key, value);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        public void write() throws FileNotFoundException {
+            PrintWriter writer = new PrintWriter(propsFile);
+            writer.write(String.join("\n", comments)); // writes the comments back at the start
+            this.forEach((key, value) -> {
+                String line = value == null ?
+                        key + "=" : String.join("=", (String) key, String.valueOf(value));
+                writer.append("\n").append(line);
+            });
+            writer.flush();
+            writer.close();
         }
     }
 }
