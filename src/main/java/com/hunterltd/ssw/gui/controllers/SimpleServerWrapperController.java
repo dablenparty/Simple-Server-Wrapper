@@ -4,6 +4,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
+
+import java.io.File;
 
 public class SimpleServerWrapperController {
     @FXML
@@ -31,6 +34,15 @@ public class SimpleServerWrapperController {
 
     @FXML
     protected void onSelectFileButtonClick() {
-
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select server JAR");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR archives", "*.jar"));
+        File chosen = fileChooser.showOpenDialog(selectFileButton.getScene().getWindow());
+        if (chosen == null)
+            return;
+        serverPathTextField.setText(chosen.toString());
+        runButton.setDisable(false);
+        sendCommandButton.setDisable(false);
+        commandTextField.setDisable(false);
     }
 }
