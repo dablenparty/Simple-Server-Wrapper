@@ -8,6 +8,8 @@ import javafx.scene.control.TextField;
 
 public class SimpleServerWrapperController {
     @FXML
+    private Button selectFileButton;
+    @FXML
     private TextField commandTextField;
     @FXML
     private Button sendCommandButton;
@@ -28,5 +30,10 @@ public class SimpleServerWrapperController {
     @FXML
     protected void onSendButtonClick() {
         serverOutputTextArea.appendText("You clicked the button!\n");
+    }
+
+    @FXML
+    protected void onSelectFileButtonClick() {
+
     }
 }

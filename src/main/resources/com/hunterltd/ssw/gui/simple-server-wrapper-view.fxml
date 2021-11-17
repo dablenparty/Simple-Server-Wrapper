@@ -14,11 +14,12 @@
 
     <HBox spacing="10.0">
         <TextField fx:id="serverPathTextField" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="runButton" text="Run" onAction="#onRunButtonClick"/>
+        <Button fx:id="selectFileButton" text="..." onAction="#onSelectFileButtonClick" minWidth="30.0"/>
+        <Button fx:id="runButton" text="Run" onAction="#onRunButtonClick" disable="true"/>
     </HBox>
     <TextArea fx:id="serverOutputTextArea" VBox.vgrow="ALWAYS" editable="false" wrapText="true"/>
     <HBox spacing="10.0">
         <TextField fx:id="commandTextField" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="sendCommandButton" text="Send" onAction="#onSendButtonClick"/>
+        <Button fx:id="sendCommandButton" text="Send" onAction="#onSendButtonClick" disable="true"/>
     </HBox>
 </VBox>
