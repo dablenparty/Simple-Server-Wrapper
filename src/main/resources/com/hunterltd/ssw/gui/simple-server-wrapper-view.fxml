@@ -19,7 +19,7 @@
     </HBox>
     <TextArea fx:id="serverOutputTextArea" VBox.vgrow="ALWAYS" editable="false" wrapText="true"/>
     <HBox spacing="10.0">
-        <TextField fx:id="commandTextField" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="commandTextField" HBox.hgrow="ALWAYS" disable="true"/>
         <Button fx:id="sendCommandButton" text="Send" onAction="#onSendButtonClick" disable="true"/>
     </HBox>
 </VBox>
