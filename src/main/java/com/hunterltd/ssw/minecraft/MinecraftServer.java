@@ -1,12 +1,14 @@
 package com.hunterltd.ssw.minecraft;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import com.hunterltd.ssw.util.events.EventEmitter;
+import com.hunterltd.ssw.util.serial.GsonExclude;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -351,6 +353,18 @@ public class MinecraftServer extends EventEmitter {
     }
 
     public static class ServerSettings {
+        private static final ExclusionStrategy EXCLUSION_STRATEGY = new ExclusionStrategy() {
+            @Override
+            public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+                return fieldAttributes.getAnnotation(GsonExclude.class) != null;
+            }
+
+            @Override
+            public boolean shouldSkipClass(Class<?> aClass) {
+                return false;
+            }
+        };
+        @GsonExclude
         private final Path settingsPath;
         private int memory;
         private List<String> extraArgs;
@@ -378,7 +392,14 @@ public class MinecraftServer extends EventEmitter {
         public static ServerSettings getSettingsFromDefaultPath(File serverFile) {
             Path settingsPath = Paths.get(serverFile.getParent(), "ssw", "wrapperSettings.json");
             if (Files.exists(settingsPath)) {
-                Gson gson = new Gson();
+                // excludes anything annotated with @GsonExclude from serialization/deserialization
+                Gson gson = new GsonBuilder()
+                        .setExclusionStrategies(EXCLUSION_STRATEGY)
+                        .registerTypeAdapter(
+                                ServerSettings.class,
+                                new ServerSettingsInstanceCreator(settingsPath)
+                        )
+                        .create();
                 String jsonString;
                 try {
                     jsonString = Files.readString(settingsPath);
@@ -389,6 +410,8 @@ public class MinecraftServer extends EventEmitter {
                 return gson.fromJson(jsonString, ServerSettings.class);
             }
             try {
+                Files.createDirectories(settingsPath.getParent());
+                Files.createFile(settingsPath);
                 ServerSettings settings = new ServerSettings(settingsPath);
                 settings.writeData();
                 return settings;
@@ -399,7 +422,9 @@ public class MinecraftServer extends EventEmitter {
         }
 
         public void writeData() throws IOException {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                    .setExclusionStrategies(EXCLUSION_STRATEGY)
+                    .create();
             String writeString = gson.toJson(this);
             Files.writeString(settingsPath, writeString);
         }
@@ -454,6 +479,13 @@ public class MinecraftServer extends EventEmitter {
 
         public void setShutdownInterval(int shutdownInterval) {
             this.shutdownInterval = shutdownInterval;
+        }
+
+        private record ServerSettingsInstanceCreator(Path path) implements InstanceCreator<ServerSettings> {
+            @Override
+            public ServerSettings createInstance(Type type) {
+                return new ServerSettings(path);
+            }
         }
     }
 
