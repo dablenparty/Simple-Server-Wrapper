@@ -1,5 +1,7 @@
 package com.hunterltd.ssw.gui.controllers;
 
+import com.hunterltd.ssw.minecraft.MinecraftServer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -7,6 +9,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.io.IOException;
+
+import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
 
 public class SimpleServerWrapperController {
     @FXML
@@ -22,9 +27,27 @@ public class SimpleServerWrapperController {
     @FXML
     private TextField serverPathTextField;
 
+    private MinecraftServer minecraftServer = null;
+
     @FXML
     protected void onRunButtonClick() {
-        runButton.setText(runButton.getText().equals("Run") ? "Stop" : "Run");
+        if (!minecraftServer.isRunning()) {
+            try {
+                minecraftServer.run();
+                runButton.setText("Stop");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            runButton.setText("Stopping...");
+            minecraftServer.stop();
+        }
+
+
+        minecraftServer.on("exit", args -> Platform.runLater(() -> {
+            flipEnabledComponents();
+            runButton.setText("Run");
+        }));
     }
 
     @FXML
@@ -40,9 +63,21 @@ public class SimpleServerWrapperController {
         File chosen = fileChooser.showOpenDialog(selectFileButton.getScene().getWindow());
         if (chosen == null)
             return;
+        minecraftServer = new MinecraftServer(chosen);
+        minecraftServer.on("data", args -> {
+            String text = (String) args[0];
+            if (!text.endsWith("\n"))
+                text += '\n';
+            String finalText = text;
+            runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
+        });
         serverPathTextField.setText(chosen.toString());
-        runButton.setDisable(false);
-        sendCommandButton.setDisable(false);
-        commandTextField.setDisable(false);
+        flipEnabledComponents();
+    }
+
+    private void flipEnabledComponents() {
+        runButton.setDisable(!runButton.isDisable());
+        sendCommandButton.setDisable(!sendCommandButton.isDisable());
+        commandTextField.setDisable(!commandTextField.isDisable());
     }
 }
