@@ -35,6 +35,15 @@ public class MinecraftServer extends EventEmitter {
     private volatile NamedExecutorService namedInputService, namedErrorService;
 
     /**
+     * Creates a class from a server file and automatically creates the settings file
+     *
+     * @param serverFile Server archive
+     */
+    public MinecraftServer(File serverFile) {
+        this(serverFile, ServerSettings.getSettingsFromDefaultPath(serverFile));
+    }
+
+    /**
      * Creates a class from an archive file and settings class
      *
      * @param serverFile     Server .jar file
