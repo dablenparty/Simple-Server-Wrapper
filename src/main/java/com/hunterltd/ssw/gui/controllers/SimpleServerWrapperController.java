@@ -6,9 +6,7 @@ import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -16,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -86,9 +85,18 @@ public class SimpleServerWrapperController {
         } else {
             selectFileButton.getScene().getWindow()
                     .setOnCloseRequest(windowEvent -> {
-                        // TODO show warning when server is still running
-                        if (minecraftServer.isRunning())
+                        if (minecraftServer.isRunning()) {
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                            alert.setTitle("Quit");
+                            alert.setHeaderText("A server is still running!");
+                            alert.setContentText("Are you sure you want to quit? This will shut down the server.");
+                            Optional<ButtonType> result = alert.showAndWait();
+                            if (result.isEmpty() || result.get() != ButtonType.OK) {
+                                windowEvent.consume();
+                                return;
+                            }
                             minecraftServer.stop();
+                        }
                         serviceList.forEach(NamedExecutorService::shutdown);
                     });
         }
