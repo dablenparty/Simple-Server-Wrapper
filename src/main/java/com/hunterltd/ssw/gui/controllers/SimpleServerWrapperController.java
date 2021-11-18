@@ -39,7 +39,6 @@ public class SimpleServerWrapperController {
     private List<NamedExecutorService> serviceList = null;
 
     public SimpleServerWrapperController() {
-        serviceList = new ArrayList<>();
     }
 
     @FXML
@@ -51,12 +50,11 @@ public class SimpleServerWrapperController {
     protected void onSendButtonClick() {
         String command = commandTextField.getText();
         // starting/stopping is handled by a separate thread
-        if (command.equals("stop")) {
-            minecraftServer.setShouldBeRunning(false);
-            return;
-        }
         try {
-            minecraftServer.sendCommand(command);
+            if (command.equals("stop"))
+                minecraftServer.setShouldBeRunning(false);
+            else
+                minecraftServer.sendCommand(command);
         } catch (IOException e) {
             e.printStackTrace();
             commandTextField.appendText("Error: %s\n".formatted(e.getMessage()));
@@ -121,34 +119,13 @@ public class SimpleServerWrapperController {
         runButton.setText("Run");
         sendCommandButton.setDisable(true);
         commandTextField.setDisable(true);
+        selectFileButton.setDisable(false);
     }
 
     private void enableServerBasedComponents() {
         runButton.setText("Stop");
         sendCommandButton.setDisable(false);
         commandTextField.setDisable(false);
-    }
-
-    // TODO move this to util, copy paste was quick and dirty
-    private void startAllServices() {
-        ScheduledExecutorService aliveScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Alive State Check"));
-        NamedExecutorService aliveNamedService = new NamedExecutorService("Alive State Check", aliveScheduledService);
-        serviceList.add(aliveNamedService);
-        AliveStateCheckTask stateCheckTask = new AliveStateCheckTask(minecraftServer);
-        aliveScheduledService.scheduleWithFixedDelay(stateCheckTask, 1L, 1L, TimeUnit.SECONDS);
-        stateCheckTask.getChildServices().forEach(aliveNamedService::addChildService);
-        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
-        if (serverSettings.getShutdown()) {
-            printlnWithTimeAndThread(System.out, "Auto startup/shutdown is enabled");
-            // make a new thread
-            ScheduledExecutorService pingScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Server Ping Service"));
-            ServerPingTask pingTask = new ServerPingTask(minecraftServer);
-            // make the named service and add the ping tasks' child service
-            NamedExecutorService serverPingService = new NamedExecutorService("Server Ping Service", pingScheduledService);
-            pingTask.getChildServices().forEach(serverPingService::addChildService);
-            serviceList.add(serverPingService);
-            // lastly, schedule the task
-            pingScheduledService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
-        }
+        selectFileButton.setDisable(true);
     }
 }
