@@ -18,13 +18,6 @@ public class SimpleServerWrapperGui extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(SimpleServerWrapperGui.class.getResource("simple-server-wrapper-view.fxml"));
         primaryStage.setTitle("Simple Server Wrapper");
         primaryStage.setScene(new Scene(fxmlLoader.load(), 320, 240));
-        primaryStage.getScene().getWindow().setOnCloseRequest(e -> {
-            try {
-                new ConfirmationDialog().start(new Stage());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
         primaryStage.show();
     }
 }
