@@ -23,7 +23,6 @@ import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndT
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
 
 public class SimpleServerWrapperController {
-    private final List<NamedExecutorService> serviceList;
     @FXML
     private Button selectFileButton;
     @FXML
@@ -37,6 +36,7 @@ public class SimpleServerWrapperController {
     @FXML
     private TextField serverPathTextField;
     private MinecraftServer minecraftServer = null;
+    private List<NamedExecutorService> serviceList = null;
 
     public SimpleServerWrapperController() {
         serviceList = new ArrayList<>();
@@ -102,7 +102,7 @@ public class SimpleServerWrapperController {
         }
 
         minecraftServer = new MinecraftServer(chosen);
-        startAllServices();
+        serviceList = minecraftServer.startAllBackgroundServices();
         minecraftServer.on("start", args -> runOnFxThread(this::enableServerBasedComponents))
                 .on("exiting", args -> runOnFxThread(() -> runButton.setText("Stopping...")))
                 .on("exit", args -> runOnFxThread(this::disabledServerBasedComponents))

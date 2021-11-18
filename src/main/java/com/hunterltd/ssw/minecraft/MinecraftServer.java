@@ -1,6 +1,8 @@
 package com.hunterltd.ssw.minecraft;
 
 import com.google.gson.*;
+import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
+import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
@@ -15,8 +17,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 /**
  * Minecraft server wrapper class
@@ -180,6 +186,34 @@ public class MinecraftServer extends EventEmitter {
                 System.err.println(e.getLocalizedMessage());
             }
         }
+    }
+
+    /**
+     * Starts all background services that this server instance requires and returns an unmodifiable list of them.
+     *
+     * @return Unmodifiable list of all {@link NamedExecutorService}'s that were started by this server instance
+     */
+    public List<NamedExecutorService> startAllBackgroundServices() {
+        List<NamedExecutorService> serviceList = new ArrayList<>(2);
+        ScheduledExecutorService aliveScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Alive State Check"));
+        NamedExecutorService aliveNamedService = new NamedExecutorService("Alive State Check", aliveScheduledService);
+        serviceList.add(aliveNamedService);
+        AliveStateCheckTask stateCheckTask = new AliveStateCheckTask(this);
+        aliveScheduledService.scheduleWithFixedDelay(stateCheckTask, 1L, 1L, TimeUnit.SECONDS);
+        stateCheckTask.getChildServices().forEach(aliveNamedService::addChildService);
+        if (serverSettings.getShutdown()) {
+            printlnWithTimeAndThread(System.out, "Auto startup/shutdown is enabled");
+            // make a new thread
+            ScheduledExecutorService pingScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Server Ping Service"));
+            ServerPingTask pingTask = new ServerPingTask(this);
+            // make the named service and add the ping tasks' child service
+            NamedExecutorService serverPingService = new NamedExecutorService("Server Ping Service", pingScheduledService);
+            pingTask.getChildServices().forEach(serverPingService::addChildService);
+            serviceList.add(serverPingService);
+            // lastly, schedule the task
+            pingScheduledService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
+        }
+        return Collections.unmodifiableList(serviceList);
     }
 
     /**

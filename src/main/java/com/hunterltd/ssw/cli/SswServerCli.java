@@ -1,14 +1,12 @@
 package com.hunterltd.ssw.cli;
 
-import com.hunterltd.ssw.util.events.EventCallback;
-import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
-import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.curse.CurseCli;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.MavenUtils;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
+import com.hunterltd.ssw.util.events.EventCallback;
 import net.lingala.zip4j.ZipFile;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -25,18 +23,16 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 public class SswServerCli {
     private final int port;
     private final MinecraftServer minecraftServer;
-    private final List<NamedExecutorService> serviceList = new ArrayList<>();
     private final Map<SswClientHandler, NamedExecutorService> clientHandlerToExecutorMap = new HashMap<>();
     private final Map<String, SswCliCommand> commandMap = new HashMap<>();
     private final File logFile;
+    private List<NamedExecutorService> serviceList;
     private ServerSocket serverSocket;
     private volatile boolean cancel = false;
     private int clientId = 0;
@@ -190,31 +186,6 @@ public class SswServerCli {
     }
 
     /**
-     * Starts all background services used by the SSW server and adds them to the {@link SswServerCli#serviceList}
-     */
-    private void startAllServices() {
-        ScheduledExecutorService aliveScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Alive State Check"));
-        NamedExecutorService aliveNamedService = new NamedExecutorService("Alive State Check", aliveScheduledService);
-        serviceList.add(aliveNamedService);
-        AliveStateCheckTask stateCheckTask = new AliveStateCheckTask(minecraftServer);
-        aliveScheduledService.scheduleWithFixedDelay(stateCheckTask, 1L, 1L, TimeUnit.SECONDS);
-        stateCheckTask.getChildServices().forEach(aliveNamedService::addChildService);
-        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
-        if (serverSettings.getShutdown()) {
-            printlnWithTimeAndThread(System.out, "Auto startup/shutdown is enabled");
-            // make a new thread
-            ScheduledExecutorService pingScheduledService = Executors.newSingleThreadScheduledExecutor(ThreadUtils.newNamedThreadFactory("Server Ping Service"));
-            ServerPingTask pingTask = new ServerPingTask(minecraftServer);
-            // make the named service and add the ping tasks' child service
-            NamedExecutorService serverPingService = new NamedExecutorService("Server Ping Service", pingScheduledService);
-            pingTask.getChildServices().forEach(serverPingService::addChildService);
-            serviceList.add(serverPingService);
-            // lastly, schedule the task
-            pingScheduledService.scheduleWithFixedDelay(pingTask, 2L, 2L, TimeUnit.SECONDS);
-        }
-    }
-
-    /**
      * Starts the SSW server
      *
      * @throws IOException if an I/O exception occurs while opening the socket, setting the timeout, or waiting for a
@@ -223,7 +194,7 @@ public class SswServerCli {
     public void start() throws IOException {
         serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
         serverSocket.setSoTimeout(5000);
-        startAllServices();
+        serviceList = minecraftServer.startAllBackgroundServices();
         registerCliCommands();
         while (!cancel) {
             pruneClientHandlers();
