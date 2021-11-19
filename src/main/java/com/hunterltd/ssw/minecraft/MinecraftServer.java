@@ -28,19 +28,21 @@ import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndT
  * Minecraft server wrapper class
  */
 public class MinecraftServer extends EventEmitter {
+    private static final int CRASHES_BEFORE_SHUTDOWN = 3;
     private final ProcessBuilder pB;
     private final ServerSettings serverSettings;
     private final List<String> commandHistory;
     private final Path serverPath;
+    private volatile boolean shouldBeRunning = false;
+    private volatile boolean shouldRestart = false;
+    private volatile boolean shuttingDown = false;
+    private volatile NamedExecutorService namedInputService, namedErrorService;
     private Process serverProcess;
     private List<String> serverArgs;
     private ServerProperties properties = null;
     private boolean propsExists;
     private int port = 25565;
-    private volatile boolean shouldBeRunning = false;
-    private volatile boolean shouldRestart = false;
-    private volatile boolean shuttingDown = false;
-    private volatile NamedExecutorService namedInputService, namedErrorService;
+    private int crashCount = 0;
 
     /**
      * Creates a class from a server file and automatically creates the settings file
@@ -129,10 +131,22 @@ public class MinecraftServer extends EventEmitter {
         propsExists = updateProperties();
         serverProcess = pB.start();
         serverProcess.onExit().thenApply(process -> {
+            // if the server should be running, but it isn't, it crashed
+            if (shouldBeRunning) {
+                crashCount++;
+                // prevents crash/launch loops
+                if (crashCount == CRASHES_BEFORE_SHUTDOWN) {
+                    System.out.println("Server has crashed " + CRASHES_BEFORE_SHUTDOWN + " times, the server will not restart");
+                    shouldBeRunning = false;
+                    shouldRestart = false;
+                    crashCount = 0;
+                } else
+                    System.out.println("Server crashed, restarting...");
+            }
             shutdownReadServices();
             emit("exit", process);
             return null;
-        }); // emits "exit" when the process exits
+        });
         emit("start", serverProcess);
         Consumer<String> gobblerConsumer = text -> emit("data", text);
         ExecutorService inputExecutorService = StreamGobbler.execute(
