@@ -16,6 +16,8 @@ import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
 
 public class SimpleServerWrapperController {
     @FXML
+    private Menu serverMenu;
+    @FXML
     private Button selectFileButton;
     @FXML
     private TextField commandTextField;
@@ -105,6 +107,7 @@ public class SimpleServerWrapperController {
                 });
         serverPathTextField.setText(chosen.toString());
         runButton.setDisable(false);
+        serverMenu.setDisable(false);
     }
 
     private void disabledServerBasedComponents() {
