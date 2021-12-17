@@ -110,6 +110,10 @@ public class SimpleServerWrapperController {
         serverMenu.setDisable(false);
     }
 
+    @FXML
+    protected void onOpenInFolderMenuClick() {
+    }
+
     private void disabledServerBasedComponents() {
         runButton.setText("Run");
         sendCommandButton.setDisable(true);

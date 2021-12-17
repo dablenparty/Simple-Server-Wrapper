@@ -12,7 +12,7 @@
         </Menu>
         <Menu text="Server" fx:id="serverMenu" disable="true">
             <MenuItem text="Settings"/>
-            <MenuItem text="Open in Folder"/>
+            <MenuItem onAction="#onOpenInFolderMenuClick" text="Open in Folder"/>
         </Menu>
     </MenuBar>
 
