@@ -7,8 +7,13 @@
       xmlns="http://javafx.com/javafx"
       fx:controller="com.hunterltd.ssw.gui.controllers.SimpleServerWrapperController">
     <MenuBar>
-        <Menu text="File"/>
-        <Menu text="Server" disable="true"/>
+        <Menu text="File">
+            <MenuItem text="Exit"/>
+        </Menu>
+        <Menu text="Server" fx:id="serverMenu" disable="true">
+            <MenuItem text="Settings"/>
+            <MenuItem text="Open in Folder"/>
+        </Menu>
     </MenuBar>
 
     <VBox alignment="CENTER" VBox.vgrow="ALWAYS" spacing="10.0">
