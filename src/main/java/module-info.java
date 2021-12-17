@@ -2,6 +2,7 @@ module com.hunterltd.ssw {
     requires com.google.gson;
     requires commons.lang;
     requires jakarta.ws.rs;
+    requires java.desktop;
     requires javafx.fxml;
     requires javafx.controls;
     requires jersey.common;
