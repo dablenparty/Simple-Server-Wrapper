@@ -3,11 +3,18 @@ package com.hunterltd.ssw.gui.controllers;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -112,6 +119,15 @@ public class SimpleServerWrapperController {
 
     @FXML
     protected void onOpenInFolderMenuClick() {
+        Path serverPath = minecraftServer.getServerPath();
+        while (!Files.isDirectory(serverPath))
+            serverPath = serverPath.getParent();
+        try {
+            Desktop.getDesktop().browse(serverPath.toUri());
+        } catch (IOException e) {
+            // TODO make alerts on errors
+            e.printStackTrace();
+        }
     }
 
     private void disabledServerBasedComponents() {
