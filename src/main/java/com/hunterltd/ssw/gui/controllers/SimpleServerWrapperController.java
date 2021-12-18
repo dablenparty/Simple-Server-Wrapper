@@ -1,12 +1,12 @@
 package com.hunterltd.ssw.gui.controllers;
 
 import com.hunterltd.ssw.gui.SimpleServerWrapperGui;
+import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -49,8 +49,19 @@ public class SimpleServerWrapperController {
     private TextField serverPathTextField;
     private MinecraftServer minecraftServer = null;
     private List<NamedExecutorService> serviceList = null;
+    private SimpleServerWrapperModel model;
 
     public SimpleServerWrapperController() {
+    }
+
+    public void initialize() {
+        model = new SimpleServerWrapperModel();
+
+        serverOutputTextArea.textProperty().bind(model.outputtedTextProperty());
+        model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
+            System.out.println(serverOutputTextArea.getScrollTop());
+            serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
+        });
     }
 
     @FXML
@@ -69,7 +80,7 @@ public class SimpleServerWrapperController {
                 minecraftServer.sendCommand(command);
         } catch (IOException e) {
             e.printStackTrace();
-            commandTextField.appendText("Error: %s\n".formatted(e.getMessage()));
+            serverOutputTextArea.appendText("Error: %s\n".formatted(e.getMessage()));
         } finally {
             commandTextField.clear();
         }
@@ -121,7 +132,8 @@ public class SimpleServerWrapperController {
                     if (!text.endsWith("\n"))
                         text += '\n';
                     String finalText = text;
-                    runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
+//                    runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
+                    runOnFxThread(() -> model.appendToOutputtedText(finalText));
                 });
         serverPathTextField.setText(chosen.toString());
         runButton.setDisable(false);
@@ -136,7 +148,7 @@ public class SimpleServerWrapperController {
         stage.setScene(new Scene(root));
         stage.setTitle("Server Settings");
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.initOwner(((MenuItem)event.getSource()).getStyleableNode().getScene().getWindow());
+        stage.initOwner(((MenuItem) event.getSource()).getStyleableNode().getScene().getWindow());
         stage.show();
     }
 
