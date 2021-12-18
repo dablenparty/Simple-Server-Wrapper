@@ -59,8 +59,11 @@ public class SimpleServerWrapperController {
 
         serverOutputTextArea.textProperty().bind(model.outputtedTextProperty());
         model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
-            System.out.println(serverOutputTextArea.getScrollTop());
-            serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
+            // works... but not very well
+            // serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
+            // https://coderedirect.com/questions/389990/auto-scroll-down-a-textarea
+            serverOutputTextArea.selectPositionCaret(serverOutputTextArea.getLength());
+            serverOutputTextArea.deselect();
         });
     }
 
