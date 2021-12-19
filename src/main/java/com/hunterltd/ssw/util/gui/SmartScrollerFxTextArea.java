@@ -17,12 +17,12 @@ public class SmartScrollerFxTextArea implements ChangeListener<String> {
     @Override
     public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
         double scrollTop = textArea.getScrollTop();
-        System.out.println(scrollTop);
         double maximum = calculateMaximumScroll(scrollTop);
+        System.out.println(maximum);
         if (scrollTop == previousMaximumScrollValue) {
             previousMaximumScrollValue = maximum;
             previousScrollValue = scrollTop;
-            textArea.selectPositionCaret(textArea.getLength());
+            textArea.selectEnd();
             textArea.deselect();
             // auto scroll
         } else {
@@ -32,8 +32,7 @@ public class SmartScrollerFxTextArea implements ChangeListener<String> {
 
     private double calculateMaximumScroll(double oldPosition) {
         // scroll to bottom
-        textArea.selectPositionCaret(textArea.getLength());
-        textArea.deselect();
+        textArea.setScrollTop(Double.MAX_VALUE);
         double maximum = textArea.getScrollTop();
         textArea.setScrollTop(oldPosition);
         return maximum;
