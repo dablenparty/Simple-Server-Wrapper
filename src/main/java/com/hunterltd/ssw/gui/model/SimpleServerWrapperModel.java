@@ -15,7 +15,7 @@ public class SimpleServerWrapperModel {
     private final StringProperty outputtedText;
     private final StringProperty serverPath;
     private final StringProperty extraArgs;
-    private final ObservableList<Double> serverMemory;
+    private final ObservableList<Double> serverMemoryOptions;
     private final IntegerProperty restartInterval;
     private final double maxMemory;
 
@@ -26,7 +26,7 @@ public class SimpleServerWrapperModel {
                 .iterate(0.5, i -> i < memGigabytes, i -> i + 0.5)
                 .boxed()
                 .collect(Collectors.toCollection(() -> new ArrayList<>((int) Math.round(memGigabytes) * 2)));
-        serverMemory = FXCollections.observableArrayList(memOpts);
+        serverMemoryOptions = FXCollections.observableArrayList(memOpts);
         maxMemory = memOpts.get(memOpts.size() - 1);
         restartInterval = new SimpleIntegerProperty();
         serverPath = new SimpleStringProperty();
@@ -91,8 +91,8 @@ public class SimpleServerWrapperModel {
         return ((double) memBytes) / Math.pow(1024, 3);
     }
 
-    public ObservableList<Double> getServerMemory() {
-        return serverMemory;
+    public ObservableList<Double> getServerMemoryOptions() {
+        return serverMemoryOptions;
     }
 
     public String getOutputtedText() {

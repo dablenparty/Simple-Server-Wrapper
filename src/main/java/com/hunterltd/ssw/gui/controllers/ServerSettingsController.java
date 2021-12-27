@@ -38,7 +38,7 @@ public class ServerSettingsController {
 
     public void initialize() {
         // General tab
-        ObjectProperty<ObservableList<Double>> memoryObjectProperty = new SimpleObjectProperty<>(model.getServerMemory());
+        ObjectProperty<ObservableList<Double>> memoryObjectProperty = new SimpleObjectProperty<>(model.getServerMemoryOptions());
         memoryComboBox.itemsProperty().bind(memoryObjectProperty);
         memoryComboBox.setOnAction(actionEvent -> {
             double comboBoxValue = memoryComboBox.getValue();
