@@ -29,6 +29,10 @@ public class ServerSettingsController extends FxController {
     private CheckBox restartCheckbox;
     @FXML
     private Slider restartIntervalSlider;
+    @FXML
+    private CheckBox proxyCheckbox;
+    @FXML
+    private Slider proxyShutdownIntervalSlider;
 
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
         super(model);
@@ -53,6 +57,10 @@ public class ServerSettingsController extends FxController {
         // Automation tab
         restartIntervalSlider.disableProperty().bind(restartCheckbox.selectedProperty().not());
         restartIntervalSlider.valueProperty().bind(model.restartIntervalProperty());
+        restartCheckbox.setSelected(serverSettings.getRestart());
+        proxyShutdownIntervalSlider.disableProperty().bind(proxyCheckbox.selectedProperty().not());
+        proxyShutdownIntervalSlider.valueProperty().bind(model.proxyShutdownIntervalProperty());
+        proxyCheckbox.setSelected(serverSettings.getShutdown());
     }
 
     @FXML

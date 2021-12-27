@@ -151,6 +151,7 @@ public class SimpleServerWrapperController extends FxController {
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         model.setExtraArgs(String.join(" ", serverSettings.getExtraArgs()));
         model.setRestartInterval(serverSettings.getRestartInterval());
+        model.setProxyShutdownInterval(serverSettings.getShutdownInterval());
         runButton.setDisable(false);
         serverMenu.setDisable(false);
     }

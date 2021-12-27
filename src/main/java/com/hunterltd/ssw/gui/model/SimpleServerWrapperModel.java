@@ -17,6 +17,7 @@ public class SimpleServerWrapperModel {
     private final StringProperty extraArgs;
     private final ObservableList<Double> serverMemoryOptions;
     private final IntegerProperty restartInterval;
+    private final IntegerProperty proxyShutdownInterval;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
@@ -32,6 +33,19 @@ public class SimpleServerWrapperModel {
         serverPath = new SimpleStringProperty();
         extraArgs = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
+        proxyShutdownInterval = new SimpleIntegerProperty();
+    }
+
+    public int getProxyShutdownInterval() {
+        return proxyShutdownInterval.get();
+    }
+
+    public void setProxyShutdownInterval(int proxyShutdownInterval) {
+        this.proxyShutdownInterval.set(proxyShutdownInterval);
+    }
+
+    public IntegerProperty proxyShutdownIntervalProperty() {
+        return proxyShutdownInterval;
     }
 
     public boolean isServerRunning() {

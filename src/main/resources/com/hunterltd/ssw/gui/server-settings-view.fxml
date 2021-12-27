@@ -37,6 +37,14 @@
                                 showTickMarks="true" HBox.hgrow="ALWAYS"/>
                     </HBox>
                 </VBox>
+                <VBox spacing="10.0">
+                    <CheckBox fx:id="proxyCheckbox" text="Insert Proxy Server"/>
+                    <HBox spacing="10.0">
+                        <Label text="Interval (minutes)"/>
+                        <Slider fx:id="proxyShutdownIntervalSlider" showTickLabels="true" min="1" max="60" snapToTicks="true" majorTickUnit="10" minorTickCount="9"
+                                showTickMarks="true" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </VBox>
             </VBox>
         </Tab>
         <Tab text="Properties" closable="false"/>
