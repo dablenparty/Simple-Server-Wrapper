@@ -13,8 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServerSettingsController implements FxController {
-    private final SimpleServerWrapperModel model;
+public class ServerSettingsController extends FxController {
     private final MinecraftServer minecraftServer;
     @FXML
     private TextField extraArgsTextField;
@@ -32,11 +31,13 @@ public class ServerSettingsController implements FxController {
     private Slider restartIntervalSlider;
 
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
-        this.model = model;
+        super(model);
         this.minecraftServer = minecraftServer;
     }
 
     public void initialize() {
+        SimpleServerWrapperModel model = getInternalModel();
+
         // General tab
         ObjectProperty<ObservableList<Double>> memoryObjectProperty = new SimpleObjectProperty<>(model.getServerMemoryOptions());
         memoryComboBox.itemsProperty().bind(memoryObjectProperty);
@@ -62,6 +63,8 @@ public class ServerSettingsController implements FxController {
 
     @FXML
     protected void onSaveClicked() throws IOException {
+        SimpleServerWrapperModel model = getInternalModel();
+
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         serverSettings.setMemory(memoryComboBox.getValue());
         String argsFieldText = model.getExtraArgs();

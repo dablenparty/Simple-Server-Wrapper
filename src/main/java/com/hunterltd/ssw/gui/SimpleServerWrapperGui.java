@@ -1,5 +1,7 @@
 package com.hunterltd.ssw.gui;
 
+import com.hunterltd.ssw.gui.controllers.SimpleServerWrapperController;
+import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -15,7 +17,9 @@ public class SimpleServerWrapperGui extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        final SimpleServerWrapperModel model = new SimpleServerWrapperModel();
         FXMLLoader fxmlLoader = new FXMLLoader(SimpleServerWrapperGui.class.getResource("simple-server-wrapper-view.fxml"));
+        fxmlLoader.setControllerFactory(aClass -> new SimpleServerWrapperController(model));
         primaryStage.setTitle("Simple Server Wrapper");
         primaryStage.setScene(new Scene(fxmlLoader.load(), 320, 240));
         primaryStage.show();

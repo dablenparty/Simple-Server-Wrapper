@@ -31,7 +31,7 @@ import java.util.Optional;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
 
-public class SimpleServerWrapperController implements FxController {
+public class SimpleServerWrapperController extends FxController {
     @FXML
     private Menu serverMenu;
     @FXML
@@ -48,13 +48,13 @@ public class SimpleServerWrapperController implements FxController {
     private TextField serverPathTextField;
     private MinecraftServer minecraftServer = null;
     private List<NamedExecutorService> serviceList = null;
-    private SimpleServerWrapperModel model;
 
-    public SimpleServerWrapperController() {
+    public SimpleServerWrapperController(SimpleServerWrapperModel model) {
+        super(model);
     }
 
     public void initialize() {
-        model = new SimpleServerWrapperModel();
+        SimpleServerWrapperModel model = getInternalModel();
 
         serverOutputTextArea.textProperty().bind(model.outputtedTextProperty());
         serverPathTextField.textProperty().bind(model.serverPathProperty());
@@ -127,6 +127,7 @@ public class SimpleServerWrapperController implements FxController {
                         serviceList.forEach(NamedExecutorService::shutdown);
                     });
         }
+        SimpleServerWrapperModel model = getInternalModel();
 
         minecraftServer = new MinecraftServer(chosen);
         serviceList = minecraftServer.startAllBackgroundServices();
@@ -157,6 +158,7 @@ public class SimpleServerWrapperController implements FxController {
     @FXML
     protected void onSettingsMenuClick(ActionEvent event) throws IOException {
         Stage stage = new Stage();
+        SimpleServerWrapperModel model = getInternalModel();
         URL viewResource = SimpleServerWrapperGui.class.getResource("server-settings-view.fxml");
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(viewResource);
