@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
 
 /**
@@ -40,6 +41,7 @@ public class MinecraftServer extends EventEmitter {
     private Process serverProcess;
     private List<String> serverArgs;
     private ServerProperties properties = null;
+    private boolean eulaAgreedTo;
     private boolean propsExists;
     private int port = 25565;
     private int crashCount = 0;
@@ -82,6 +84,8 @@ public class MinecraftServer extends EventEmitter {
         serverPath = serverPath1;
         propsExists = updateProperties();
 
+        parseEula();
+
         String javaHome = System.getProperty("java.home");
         File executableFile = Paths.get(javaHome, "bin", "java.exe").toFile();
         String javaCommand = executableFile.exists() ? executableFile.toString() : "java";
@@ -94,13 +98,38 @@ public class MinecraftServer extends EventEmitter {
                 serverPath.toString(),
                 "nogui"));
 
-        if (serverSettings.hasExtraArgs()) serverArgs.addAll(3, minecraftServerSettings.getExtraArgs());
+        if (serverSettings.hasExtraArgs())
+            serverArgs.addAll(3, minecraftServerSettings.getExtraArgs());
         updateExtraArgs();
 
         pB.command(serverArgs);
 
         commandHistory = new ArrayList<>();
         commandHistory.add(""); // Not entirely sure why this is needed, but the command history won't work without it
+    }
+
+    private void parseEula() {
+        Path eulaPath = Paths.get(serverPath.getParent().toString(), "eula.txt");
+        if (Files.exists(eulaPath)) {
+            try {
+                List<String> lines = Files.readAllLines(eulaPath);
+                lines.forEach(s -> {
+                    // commented lines
+                    if (s.startsWith("#"))
+                        return;
+                    if (s.startsWith("eula")) {
+                        String[] tokens = s.split("=");
+                        eulaAgreedTo = Boolean.parseBoolean(tokens[1]);
+                    }
+                });
+            } catch (IOException e) {
+                printfWithTimeAndThread(System.err, "An error occurred parsing %s%n", e.getLocalizedMessage());
+            }
+        }
+    }
+
+    public boolean isEulaAgreedTo() {
+        return eulaAgreedTo;
     }
 
     /**
