@@ -1,36 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<?import javafx.geometry.Insets?>
-<TabPane xmlns="http://javafx.com/javafx"
-         xmlns:fx="http://javafx.com/fxml"
-         fx:controller="com.hunterltd.ssw.gui.controllers.ServerSettingsController"
-         prefHeight="400.0" prefWidth="600.0">
-
-    <Tab text="General" closable="false">
-        <VBox>
-            <VBox VBox.vgrow="ALWAYS">
-                <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                </padding>
-                <HBox spacing="10.0">
-                    <Label text="Memory (GB)"/>
-                    <ComboBox fx:id="memoryComboBox"/>
-                    <Slider HBox.hgrow="ALWAYS" showTickMarks="true" majorTickUnit="1.0" max="32"/>
-                </HBox>
-            </VBox>
-            <HBox alignment="BOTTOM_RIGHT" spacing="10.0">
-                <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                </padding>
-                <Button fx:id="saveButton" onAction="#onSaveClicked" text="Save" defaultButton="true"/>
-                <Button fx:id="cancelButton" onAction="#onCancelClicked" text="Cancel"/>
-            </HBox>
-        </VBox>
-</Tab>
-    <Tab text="Automation" closable="false"/>
-    <Tab text="Properties" closable="false"/>
-
-</TabPane>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      xmlns="http://javafx.com/javafx"
+      fx:controller="com.hunterltd.ssw.gui.controllers.ServerSettingsController"
+      prefHeight="400.0" prefWidth="600.0">
+    <TabPane VBox.vgrow="ALWAYS">
+        <Tab text="General" closable="false">
+                <VBox>
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <HBox spacing="10.0">
+                        <Label text="Memory (GB)"/>
+                        <ComboBox fx:id="memoryComboBox"/>
+                        <Slider HBox.hgrow="ALWAYS" showTickMarks="true" majorTickUnit="1.0" max="32"/>
+                    </HBox>
+                </VBox>
+        </Tab>
+        <Tab text="Automation" closable="false"/>
+        <Tab text="Properties" closable="false"/>
+    </TabPane>
+    <HBox alignment="BOTTOM_RIGHT" spacing="10.0">
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+        </padding>
+        <Button fx:id="saveButton" onAction="#onSaveClicked" text="Save" defaultButton="true"/>
+        <Button fx:id="cancelButton" onAction="#onCancelClicked" text="Cancel"/>
+    </HBox>
+</VBox>
