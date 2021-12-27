@@ -5,11 +5,12 @@ import com.hunterltd.ssw.minecraft.MinecraftServer;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class ServerSettingsController {
     private final SimpleServerWrapperModel model;
@@ -36,5 +37,12 @@ public class ServerSettingsController {
     protected void onCancelClicked() {
         // TODO check for unsaved changes
         ((Stage) cancelButton.getScene().getWindow()).close();
+    }
+
+    @FXML
+    protected void onSaveClicked() throws IOException {
+        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
+        serverSettings.setMemory(memoryComboBox.getValue());
+        serverSettings.writeData();
     }
 }
