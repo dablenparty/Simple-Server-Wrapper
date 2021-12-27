@@ -52,7 +52,7 @@ public class ServerSettingsController extends FxController {
 
         // Automation tab
         restartIntervalSlider.disableProperty().bind(restartCheckbox.selectedProperty().not());
-        model.restartIntervalProperty().bind(restartIntervalSlider.valueProperty());
+        restartIntervalSlider.valueProperty().bind(model.restartIntervalProperty());
     }
 
     @FXML
