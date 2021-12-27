@@ -48,11 +48,9 @@ public class ServerSettingsController {
         memoryComboBox.setValue(serverSettings.getMemory());
         memoryProgressBar.setProgress(serverSettings.getMemory() / model.getMaxMemory());
         extraArgsTextField.textProperty().bind(model.extraArgsProperty());
-        extraArgsTextField.setText(String.join(" ", serverSettings.getExtraArgs()));
 
         // Automation tab
         restartIntervalSlider.disableProperty().bind(restartCheckbox.selectedProperty().not());
-        model.setRestartInterval(serverSettings.getRestartInterval());
         model.restartIntervalProperty().bind(restartIntervalSlider.valueProperty());
     }
 
