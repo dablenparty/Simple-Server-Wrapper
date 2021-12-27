@@ -5,9 +5,11 @@ import com.hunterltd.ssw.minecraft.MinecraftServer;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.stage.Stage;
 
 public class ServerSettingsController {
     private final SimpleServerWrapperModel model;
@@ -28,5 +30,11 @@ public class ServerSettingsController {
         ObjectProperty<ObservableList<Double>> memoryObjectProperty = new SimpleObjectProperty<>(model.getServerMemory());
         memoryComboBox.itemsProperty().bind(memoryObjectProperty);
         memoryComboBox.setValue(minecraftServer.getServerSettings().getMemory());
+    }
+
+    @FXML
+    protected void onCancelClicked() {
+        // TODO check for unsaved changes
+        ((Stage) cancelButton.getScene().getWindow()).close();
     }
 }
