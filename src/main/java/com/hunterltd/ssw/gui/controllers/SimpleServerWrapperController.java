@@ -147,7 +147,10 @@ public class SimpleServerWrapperController {
     protected void onSettingsMenuClick(ActionEvent event) throws IOException {
         Stage stage = new Stage();
         URL viewResource = SimpleServerWrapperGui.class.getResource("server-settings-view.fxml");
-        Parent root = FXMLLoader.load(Objects.requireNonNull(viewResource));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(viewResource);
+        loader.setControllerFactory(aClass -> new ServerSettingsController(model));
+        Parent root = loader.load();
         stage.setScene(new Scene(root));
         stage.setTitle("Server Settings");
         stage.initModality(Modality.APPLICATION_MODAL);
