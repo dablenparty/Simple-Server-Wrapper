@@ -9,10 +9,13 @@ module com.hunterltd.ssw {
     requires net.sourceforge.argparse4j;
     requires org.apache.commons.io;
     requires zip4j;
+    requires java.management;
+    requires jdk.management;
 
     opens com.hunterltd.ssw.gui to javafx.fxml;
     opens com.hunterltd.ssw.gui.controllers to javafx.fxml;
     opens com.hunterltd.ssw.minecraft to com.google.gson;
     exports com.hunterltd.ssw.gui;
     exports com.hunterltd.ssw.gui.controllers;
+    exports com.hunterltd.ssw.gui.model;
 }
