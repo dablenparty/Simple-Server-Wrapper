@@ -18,4 +18,5 @@ module com.hunterltd.ssw {
     exports com.hunterltd.ssw.gui;
     exports com.hunterltd.ssw.gui.controllers;
     exports com.hunterltd.ssw.gui.model;
+    exports com.hunterltd.ssw.minecraft;
 }
