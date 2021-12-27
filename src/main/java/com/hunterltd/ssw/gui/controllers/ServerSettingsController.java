@@ -6,13 +6,18 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 
 public class ServerSettingsController {
-    @FXML
-    public ComboBox<Double> memoryComboBox;
     private final SimpleServerWrapperModel model;
     private final MinecraftServer minecraftServer;
+    @FXML
+    private ComboBox<Double> memoryComboBox;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button cancelButton;
 
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
         this.model = model;
