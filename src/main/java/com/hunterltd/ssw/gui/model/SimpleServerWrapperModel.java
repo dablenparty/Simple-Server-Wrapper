@@ -14,6 +14,7 @@ import java.util.stream.DoubleStream;
 public class SimpleServerWrapperModel {
     private final StringProperty outputtedText;
     private final ObservableList<Double> serverMemory;
+    private final double maxMemory;
 
     public SimpleServerWrapperModel() {
         outputtedText = new SimpleStringProperty();
@@ -23,6 +24,11 @@ public class SimpleServerWrapperModel {
                 .boxed()
                 .collect(Collectors.toCollection(() -> new ArrayList<>((int) Math.round(memGigabytes) * 2)));
         serverMemory = FXCollections.observableArrayList(memOpts);
+        maxMemory = memOpts.get(memOpts.size() - 1);
+    }
+
+    public double getMaxMemory() {
+        return maxMemory;
     }
 
     private double calculateSystemMemoryGb() {
