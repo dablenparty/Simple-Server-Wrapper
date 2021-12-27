@@ -30,7 +30,7 @@
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                 </padding>
                 <VBox spacing="10.0">
-                    <CheckBox text="Auto-Restart"/>
+                    <CheckBox fx:id="restartCheckbox" text="Auto-Restart"/>
                     <HBox spacing="10.0">
                         <Label text="Interval (hours)"/>
                         <Slider fx:id="restartIntervalSlider" showTickLabels="true" min="1" max="24" snapToTicks="true" majorTickUnit="6" minorTickCount="5"

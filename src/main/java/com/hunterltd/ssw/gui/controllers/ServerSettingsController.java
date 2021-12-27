@@ -27,6 +27,8 @@ public class ServerSettingsController {
     @FXML
     private Button cancelButton;
     @FXML
+    private CheckBox restartCheckbox;
+    @FXML
     private Slider restartIntervalSlider;
 
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
@@ -48,6 +50,7 @@ public class ServerSettingsController {
         extraArgsTextField.setText(String.join(" ", serverSettings.getExtraArgs()));
 
         // Automation tab
+        restartIntervalSlider.disableProperty().bind(restartCheckbox.selectedProperty().not());
         model.setRestartInterval(serverSettings.getRestartInterval());
         model.restartIntervalProperty().bind(restartIntervalSlider.valueProperty());
     }
