@@ -82,8 +82,12 @@ public class MinecraftServer extends EventEmitter {
         serverPath = serverPath1;
         propsExists = updateProperties();
 
+        String javaHome = System.getProperty("java.home");
+        File executableFile = Paths.get(javaHome, "bin", "java.exe").toFile();
+        String javaCommand = executableFile.exists() ? executableFile.toString() : "java";
+
         int settingsMemory = serverSettings.getMemory();
-        serverArgs = new ArrayList<>(Arrays.asList("java",
+        serverArgs = new ArrayList<>(Arrays.asList(javaCommand,
                 String.format("-Xmx%dM", settingsMemory),
                 String.format("-Xms%dM", settingsMemory),
                 "-jar",
