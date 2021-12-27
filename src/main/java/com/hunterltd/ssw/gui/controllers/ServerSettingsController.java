@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServerSettingsController {
+public class ServerSettingsController implements FxController {
     private final SimpleServerWrapperModel model;
     private final MinecraftServer minecraftServer;
     @FXML

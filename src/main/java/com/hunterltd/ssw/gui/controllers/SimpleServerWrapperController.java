@@ -31,7 +31,7 @@ import java.util.Optional;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
 
-public class SimpleServerWrapperController {
+public class SimpleServerWrapperController implements FxController {
     @FXML
     private Menu serverMenu;
     @FXML
