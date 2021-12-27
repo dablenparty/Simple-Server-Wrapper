@@ -138,6 +138,9 @@ public class SimpleServerWrapperController {
                     runOnFxThread(() -> model.appendToOutputtedText(finalText));
                 });
         model.setServerPath(minecraftServer.getServerPath().toString());
+        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
+        model.setExtraArgs(String.join(" ", serverSettings.getExtraArgs()));
+        model.setRestartInterval(serverSettings.getRestartInterval());
         runButton.setDisable(false);
         serverMenu.setDisable(false);
     }
