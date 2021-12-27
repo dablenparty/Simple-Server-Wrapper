@@ -47,6 +47,7 @@ public class ServerSettingsController {
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         memoryComboBox.setValue(serverSettings.getMemory());
         memoryProgressBar.setProgress(serverSettings.getMemory() / model.getMaxMemory());
+        extraArgsTextField.textProperty().bind(model.extraArgsProperty());
         extraArgsTextField.setText(String.join(" ", serverSettings.getExtraArgs()));
 
         // Automation tab
@@ -65,10 +66,10 @@ public class ServerSettingsController {
     protected void onSaveClicked() throws IOException {
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         serverSettings.setMemory(memoryComboBox.getValue());
-        String argsFieldText = extraArgsTextField.getText();
+        String argsFieldText = model.getExtraArgs();
         List<String> extraArgs = argsFieldText.isBlank() ? new ArrayList<>() : List.of(argsFieldText.split(" "));
-        serverSettings.setRestartInterval(model.getRestartInterval());
         serverSettings.setExtraArgs(extraArgs);
+        serverSettings.setRestartInterval(model.getRestartInterval());
         serverSettings.writeData();
     }
 }
