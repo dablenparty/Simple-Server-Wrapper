@@ -1,6 +1,8 @@
 package com.hunterltd.ssw.gui.model;
 
 import com.sun.management.OperatingSystemMXBean;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -14,6 +16,7 @@ import java.util.stream.DoubleStream;
 public class SimpleServerWrapperModel {
     private final StringProperty outputtedText;
     private final ObservableList<Double> serverMemory;
+    private final IntegerProperty restartInterval;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
@@ -25,6 +28,19 @@ public class SimpleServerWrapperModel {
                 .collect(Collectors.toCollection(() -> new ArrayList<>((int) Math.round(memGigabytes) * 2)));
         serverMemory = FXCollections.observableArrayList(memOpts);
         maxMemory = memOpts.get(memOpts.size() - 1);
+        restartInterval = new SimpleIntegerProperty();
+    }
+
+    public int getRestartInterval() {
+        return restartInterval.get();
+    }
+
+    public void setRestartInterval(int restartInterval) {
+        this.restartInterval.set(restartInterval);
+    }
+
+    public IntegerProperty restartIntervalProperty() {
+        return restartInterval;
     }
 
     public double getMaxMemory() {
