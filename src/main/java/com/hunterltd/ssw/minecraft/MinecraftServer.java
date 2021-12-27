@@ -162,19 +162,29 @@ public class MinecraftServer extends EventEmitter {
      */
     public void run() throws IOException {
         propsExists = updateProperties();
+        parseEula();
         serverProcess = pB.start();
         serverProcess.onExit().thenApply(process -> {
             // if the server should be running, but it isn't, it crashed
             if (shouldBeRunning) {
                 crashCount++;
                 // prevents crash/launch loops
-                if (crashCount == CRASHES_BEFORE_SHUTDOWN) {
-                    System.out.println("Server has crashed " + CRASHES_BEFORE_SHUTDOWN + " times, the server will not restart");
+                boolean restart = false;
+                String message;
+                if (!eulaAgreedTo)
+                    message = "EULA is not agreed to, the server will not restart";
+                else if (crashCount == CRASHES_BEFORE_SHUTDOWN)
+                    message = "Server has crashed " + CRASHES_BEFORE_SHUTDOWN + " times, the server will not restart";
+                else {
+                    restart = true;
+                    message = "Server crashed, restarting...";
+                }
+                printlnWithTimeAndThread(System.out, message);
+                if (!restart) {
                     shouldBeRunning = false;
                     shouldRestart = false;
                     crashCount = 0;
-                } else
-                    System.out.println("Server crashed, restarting...");
+                }
             }
             shutdownReadServices();
             emit("exit", process);
