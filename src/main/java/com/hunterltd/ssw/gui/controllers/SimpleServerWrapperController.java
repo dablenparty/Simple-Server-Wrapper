@@ -57,6 +57,7 @@ public class SimpleServerWrapperController {
         model = new SimpleServerWrapperModel();
 
         serverOutputTextArea.textProperty().bind(model.outputtedTextProperty());
+        serverPathTextField.textProperty().bind(model.serverPathProperty());
         model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
             // works... but not very well
             // serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
@@ -134,10 +135,9 @@ public class SimpleServerWrapperController {
                     if (!text.endsWith("\n"))
                         text += '\n';
                     String finalText = text;
-//                    runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
                     runOnFxThread(() -> model.appendToOutputtedText(finalText));
                 });
-        serverPathTextField.setText(chosen.toString());
+        model.setServerPath(minecraftServer.getServerPath().toString());
         runButton.setDisable(false);
         serverMenu.setDisable(false);
     }

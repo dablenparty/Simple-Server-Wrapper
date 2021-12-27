@@ -15,6 +15,7 @@ import java.util.stream.DoubleStream;
 
 public class SimpleServerWrapperModel {
     private final StringProperty outputtedText;
+    private final StringProperty serverPath;
     private final ObservableList<Double> serverMemory;
     private final IntegerProperty restartInterval;
     private final double maxMemory;
@@ -29,6 +30,19 @@ public class SimpleServerWrapperModel {
         serverMemory = FXCollections.observableArrayList(memOpts);
         maxMemory = memOpts.get(memOpts.size() - 1);
         restartInterval = new SimpleIntegerProperty();
+        serverPath = new SimpleStringProperty();
+    }
+
+    public String getServerPath() {
+        return serverPath.get();
+    }
+
+    public StringProperty serverPathProperty() {
+        return serverPath;
+    }
+
+    public void setServerPath(String serverPath) {
+        this.serverPath.set(serverPath);
     }
 
     public int getRestartInterval() {
