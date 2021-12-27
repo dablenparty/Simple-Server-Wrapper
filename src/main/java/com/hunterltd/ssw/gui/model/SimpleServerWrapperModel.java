@@ -16,6 +16,7 @@ import java.util.stream.DoubleStream;
 public class SimpleServerWrapperModel {
     private final StringProperty outputtedText;
     private final StringProperty serverPath;
+    private final StringProperty extraArgs;
     private final ObservableList<Double> serverMemory;
     private final IntegerProperty restartInterval;
     private final double maxMemory;
@@ -31,18 +32,31 @@ public class SimpleServerWrapperModel {
         maxMemory = memOpts.get(memOpts.size() - 1);
         restartInterval = new SimpleIntegerProperty();
         serverPath = new SimpleStringProperty();
+        extraArgs = new SimpleStringProperty();
+    }
+
+    public String getExtraArgs() {
+        return extraArgs.get();
+    }
+
+    public void setExtraArgs(String extraArgs) {
+        this.extraArgs.set(extraArgs);
+    }
+
+    public StringProperty extraArgsProperty() {
+        return extraArgs;
     }
 
     public String getServerPath() {
         return serverPath.get();
     }
 
-    public StringProperty serverPathProperty() {
-        return serverPath;
-    }
-
     public void setServerPath(String serverPath) {
         this.serverPath.set(serverPath);
+    }
+
+    public StringProperty serverPathProperty() {
+        return serverPath;
     }
 
     public int getRestartInterval() {
