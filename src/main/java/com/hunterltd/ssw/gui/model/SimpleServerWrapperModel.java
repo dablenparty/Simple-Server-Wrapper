@@ -1,10 +1,7 @@
 package com.hunterltd.ssw.gui.model;
 
 import com.sun.management.OperatingSystemMXBean;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -14,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class SimpleServerWrapperModel {
+    private final BooleanProperty serverRunning;
     private final StringProperty outputtedText;
     private final StringProperty serverPath;
     private final StringProperty extraArgs;
@@ -33,6 +31,19 @@ public class SimpleServerWrapperModel {
         restartInterval = new SimpleIntegerProperty();
         serverPath = new SimpleStringProperty();
         extraArgs = new SimpleStringProperty();
+        serverRunning = new SimpleBooleanProperty(false);
+    }
+
+    public boolean isServerRunning() {
+        return serverRunning.get();
+    }
+
+    public void setServerRunning(boolean serverRunning) {
+        this.serverRunning.set(serverRunning);
+    }
+
+    public BooleanProperty serverRunningProperty() {
+        return serverRunning;
     }
 
     public String getExtraArgs() {

@@ -58,6 +58,9 @@ public class SimpleServerWrapperController {
 
         serverOutputTextArea.textProperty().bind(model.outputtedTextProperty());
         serverPathTextField.textProperty().bind(model.serverPathProperty());
+        sendCommandButton.disableProperty().bind(model.serverRunningProperty().not());
+        commandTextField.disableProperty().bind(model.serverRunningProperty().not());
+        selectFileButton.disableProperty().bind(model.serverRunningProperty());
         model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
             // works... but not very well
             // serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
@@ -127,9 +130,15 @@ public class SimpleServerWrapperController {
 
         minecraftServer = new MinecraftServer(chosen);
         serviceList = minecraftServer.startAllBackgroundServices();
-        minecraftServer.on("start", args -> runOnFxThread(this::enableServerBasedComponents))
+        minecraftServer.on("start", args -> runOnFxThread(() -> {
+                    runButton.setText("Stop");
+                    model.setServerRunning(true);
+                }))
                 .on("exiting", args -> runOnFxThread(() -> runButton.setText("Stopping...")))
-                .on("exit", args -> runOnFxThread(this::disabledServerBasedComponents))
+                .on("exit", args -> runOnFxThread(() -> {
+                    runButton.setText("Run");
+                    model.setServerRunning(false);
+                }))
                 .on("data", args -> {
                     String text = (String) args[0];
                     if (!text.endsWith("\n"))
@@ -171,19 +180,5 @@ public class SimpleServerWrapperController {
             // TODO make alerts on errors
             e.printStackTrace();
         }
-    }
-
-    private void disabledServerBasedComponents() {
-        runButton.setText("Run");
-        sendCommandButton.setDisable(true);
-        commandTextField.setDisable(true);
-        selectFileButton.setDisable(false);
-    }
-
-    private void enableServerBasedComponents() {
-        runButton.setText("Stop");
-        sendCommandButton.setDisable(false);
-        commandTextField.setDisable(false);
-        selectFileButton.setDisable(true);
     }
 }
