@@ -85,21 +85,6 @@ public class MinecraftServer extends EventEmitter {
         propsExists = updateProperties();
 
         parseEula();
-
-        String javaHome = System.getProperty("java.home");
-        File executableFile = Paths.get(javaHome, "bin", "java.exe").toFile();
-        String javaCommand = executableFile.exists() ? executableFile.toString() : "java";
-
-        int settingsMemory = serverSettings.getMemory();
-        serverArgs = new ArrayList<>(Arrays.asList(javaCommand,
-                String.format("-Xmx%dM", settingsMemory),
-                String.format("-Xms%dM", settingsMemory),
-                "-jar",
-                serverPath.toString(),
-                "nogui"));
-
-        if (serverSettings.hasExtraArgs())
-            serverArgs.addAll(3, minecraftServerSettings.getExtraArgs());
         updateExtraArgs();
 
         pB.command(serverArgs);
@@ -372,14 +357,20 @@ public class MinecraftServer extends EventEmitter {
      * Updates the extra args for the server
      */
     public void updateExtraArgs() {
-        serverArgs = new ArrayList<>(Arrays.asList("java",
-                String.format("-Xmx%dM", serverSettings.getMemory()),
-                String.format("-Xms%dM", serverSettings.getMemory()),
+        String javaHome = System.getProperty("java.home");
+        File executableFile = Paths.get(javaHome, "bin", "java.exe").toFile();
+        String javaCommand = executableFile.exists() ? executableFile.toString() : "java";
+
+        int settingsMemoryMb = (int) (serverSettings.getMemory() * 1024);
+        serverArgs = new ArrayList<>(Arrays.asList(javaCommand,
+                String.format("-Xmx%dM", settingsMemoryMb),
+                String.format("-Xms%dM", settingsMemoryMb),
                 "-jar",
                 serverPath.toString(),
                 "nogui"));
 
-        if (serverSettings.hasExtraArgs()) serverArgs.addAll(3, serverSettings.getExtraArgs());
+        if (serverSettings.hasExtraArgs())
+            serverArgs.addAll(3, serverSettings.getExtraArgs());
     }
 
     /**
@@ -457,7 +448,7 @@ public class MinecraftServer extends EventEmitter {
         };
         @GsonExclude
         private final Path settingsPath;
-        private int memory;
+        private double memory;
         private List<String> extraArgs;
         private boolean autoRestart;
         private int restartInterval;
@@ -465,7 +456,7 @@ public class MinecraftServer extends EventEmitter {
         private int shutdownInterval;
 
         public ServerSettings(Path settingsPath) {
-            memory = 1024;
+            memory = 1.0;
             extraArgs = new ArrayList<>();
             autoRestart = false;
             restartInterval = 6;
@@ -520,7 +511,7 @@ public class MinecraftServer extends EventEmitter {
             Files.writeString(settingsPath, writeString);
         }
 
-        public int getMemory() {
+        public double getMemory() {
             return memory;
         }
 
