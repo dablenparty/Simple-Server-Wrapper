@@ -4,7 +4,6 @@ import com.hunterltd.ssw.gui.SimpleServerWrapperGui;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
-import com.hunterltd.ssw.util.gui.SmartScrollerFxTextArea;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -59,14 +58,13 @@ public class SimpleServerWrapperController {
         model = new SimpleServerWrapperModel();
 
         serverOutputTextArea.textProperty().bind(model.outputtedTextProperty());
-//        model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
-//            // works... but not very well
-//            // serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
-//            // https://coderedirect.com/questions/389990/auto-scroll-down-a-textarea
-//            serverOutputTextArea.selectPositionCaret(serverOutputTextArea.getLength());
-//            serverOutputTextArea.deselect();
-//        });
-        model.outputtedTextProperty().addListener(new SmartScrollerFxTextArea(serverOutputTextArea));
+        model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
+            // works... but not very well
+            // serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
+            // TODO add a checkbox for auto-scrolling
+            serverOutputTextArea.selectEnd();
+            serverOutputTextArea.deselect();
+        });
     }
 
     @FXML
