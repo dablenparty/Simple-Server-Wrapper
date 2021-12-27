@@ -16,7 +16,7 @@
                 <HBox spacing="10.0">
                     <Label text="Memory (GB)"/>
                     <ComboBox fx:id="memoryComboBox"/>
-                    <ProgressBar HBox.hgrow="ALWAYS"/>
+                    <ProgressBar fx:id="memoryProgressBar" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
                 </HBox>
                 <HBox spacing="10.0">
                     <Label text="Extra JVM Arguments"/>
