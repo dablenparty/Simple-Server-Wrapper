@@ -8,13 +8,18 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerSettingsController {
     private final SimpleServerWrapperModel model;
     private final MinecraftServer minecraftServer;
+    @FXML
+    private TextField extraArgsTextField;
     @FXML
     private ComboBox<Double> memoryComboBox;
     @FXML
@@ -30,7 +35,9 @@ public class ServerSettingsController {
     public void initialize() {
         ObjectProperty<ObservableList<Double>> memoryObjectProperty = new SimpleObjectProperty<>(model.getServerMemory());
         memoryComboBox.itemsProperty().bind(memoryObjectProperty);
-        memoryComboBox.setValue(minecraftServer.getServerSettings().getMemory());
+        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
+        memoryComboBox.setValue(serverSettings.getMemory());
+        extraArgsTextField.setText(String.join(" ", serverSettings.getExtraArgs()));
     }
 
     @FXML
@@ -43,6 +50,9 @@ public class ServerSettingsController {
     protected void onSaveClicked() throws IOException {
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         serverSettings.setMemory(memoryComboBox.getValue());
+        String argsFieldText = extraArgsTextField.getText();
+        List<String> extraArgs = argsFieldText.isBlank() ? new ArrayList<>() : List.of(argsFieldText.split(" "));
+        serverSettings.setExtraArgs(extraArgs);
         serverSettings.writeData();
     }
 }
