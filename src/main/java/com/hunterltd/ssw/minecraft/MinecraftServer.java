@@ -515,7 +515,7 @@ public class MinecraftServer extends EventEmitter {
             return memory;
         }
 
-        public void setMemory(int memory) {
+        public void setMemory(double memory) {
             this.memory = memory;
         }
 
