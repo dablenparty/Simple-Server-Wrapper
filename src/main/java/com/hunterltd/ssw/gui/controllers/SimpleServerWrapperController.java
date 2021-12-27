@@ -27,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
@@ -149,7 +148,7 @@ public class SimpleServerWrapperController {
         URL viewResource = SimpleServerWrapperGui.class.getResource("server-settings-view.fxml");
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(viewResource);
-        loader.setControllerFactory(aClass -> new ServerSettingsController(model));
+        loader.setControllerFactory(aClass -> new ServerSettingsController(model, minecraftServer));
         Parent root = loader.load();
         stage.setScene(new Scene(root));
         stage.setTitle("Server Settings");
