@@ -12,6 +12,8 @@ import java.util.stream.DoubleStream;
 
 public class SimpleServerWrapperModel {
     private final BooleanProperty serverRunning;
+    private final BooleanProperty restart;
+    private final BooleanProperty proxy;
     private final StringProperty outputtedText;
     private final StringProperty serverPath;
     private final StringProperty extraArgs;
@@ -34,6 +36,32 @@ public class SimpleServerWrapperModel {
         extraArgs = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
         proxyShutdownInterval = new SimpleIntegerProperty();
+        restart = new SimpleBooleanProperty();
+        proxy = new SimpleBooleanProperty();
+    }
+
+    public boolean isRestart() {
+        return restart.get();
+    }
+
+    public void setRestart(boolean restart) {
+        this.restart.set(restart);
+    }
+
+    public BooleanProperty restartProperty() {
+        return restart;
+    }
+
+    public boolean isProxy() {
+        return proxy.get();
+    }
+
+    public void setProxy(boolean proxy) {
+        this.proxy.set(proxy);
+    }
+
+    public BooleanProperty proxyProperty() {
+        return proxy;
     }
 
     public int getProxyShutdownInterval() {
