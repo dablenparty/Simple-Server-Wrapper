@@ -56,11 +56,11 @@ public class ServerSettingsController extends FxController {
 
         // Automation tab
         restartIntervalSlider.disableProperty().bind(restartCheckbox.selectedProperty().not());
-        restartIntervalSlider.valueProperty().bind(model.restartIntervalProperty());
-        restartCheckbox.selectedProperty().bind(model.restartProperty());
+        restartIntervalSlider.valueProperty().bindBidirectional(model.restartIntervalProperty());
+        restartCheckbox.selectedProperty().bindBidirectional(model.restartProperty());
         proxyShutdownIntervalSlider.disableProperty().bind(proxyCheckbox.selectedProperty().not());
-        proxyShutdownIntervalSlider.valueProperty().bind(model.proxyShutdownIntervalProperty());
-        proxyCheckbox.selectedProperty().bind(model.proxyProperty());
+        proxyShutdownIntervalSlider.valueProperty().bindBidirectional(model.proxyShutdownIntervalProperty());
+        proxyCheckbox.selectedProperty().bindBidirectional(model.proxyProperty());
     }
 
     @FXML
