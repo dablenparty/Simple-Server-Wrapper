@@ -33,7 +33,8 @@
                     <CheckBox fx:id="restartCheckbox" text="Auto-Restart"/>
                     <HBox spacing="10.0">
                         <Label text="Interval (hours)"/>
-                        <Slider fx:id="restartIntervalSlider" showTickLabels="true" min="1" max="24" snapToTicks="true" majorTickUnit="6" minorTickCount="5"
+                        <Slider fx:id="restartIntervalSlider" showTickLabels="true" min="1" max="24" snapToTicks="true"
+                                majorTickUnit="6" minorTickCount="5"
                                 showTickMarks="true" HBox.hgrow="ALWAYS"/>
                     </HBox>
                 </VBox>
@@ -41,7 +42,8 @@
                     <CheckBox fx:id="proxyCheckbox" text="Insert Proxy Server"/>
                     <HBox spacing="10.0">
                         <Label text="Interval (minutes)"/>
-                        <Slider fx:id="proxyShutdownIntervalSlider" showTickLabels="true" min="1" max="60" snapToTicks="true" majorTickUnit="10" minorTickCount="9"
+                        <Slider fx:id="proxyShutdownIntervalSlider" showTickLabels="true" min="1" max="60"
+                                snapToTicks="true" majorTickUnit="10" minorTickCount="9"
                                 showTickMarks="true" HBox.hgrow="ALWAYS"/>
                     </HBox>
                 </VBox>
