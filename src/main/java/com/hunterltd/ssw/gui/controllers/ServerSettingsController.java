@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ServerSettingsController extends FxController {
     private final MinecraftServer minecraftServer;
@@ -63,9 +64,27 @@ public class ServerSettingsController extends FxController {
         proxyCheckbox.selectedProperty().bindBidirectional(model.proxyProperty());
     }
 
+    // TODO set a dirty flag whenever something changes, it's a lot faster than this
+    private boolean settingsChanged(SimpleServerWrapperModel model, MinecraftServer.ServerSettings serverSettings) {
+        return memoryComboBox.getValue() != serverSettings.getMemory()
+                || model.isProxy() != serverSettings.getShutdown()
+                || model.isRestart() != serverSettings.getRestart()
+                || model.getRestartInterval() != serverSettings.getRestartInterval()
+                || model.getProxyShutdownInterval() != serverSettings.getShutdownInterval()
+                || !model.getExtraArgs().equals(String.join(" ", serverSettings.getExtraArgs()));
+    }
+
     @FXML
     protected void onCancelClicked() {
-        // TODO check for unsaved changes
+        if (settingsChanged(getInternalModel(), minecraftServer.getServerSettings())) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText("You have unsaved changes!");
+            alert.setContentText("Would you like to exit without saving?");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isEmpty() || result.get() != ButtonType.OK)
+                return;
+        }
         ((Stage) cancelButton.getScene().getWindow()).close();
     }
 
