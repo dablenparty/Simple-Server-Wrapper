@@ -53,7 +53,7 @@ public class ServerSettingsController extends FxController {
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         memoryComboBox.setValue(serverSettings.getMemory());
         memoryProgressBar.setProgress(serverSettings.getMemory() / model.getMaxMemory());
-        extraArgsTextField.textProperty().bind(model.extraArgsProperty());
+        extraArgsTextField.textProperty().bindBidirectional(model.extraArgsProperty());
 
         // Automation tab
         restartIntervalSlider.disableProperty().bind(restartCheckbox.selectedProperty().not());
