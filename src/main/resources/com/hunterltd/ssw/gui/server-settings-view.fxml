@@ -50,10 +50,23 @@
             </VBox>
         </Tab>
         <Tab text="Properties" closable="false">
-            <TableView fx:id="propertyTableView" editable="true">
-                <TableColumn fx:id="propertyTableColumn" text="Property"/>
-                <TableColumn fx:id="valueTableColumn" text="Value" onEditCommit="#onValueEdited"/>
-            </TableView>
+            <VBox spacing="10.0">
+                <TableView fx:id="propertyTableView" editable="true">
+                    <TableColumn fx:id="propertyTableColumn" text="Property"/>
+                    <TableColumn fx:id="valueTableColumn" text="Value" onEditCommit="#onValueEdited"/>
+                </TableView>
+                <HBox spacing="10.0">
+                    <VBox>
+                        <Label text="Key"/>
+                        <TextField fx:id="newKeyTextField"/>
+                    </VBox>
+                    <VBox>
+                        <Label text="Value"/>
+                        <TextField fx:id="newValueTextField"/>
+                    </VBox>
+                    <Button fx:id="addPropertyButton" text="Add" onAction="#onAddPropertyClicked"/>
+                </HBox>
+            </VBox>
         </Tab>
     </TabPane>
     <HBox alignment="BOTTOM_RIGHT" spacing="10.0">

@@ -13,13 +13,11 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ServerSettingsController extends FxController {
     private final MinecraftServer minecraftServer;
+    private final HashMap<String, String> oldProperties;
     @FXML
     private TextField extraArgsTextField;
     @FXML
@@ -44,11 +42,18 @@ public class ServerSettingsController extends FxController {
     private TableColumn<Map.Entry<String, String>, String> propertyTableColumn;
     @FXML
     private TableColumn<Map.Entry<String, String>, String> valueTableColumn;
+    @FXML
+    private TextField newValueTextField;
+    @FXML
+    private TextField newKeyTextField;
+    @FXML
+    private Button addPropertyButton;
     private boolean dirty = false;
 
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
         super(model);
         this.minecraftServer = minecraftServer;
+        oldProperties = new HashMap<>(minecraftServer.getProperties());
     }
 
     public void initialize() {
@@ -103,6 +108,9 @@ public class ServerSettingsController extends FxController {
             if (result.isEmpty() || result.get() != ButtonType.OK)
                 return;
         }
+        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
+        properties.clear();
+        properties.putAll(oldProperties);
         ((Stage) cancelButton.getScene().getWindow()).close();
     }
 
@@ -125,5 +133,11 @@ public class ServerSettingsController extends FxController {
     protected void onValueEdited(TableColumn.CellEditEvent<Map.Entry<String, String>, String> editEvent) {
         dirty = true;
         editEvent.getTableView().getItems().get(editEvent.getTablePosition().getRow()).setValue(editEvent.getNewValue());
+    }
+
+    @FXML
+    protected void onAddPropertyClicked() {
+        dirty = true;
+        minecraftServer.getProperties().put(newKeyTextField.getText(), newValueTextField.getText());
     }
 }
