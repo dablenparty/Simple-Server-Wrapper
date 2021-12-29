@@ -4,6 +4,8 @@ import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -12,6 +14,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ServerSettingsController extends FxController {
@@ -34,12 +37,19 @@ public class ServerSettingsController extends FxController {
     private CheckBox proxyCheckbox;
     @FXML
     private Slider proxyShutdownIntervalSlider;
+    @FXML
+    private TableView<Map.Entry<String, ?>> propertyTableView;
+    @FXML
+    private TableColumn<Map.Entry<String, ?>, String> propertyTableColumn;
+    @FXML
+    private TableColumn<Map.Entry<String, ?>, String> valueTableColumn;
 
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
         super(model);
         this.minecraftServer = minecraftServer;
     }
 
+    @SuppressWarnings("unchecked")
     public void initialize() {
         SimpleServerWrapperModel model = getInternalModel();
 
@@ -62,6 +72,13 @@ public class ServerSettingsController extends FxController {
         proxyShutdownIntervalSlider.disableProperty().bind(proxyCheckbox.selectedProperty().not());
         proxyShutdownIntervalSlider.valueProperty().bindBidirectional(model.proxyShutdownIntervalProperty());
         proxyCheckbox.selectedProperty().bindBidirectional(model.proxyProperty());
+
+        // Properties tab
+        propertyTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getKey()));
+        valueTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(String.valueOf(dataFeatures.getValue().getValue())));
+        ObservableList<Map.Entry<String, ?>> items = FXCollections.observableArrayList(minecraftServer.getProperties().entrySet());
+        propertyTableView.setItems(items);
+        propertyTableView.getColumns().setAll(propertyTableColumn, valueTableColumn);
     }
 
     // TODO set a dirty flag whenever something changes, it's a lot faster than this

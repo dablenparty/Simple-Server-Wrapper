@@ -50,7 +50,7 @@
             </VBox>
         </Tab>
         <Tab text="Properties" closable="false">
-            <TableView>
+            <TableView fx:id="propertyTableView">
                 <TableColumn fx:id="propertyTableColumn" text="Property"/>
                 <TableColumn fx:id="valueTableColumn" text="Value"/>
             </TableView>
