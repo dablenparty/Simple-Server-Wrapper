@@ -15,6 +15,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -179,5 +181,12 @@ public class SimpleServerWrapperController extends FxController {
             // TODO make alerts on errors
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    protected void onKeyPressedInCommandField(KeyEvent keyEvent) {
+        // TODO add support for arrow keys cycling command history
+        if (keyEvent.getCode() == KeyCode.ENTER)
+            sendCommandButton.fire();
     }
 }
