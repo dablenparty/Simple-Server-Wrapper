@@ -148,12 +148,6 @@ public class SimpleServerWrapperController extends FxController {
                     runOnFxThread(() -> model.appendToOutputtedText(finalText));
                 });
         model.setServerPath(minecraftServer.getServerPath().toString());
-        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
-        model.setExtraArgs(String.join(" ", serverSettings.getExtraArgs()));
-        model.setRestart(serverSettings.getRestart());
-        model.setRestartInterval(serverSettings.getRestartInterval());
-        model.setProxy(serverSettings.getShutdown());
-        model.setProxyShutdownInterval(serverSettings.getShutdownInterval());
         runButton.setDisable(false);
         serverMenu.setDisable(false);
     }

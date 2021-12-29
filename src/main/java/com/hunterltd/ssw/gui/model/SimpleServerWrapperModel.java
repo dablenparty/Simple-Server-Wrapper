@@ -4,24 +4,17 @@ import com.sun.management.OperatingSystemMXBean;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class SimpleServerWrapperModel {
     private final BooleanProperty serverRunning;
-    private final BooleanProperty restart;
-    private final BooleanProperty proxy;
     private final StringProperty outputtedText;
     private final StringProperty serverPath;
-    private final StringProperty extraArgs;
     private final ObservableList<Double> serverMemoryOptions;
-    private final IntegerProperty restartInterval;
-    private final IntegerProperty proxyShutdownInterval;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
@@ -33,49 +26,8 @@ public class SimpleServerWrapperModel {
                 .collect(Collectors.toCollection(() -> new ArrayList<>((int) Math.round(memGigabytes) * 2)));
         serverMemoryOptions = FXCollections.observableArrayList(memOpts);
         maxMemory = memOpts.get(memOpts.size() - 1);
-        restartInterval = new SimpleIntegerProperty();
         serverPath = new SimpleStringProperty();
-        extraArgs = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
-        proxyShutdownInterval = new SimpleIntegerProperty();
-        restart = new SimpleBooleanProperty();
-        proxy = new SimpleBooleanProperty();
-    }
-
-    public boolean isRestart() {
-        return restart.get();
-    }
-
-    public void setRestart(boolean restart) {
-        this.restart.set(restart);
-    }
-
-    public BooleanProperty restartProperty() {
-        return restart;
-    }
-
-    public boolean isProxy() {
-        return proxy.get();
-    }
-
-    public void setProxy(boolean proxy) {
-        this.proxy.set(proxy);
-    }
-
-    public BooleanProperty proxyProperty() {
-        return proxy;
-    }
-
-    public int getProxyShutdownInterval() {
-        return proxyShutdownInterval.get();
-    }
-
-    public void setProxyShutdownInterval(int proxyShutdownInterval) {
-        this.proxyShutdownInterval.set(proxyShutdownInterval);
-    }
-
-    public IntegerProperty proxyShutdownIntervalProperty() {
-        return proxyShutdownInterval;
     }
 
     public boolean isServerRunning() {
@@ -90,18 +42,6 @@ public class SimpleServerWrapperModel {
         return serverRunning;
     }
 
-    public String getExtraArgs() {
-        return extraArgs.get();
-    }
-
-    public void setExtraArgs(String extraArgs) {
-        this.extraArgs.set(extraArgs);
-    }
-
-    public StringProperty extraArgsProperty() {
-        return extraArgs;
-    }
-
     public String getServerPath() {
         return serverPath.get();
     }
@@ -112,18 +52,6 @@ public class SimpleServerWrapperModel {
 
     public StringProperty serverPathProperty() {
         return serverPath;
-    }
-
-    public int getRestartInterval() {
-        return restartInterval.get();
-    }
-
-    public void setRestartInterval(int restartInterval) {
-        this.restartInterval.set(restartInterval);
-    }
-
-    public IntegerProperty restartIntervalProperty() {
-        return restartInterval;
     }
 
     public double getMaxMemory() {
