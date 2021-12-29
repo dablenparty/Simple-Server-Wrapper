@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -38,18 +39,17 @@ public class ServerSettingsController extends FxController {
     @FXML
     private Slider proxyShutdownIntervalSlider;
     @FXML
-    private TableView<Map.Entry<String, ?>> propertyTableView;
+    private TableView<Map.Entry<String, String>> propertyTableView;
     @FXML
-    private TableColumn<Map.Entry<String, ?>, String> propertyTableColumn;
+    private TableColumn<Map.Entry<String, String>, String> propertyTableColumn;
     @FXML
-    private TableColumn<Map.Entry<String, ?>, String> valueTableColumn;
+    private TableColumn<Map.Entry<String, String>, String> valueTableColumn;
 
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
         super(model);
         this.minecraftServer = minecraftServer;
     }
 
-    @SuppressWarnings("unchecked")
     public void initialize() {
         SimpleServerWrapperModel model = getInternalModel();
 
@@ -73,10 +73,13 @@ public class ServerSettingsController extends FxController {
         proxyShutdownIntervalSlider.valueProperty().bindBidirectional(model.proxyShutdownIntervalProperty());
         proxyCheckbox.selectedProperty().bindBidirectional(model.proxyProperty());
 
+        minecraftServer.getProperties().forEach((key, value) -> model.getPropertiesStringMap().put((String) key, String.valueOf(value)));
+
         // Properties tab
         propertyTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getKey()));
-        valueTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(String.valueOf(dataFeatures.getValue().getValue())));
-        ObservableList<Map.Entry<String, ?>> items = FXCollections.observableArrayList(minecraftServer.getProperties().entrySet());
+        valueTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getValue()));
+        valueTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(model.getPropertiesStringMap().entrySet());
         propertyTableView.setItems(items);
         propertyTableView.getColumns().setAll(propertyTableColumn, valueTableColumn);
     }
@@ -119,5 +122,10 @@ public class ServerSettingsController extends FxController {
         serverSettings.setRestart(model.isRestart());
         serverSettings.setShutdown(model.isProxy());
         serverSettings.writeData();
+    }
+
+    @FXML
+    protected void onValueEdited(TableColumn.CellEditEvent<Map.Entry<String, String>, String> editEvent) {
+        editEvent.getTableView().getItems().get(editEvent.getTablePosition().getRow()).setValue(editEvent.getNewValue());
     }
 }
