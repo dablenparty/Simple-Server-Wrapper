@@ -22,7 +22,6 @@ public class SimpleServerWrapperModel {
     private final ObservableList<Double> serverMemoryOptions;
     private final IntegerProperty restartInterval;
     private final IntegerProperty proxyShutdownInterval;
-    private final MapProperty<String, String> propertiesStringMap;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
@@ -41,19 +40,6 @@ public class SimpleServerWrapperModel {
         proxyShutdownInterval = new SimpleIntegerProperty();
         restart = new SimpleBooleanProperty();
         proxy = new SimpleBooleanProperty();
-        propertiesStringMap = new SimpleMapProperty<>(FXCollections.observableMap(new HashMap<>()));
-    }
-
-    public ObservableMap<String, String> getPropertiesStringMap() {
-        return propertiesStringMap.get();
-    }
-
-    public void setPropertiesStringMap(ObservableMap<String, String> propertiesStringMap) {
-        this.propertiesStringMap.set(propertiesStringMap);
-    }
-
-    public MapProperty<String, String> propertiesStringMapProperty() {
-        return propertiesStringMap;
     }
 
     public boolean isRestart() {
