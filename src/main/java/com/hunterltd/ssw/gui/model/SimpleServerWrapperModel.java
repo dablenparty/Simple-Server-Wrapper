@@ -4,6 +4,7 @@ import com.sun.management.OperatingSystemMXBean;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class SimpleServerWrapperModel {
     private final ObservableList<Double> serverMemoryOptions;
     private final IntegerProperty restartInterval;
     private final IntegerProperty proxyShutdownInterval;
+    private final MapProperty<String, String> propertiesStringMap;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
@@ -38,6 +40,19 @@ public class SimpleServerWrapperModel {
         proxyShutdownInterval = new SimpleIntegerProperty();
         restart = new SimpleBooleanProperty();
         proxy = new SimpleBooleanProperty();
+        propertiesStringMap = new SimpleMapProperty<>();
+    }
+
+    public ObservableMap<String, String> getPropertiesStringMap() {
+        return propertiesStringMap.get();
+    }
+
+    public void setPropertiesStringMap(ObservableMap<String, String> propertiesStringMap) {
+        this.propertiesStringMap.set(propertiesStringMap);
+    }
+
+    public MapProperty<String, String> propertiesStringMapProperty() {
+        return propertiesStringMap;
     }
 
     public boolean isRestart() {
