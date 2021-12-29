@@ -341,7 +341,7 @@ public class MinecraftServer extends EventEmitter {
         try {
             properties = new ServerProperties(Paths.get(String.valueOf(serverPath.getParent()), "server.properties").toFile());
             propsExists = true;
-            port = (int) properties.get("server-port");
+            port = Integer.parseInt(properties.get("server-port"));
             return true;
         } catch (FileNotFoundException e) {
             propsExists = false;
@@ -571,8 +571,7 @@ public class MinecraftServer extends EventEmitter {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static class ServerProperties extends HashMap {
+    public static class ServerProperties extends HashMap<String, String> {
         private final File propsFile;
         private final List<String> comments = new ArrayList<>();
 
@@ -593,23 +592,9 @@ public class MinecraftServer extends EventEmitter {
                         return; // Ignores commented lines
                     }
                     String[] split = line.split("=");
-                    if (split.length == 1) {
-                        // No value for key
-                        this.put(split[0], null);
-                    } else {
-                        String key = split[0], value = split[1];
-                        try {
-                            this.put(key, Integer.parseInt(value));
-                        } catch (NumberFormatException e) {
-                            switch (value) {
-                                case "true" -> this.put(key, true);
-                                case "false" -> this.put(key, false);
-                                default ->
-                                        // regular string
-                                        this.put(key, value);
-                            }
-                        }
-                    }
+                    // No value for key
+                    String value = split.length == 1 ? null : split[1];
+                    this.put(split[0], value);
                 });
             }
         }
@@ -619,7 +604,7 @@ public class MinecraftServer extends EventEmitter {
             writer.write(String.join("\n", comments)); // writes the comments back at the start
             this.forEach((key, value) -> {
                 String line = value == null ?
-                        key + "=" : String.join("=", (String) key, String.valueOf(value));
+                        key + "=" : String.join("=", key, value);
                 writer.append("\n").append(line);
             });
             writer.flush();
