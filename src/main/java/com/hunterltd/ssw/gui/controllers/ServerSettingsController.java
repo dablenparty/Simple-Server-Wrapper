@@ -73,13 +73,11 @@ public class ServerSettingsController extends FxController {
         proxyShutdownIntervalSlider.valueProperty().bindBidirectional(model.proxyShutdownIntervalProperty());
         proxyCheckbox.selectedProperty().bindBidirectional(model.proxyProperty());
 
-        minecraftServer.getProperties().forEach((key, value) -> model.getPropertiesStringMap().put((String) key, String.valueOf(value)));
-
         // Properties tab
         propertyTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getKey()));
         valueTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getValue()));
         valueTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(model.getPropertiesStringMap().entrySet());
+        ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(minecraftServer.getProperties().entrySet());
         propertyTableView.setItems(items);
         propertyTableView.getColumns().setAll(propertyTableColumn, valueTableColumn);
     }
@@ -122,6 +120,7 @@ public class ServerSettingsController extends FxController {
         serverSettings.setRestart(model.isRestart());
         serverSettings.setShutdown(model.isProxy());
         serverSettings.writeData();
+        minecraftServer.getProperties().write();
     }
 
     @FXML
