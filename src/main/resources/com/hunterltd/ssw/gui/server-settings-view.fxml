@@ -50,9 +50,9 @@
             </VBox>
         </Tab>
         <Tab text="Properties" closable="false">
-            <TableView fx:id="propertyTableView">
+            <TableView fx:id="propertyTableView" editable="true">
                 <TableColumn fx:id="propertyTableColumn" text="Property"/>
-                <TableColumn fx:id="valueTableColumn" text="Value"/>
+                <TableColumn fx:id="valueTableColumn" text="Value" onEditCommit="#onValueEdited"/>
             </TableView>
         </Tab>
     </TabPane>
