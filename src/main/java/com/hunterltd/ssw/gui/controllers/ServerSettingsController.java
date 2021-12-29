@@ -65,23 +65,27 @@ public class ServerSettingsController extends FxController {
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         memoryComboBox.setValue(serverSettings.getMemory());
         memoryProgressBar.setProgress(serverSettings.getMemory() / model.getMaxMemory());
-        extraArgsTextField.textProperty().bindBidirectional(model.extraArgsProperty());
+
         extraArgsTextField.setOnKeyTyped(keyEvent -> dirty = true);
 
         // Automation tab
+        restartCheckbox.setSelected(serverSettings.getRestart());
+        proxyCheckbox.setSelected(serverSettings.getShutdown());
+
         restartIntervalSlider.disableProperty().bind(restartCheckbox.selectedProperty().not());
-        restartIntervalSlider.valueProperty().bindBidirectional(model.restartIntervalProperty());
         restartIntervalSlider.setOnMouseReleased(mouseEvent -> dirty = true);
-        restartCheckbox.selectedProperty().bindBidirectional(model.restartProperty());
+        restartIntervalSlider.setValue(serverSettings.getRestartInterval());
+
         proxyShutdownIntervalSlider.disableProperty().bind(proxyCheckbox.selectedProperty().not());
-        proxyShutdownIntervalSlider.valueProperty().bindBidirectional(model.proxyShutdownIntervalProperty());
         proxyShutdownIntervalSlider.setOnMouseReleased(mouseEvent -> dirty = true);
-        proxyCheckbox.selectedProperty().bindBidirectional(model.proxyProperty());
+        proxyShutdownIntervalSlider.setValue(serverSettings.getShutdownInterval());
 
         // Properties tab
         propertyTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getKey()));
+
         valueTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getValue()));
         valueTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+
         ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(minecraftServer.getProperties().entrySet());
         propertyTableView.setItems(items);
         //noinspection unchecked
@@ -104,17 +108,15 @@ public class ServerSettingsController extends FxController {
 
     @FXML
     protected void onSaveClicked() throws IOException {
-        SimpleServerWrapperModel model = getInternalModel();
-
         MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
         serverSettings.setMemory(memoryComboBox.getValue());
-        String argsFieldText = model.getExtraArgs();
+        String argsFieldText = extraArgsTextField.getText();
         List<String> extraArgs = argsFieldText.isBlank() ? new ArrayList<>() : List.of(argsFieldText.split(" "));
         serverSettings.setExtraArgs(extraArgs);
-        serverSettings.setRestartInterval(model.getRestartInterval());
-        serverSettings.setShutdownInterval(model.getProxyShutdownInterval());
-        serverSettings.setRestart(model.isRestart());
-        serverSettings.setShutdown(model.isProxy());
+        serverSettings.setRestartInterval((int) restartIntervalSlider.getValue());
+        serverSettings.setShutdownInterval((int) proxyShutdownIntervalSlider.getValue());
+        serverSettings.setRestart(restartCheckbox.isSelected());
+        serverSettings.setShutdown(proxyCheckbox.isSelected());
         serverSettings.writeData();
         minecraftServer.getProperties().write();
     }
