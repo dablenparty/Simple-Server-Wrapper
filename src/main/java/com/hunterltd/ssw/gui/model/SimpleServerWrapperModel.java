@@ -8,6 +8,7 @@ import javafx.collections.ObservableMap;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
@@ -40,7 +41,7 @@ public class SimpleServerWrapperModel {
         proxyShutdownInterval = new SimpleIntegerProperty();
         restart = new SimpleBooleanProperty();
         proxy = new SimpleBooleanProperty();
-        propertiesStringMap = new SimpleMapProperty<>();
+        propertiesStringMap = new SimpleMapProperty<>(FXCollections.observableMap(new HashMap<>()));
     }
 
     public ObservableMap<String, String> getPropertiesStringMap() {
