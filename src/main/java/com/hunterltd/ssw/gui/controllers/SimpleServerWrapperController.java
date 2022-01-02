@@ -38,6 +38,8 @@ public class SimpleServerWrapperController extends FxController {
     @FXML
     private Menu serverMenu;
     @FXML
+    private CheckMenuItem autoScrollMenuItem;
+    @FXML
     private Button selectFileButton;
     @FXML
     private TextField commandTextField;
