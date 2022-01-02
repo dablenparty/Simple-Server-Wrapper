@@ -7,6 +7,7 @@ import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -194,5 +195,10 @@ public class SimpleServerWrapperController extends FxController {
         // TODO add support for arrow keys cycling command history
         if (keyEvent.getCode() == KeyCode.ENTER)
             sendCommandButton.fire();
+    }
+
+    @FXML
+    protected void onExitMenuClick(ActionEvent actionEvent) {
+        ((Stage) ((Node) actionEvent.getSource()).getScene().getWindow()).close();
     }
 }

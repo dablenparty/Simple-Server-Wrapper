@@ -8,7 +8,7 @@
       fx:controller="com.hunterltd.ssw.gui.controllers.SimpleServerWrapperController">
     <MenuBar>
         <Menu text="File">
-            <MenuItem text="Exit"/>
+            <MenuItem text="Exit" onAction="#onExitMenuClick"/>
         </Menu>
         <Menu text="Server" fx:id="serverMenu" disable="true">
             <MenuItem onAction="#onSettingsMenuClick" text="Settings"/>
