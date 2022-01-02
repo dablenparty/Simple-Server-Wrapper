@@ -11,7 +11,7 @@
             <MenuItem text="Exit" onAction="#onExitMenuClick"/>
         </Menu>
         <Menu text="View">
-            <CheckMenuItem fx:id="autoScrollMenuItem" text="Auto-scroll"/>
+            <CheckMenuItem fx:id="autoScrollMenuItem" text="Auto-scroll" selected="true"/>
         </Menu>
         <Menu text="Server" fx:id="serverMenu" disable="true">
             <MenuItem onAction="#onSettingsMenuClick" text="Settings"/>
