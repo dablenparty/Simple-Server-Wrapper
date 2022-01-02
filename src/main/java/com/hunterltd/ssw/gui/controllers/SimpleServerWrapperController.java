@@ -70,15 +70,21 @@ public class SimpleServerWrapperController extends FxController {
             serverOutputTextArea.selectEnd();
             serverOutputTextArea.deselect();
         });
+
+        model.commandTextProperty().bind(commandTextField.textProperty());
     }
 
     @FXML
     protected void onRunButtonClick() {
+        SimpleServerWrapperModel model = getInternalModel();
+        if (!minecraftServer.isRunning())
+            model.setOutputtedText("");
         minecraftServer.setShouldBeRunning(!minecraftServer.isRunning());
     }
 
     @FXML
     protected void onSendButtonClick() {
+        SimpleServerWrapperModel model = getInternalModel();
         String command = commandTextField.getText();
         // starting/stopping is handled by a separate thread
         try {
@@ -88,7 +94,7 @@ public class SimpleServerWrapperController extends FxController {
                 minecraftServer.sendCommand(command);
         } catch (IOException e) {
             e.printStackTrace();
-            serverOutputTextArea.appendText("Error: %s\n".formatted(e.getMessage()));
+            model.appendToOutputtedText("Error: %s\n".formatted(e.getMessage()));
         } finally {
             commandTextField.clear();
         }

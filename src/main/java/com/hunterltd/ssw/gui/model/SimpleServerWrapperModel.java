@@ -1,7 +1,10 @@
 package com.hunterltd.ssw.gui.model;
 
 import com.sun.management.OperatingSystemMXBean;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -14,11 +17,12 @@ public class SimpleServerWrapperModel {
     private final BooleanProperty serverRunning;
     private final StringProperty outputtedText;
     private final StringProperty serverPath;
+    private final StringProperty commandText;
     private final ObservableList<Double> serverMemoryOptions;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
-        outputtedText = new SimpleStringProperty();
+        outputtedText = new SimpleStringProperty("");
         double memGigabytes = calculateSystemMemoryGb();
         ArrayList<Double> memOpts = DoubleStream
                 .iterate(0.5, i -> i < memGigabytes, i -> i + 0.5)
@@ -28,6 +32,19 @@ public class SimpleServerWrapperModel {
         maxMemory = memOpts.get(memOpts.size() - 1);
         serverPath = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
+        commandText = new SimpleStringProperty("");
+    }
+
+    public String getCommandText() {
+        return commandText.get();
+    }
+
+    public void setCommandText(String commandText) {
+        this.commandText.set(commandText);
+    }
+
+    public StringProperty commandTextProperty() {
+        return commandText;
     }
 
     public boolean isServerRunning() {
