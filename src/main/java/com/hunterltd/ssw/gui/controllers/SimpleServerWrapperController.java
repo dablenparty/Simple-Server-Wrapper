@@ -69,12 +69,14 @@ public class SimpleServerWrapperController extends FxController {
         model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
             // works... but not very well
             // serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
-            // TODO add a checkbox for auto-scrolling
-            serverOutputTextArea.selectEnd();
-            serverOutputTextArea.deselect();
+            if (model.isAutoScroll()) {
+                serverOutputTextArea.selectEnd();
+                serverOutputTextArea.deselect();
+            }
         });
 
         model.commandTextProperty().bind(commandTextField.textProperty());
+        model.autoScrollProperty().bind(autoScrollMenuItem.selectedProperty());
     }
 
     @FXML
