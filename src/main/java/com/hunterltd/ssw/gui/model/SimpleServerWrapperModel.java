@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class SimpleServerWrapperModel {
+    private final BooleanProperty autoScroll;
     private final BooleanProperty serverRunning;
     private final StringProperty outputtedText;
     private final StringProperty serverPath;
@@ -33,6 +34,19 @@ public class SimpleServerWrapperModel {
         serverPath = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
         commandText = new SimpleStringProperty("");
+        autoScroll = new SimpleBooleanProperty(true);
+    }
+
+    public boolean isAutoScroll() {
+        return autoScroll.get();
+    }
+
+    public void setAutoScroll(boolean autoScroll) {
+        this.autoScroll.set(autoScroll);
+    }
+
+    public BooleanProperty autoScrollProperty() {
+        return autoScroll;
     }
 
     public String getCommandText() {
