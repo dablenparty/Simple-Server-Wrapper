@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.hunterltd.ssw.curse.api.CurseAddon;
+import com.hunterltd.ssw.util.events.EventEmitter;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
 
-public class CurseModpack implements AutoCloseable {
+public class CurseModpack extends EventEmitter implements AutoCloseable {
     private final Path extractedPath;
     private MinecraftOptions minecraft;
     private String manifestType;
@@ -140,6 +141,7 @@ public class CurseModpack implements AutoCloseable {
                         FileUtils.deleteDirectory(directory);
                     } catch (IOException e) {
                         System.err.println("There was an error deleting " + directory);
+                        emit("error", e);
                         e.printStackTrace();
                     }
                 });
@@ -161,13 +163,16 @@ public class CurseModpack implements AutoCloseable {
                 prefix = "";
                 formatString += "%n";
             }
-            System.out.printf(formatString, prefix, i + 1, filesLength, addon);
+            String formattedString = String.format(formatString, prefix, i + 1, filesLength, addon);
+            System.out.print(formattedString);
+            emit("download", formattedString);
             try {
                 addon.download(serverFolderString);
             } catch (IOException e) {
                 if (prettyPrint)
                     System.out.println();
                 printfWithTimeAndThread(System.err, "There was an error downloading mod #%d '%s':%n", i + 1, addon);
+                emit("error", e);
                 e.printStackTrace();
             }
         }
@@ -177,7 +182,9 @@ public class CurseModpack implements AutoCloseable {
         try {
             Files.list(overrideFolder).map(Path::toFile).forEach(file -> {
                 try {
-                    System.out.printf("Copying '%s' override%n", FilenameUtils.getBaseName(file.toString()));
+                    String baseName = FilenameUtils.getBaseName(file.toString());
+                    System.out.printf("Copying '%s' override%n", baseName);
+                    emit("override", baseName);
                     File copyTo;
                     if (file.isDirectory()) {
                         copyTo = Paths.get(serverFolderString, file.getName()).toFile();
@@ -187,11 +194,13 @@ public class CurseModpack implements AutoCloseable {
                         FileUtils.copyFileToDirectory(file, copyTo);
                     }
                 } catch (IOException exception) {
+                    emit("error", exception);
                     exception.printStackTrace();
                 }
             });
         } catch (IOException e) {
             System.err.println("There was an error copying the overrides");
+            emit("error", e);
             e.printStackTrace();
         }
         return true;
