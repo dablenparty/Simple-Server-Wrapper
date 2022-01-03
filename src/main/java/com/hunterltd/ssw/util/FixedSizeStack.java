@@ -30,6 +30,24 @@ public class FixedSizeStack<E> {
     }
 
     /**
+     * Returns the number of elements in the stack
+     *
+     * @return Number of elements in this stack
+     */
+    public int size() {
+        return elements.size();
+    }
+
+    /**
+     * Returns the maximum number of elements this stack can hold
+     *
+     * @return Maximum number of elements
+     */
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    /**
      * Pushes an element to the top of the stack
      *
      * @param item Element to add
