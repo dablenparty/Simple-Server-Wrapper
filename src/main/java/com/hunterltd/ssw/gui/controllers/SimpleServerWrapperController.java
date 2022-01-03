@@ -68,7 +68,6 @@ public class SimpleServerWrapperController extends FxController {
 
         model.commandTextProperty().bind(commandTextField.textProperty());
         model.autoScrollProperty().bind(autoScrollMenuItem.selectedProperty());
-        serverOutputTextArea.autoScrollProperty().bind(model.autoScrollProperty());
     }
 
     @FXML
