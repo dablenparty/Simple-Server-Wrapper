@@ -13,11 +13,11 @@ public class AutoScrollTextArea extends TextArea {
 
     @Override
     public void appendText(String s) {
-        if (!autoScroll.get())
+        if (autoScroll.get())
             super.appendText(s);
         else {
             double scrollTop = getScrollTop();
-            super.appendText(s);
+            setText(getText() + s);
             setScrollTop(scrollTop);
         }
     }
