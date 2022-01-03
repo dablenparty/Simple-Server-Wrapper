@@ -23,4 +23,9 @@ public class FixedSizeStack<E> {
             throw new EmptyStackException();
         return elements.remove(elements.size() - 1);
     }
+
+    @Override
+    public String toString() {
+        return elements.toString();
+    }
 }
