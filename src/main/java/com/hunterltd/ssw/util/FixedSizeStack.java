@@ -54,13 +54,18 @@ public class FixedSizeStack<E> {
      * @param item Element to add
      */
     public void push(E item) {
-        if (elements.size() == maxSize) elements.remove(0);
+        if (elements.size() == maxSize)
+            elements.remove(0).getNext().ifPresent(element -> element.setPrevious(null));
         StackElement<E> newElement = new StackElement<>(item);
-        StackElement<E> topElement = peekElement();
-        // link new element to top of stack
-        newElement.setPrevious(topElement);
-        topElement.setNext(newElement);
-        elements.add(newElement);
+        try {
+            StackElement<E> topElement = peekElement();
+            // link new element to top of stack
+            newElement.setPrevious(topElement);
+            topElement.setNext(newElement);
+        } catch (EmptyStackException ignored) {
+        } finally {
+            elements.add(newElement);
+        }
     }
 
     /**
@@ -70,7 +75,9 @@ public class FixedSizeStack<E> {
      */
     public E pop() {
         if (elements.isEmpty()) throw new EmptyStackException();
-        return elements.remove(elements.size() - 1).getValue();
+        StackElement<E> poppedElement = elements.remove(elements.size() - 1);
+        poppedElement.getPrevious().ifPresent(element -> element.setNext(null));
+        return poppedElement.getValue();
     }
 
     /**
