@@ -27,7 +27,8 @@ public class CurseInstallerController extends FxController {
 
     @Override
     public void initialize() {
-
+        SimpleServerWrapperModel model = getInternalModel();
+        serverFolderTextField.textProperty().bind(model.serverPathProperty());
     }
 
     @FXML
