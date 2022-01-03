@@ -163,9 +163,8 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
                 prefix = "";
                 formatString += "%n";
             }
-            String formattedString = String.format(formatString, prefix, i + 1, filesLength, addon);
-            System.out.print(formattedString);
-            emit("download", formattedString);
+            System.out.printf(formatString, prefix, i + 1, filesLength, addon);
+            emit("download", addon, i + 1, filesLength);
             try {
                 addon.download(serverFolderString);
             } catch (IOException e) {
@@ -203,6 +202,7 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
             emit("error", e);
             e.printStackTrace();
         }
+        emit("done");
         return true;
     }
 
