@@ -51,6 +51,7 @@ public class SimpleServerWrapperController extends FxController {
     private TextField serverPathTextField;
     private MinecraftServer minecraftServer = null;
     private List<NamedExecutorService> serviceList = null;
+    private int commandHistoryIndex = 0;
 
     public SimpleServerWrapperController(SimpleServerWrapperModel model) {
         super(model);
@@ -90,6 +91,7 @@ public class SimpleServerWrapperController extends FxController {
             appendToTextArea("Error: %s\n".formatted(e.getMessage()));
         } finally {
             commandTextField.clear();
+            commandHistoryIndex = 0;
         }
     }
 
