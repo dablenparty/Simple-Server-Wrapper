@@ -2,9 +2,10 @@ package com.hunterltd.ssw.util;
 
 import java.util.ArrayList;
 import java.util.EmptyStackException;
+import java.util.List;
 
 public class FixedSizeStack<E> {
-    private final ArrayList<E> elements;
+    private final List<E> elements;
     private final int maxSize;
 
     public FixedSizeStack(int maxSize) {
