@@ -32,7 +32,7 @@ public class MinecraftServer extends EventEmitter {
     private static final int CRASHES_BEFORE_SHUTDOWN = 3;
     private final ProcessBuilder pB;
     private final ServerSettings serverSettings;
-    private final List<String> commandHistory;
+    private final Stack<String> commandHistory;
     private final Path serverPath;
     private volatile boolean shouldBeRunning = false;
     private volatile boolean shouldRestart = false;
@@ -89,8 +89,7 @@ public class MinecraftServer extends EventEmitter {
 
         pB.command(serverArgs);
 
-        commandHistory = new ArrayList<>();
-        commandHistory.add(""); // Not entirely sure why this is needed, but the command history won't work without it
+        commandHistory = new Stack<>();
     }
 
     private void parseEula() {
@@ -138,6 +137,11 @@ public class MinecraftServer extends EventEmitter {
         out.write(cmd.getBytes(StandardCharsets.UTF_8));
         out.flush(); // sends the command
         commandHistory.add(cmd.trim());
+        // effectively allows no more than 10 items
+        if (commandHistory.size() > 10) {
+            commandHistory.remove(0);
+            commandHistory.setSize(10);
+        }
     }
 
     /**
@@ -397,18 +401,12 @@ public class MinecraftServer extends EventEmitter {
     }
 
     /**
-     * @param idx Index to retrieve
-     * @return Command from history
+     * Returns the command history as a queue
+     *
+     * @return Command history queue
      */
-    public String getCommandFromHistory(int idx) {
-        return commandHistory.get(idx);
-    }
-
-    /**
-     * @return Number of commands in the history
-     */
-    public int getHistorySize() {
-        return commandHistory.size();
+    public Stack<String> getCommandHistory() {
+        return commandHistory;
     }
 
     /**
