@@ -17,6 +17,7 @@ module com.hunterltd.ssw {
     opens com.hunterltd.ssw.minecraft to com.google.gson;
     exports com.hunterltd.ssw.gui;
     exports com.hunterltd.ssw.gui.controllers;
+    exports com.hunterltd.ssw.gui.components;
     exports com.hunterltd.ssw.gui.model;
     exports com.hunterltd.ssw.minecraft;
     exports com.hunterltd.ssw.util.concurrency;
