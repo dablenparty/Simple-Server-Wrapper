@@ -94,6 +94,7 @@ public class FixedSizeStack<E> {
      * Returns, but does not remove, the {@code StackElement} wrapper around the value at the top of the stack
      *
      * @return {@code StackElement} at the top of the stack
+     * @throws EmptyStackException if the stack is empty
      */
     public StackElement<E> peekElement() {
         if (elements.isEmpty()) throw new EmptyStackException();
