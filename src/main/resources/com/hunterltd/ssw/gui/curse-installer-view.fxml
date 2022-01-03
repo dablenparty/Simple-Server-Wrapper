@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.hunterltd.ssw.gui.controllers.CurseInstallerController"
-            prefHeight="400.0" prefWidth="600.0">
-
-</AnchorPane>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      xmlns="http://javafx.com/javafx"
+      fx:controller="com.hunterltd.ssw.gui.controllers.CurseInstallerController"
+      prefHeight="400.0" prefWidth="600.0"
+      alignment="CENTER">
+    <HBox spacing="10.0">
+        <Label text="Modpack ZIP Archive"/>
+        <TextField fx:id="modpackTextField" editable="false" HBox.hgrow="ALWAYS"/>
+    </HBox>
+    <HBox spacing="10.0">
+        <Label text="Server folder"/>
+        <TextField fx:id="serverFolderTextField" editable="false" HBox.hgrow="ALWAYS"/>
+    </HBox>
+    <VBox spacing="5.0">
+        <ProgressBar fx:id="installProgressBar"/>
+        <Label fx:id="installProgressLabel"/>
+    </VBox>
+    <Button text="Install" onAction="#onInstallButtonClicked"/>
+</VBox>
