@@ -9,7 +9,7 @@ public class FixedSizeStack<E> {
 
     public FixedSizeStack(int maxSize) {
         this.maxSize = maxSize;
-        elements = new ArrayList<>(maxSize + 1);
+        elements = new ArrayList<>(maxSize);
     }
 
     public void push(E item) {
