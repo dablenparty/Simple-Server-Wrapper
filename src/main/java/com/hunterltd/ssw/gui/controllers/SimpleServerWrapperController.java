@@ -1,7 +1,7 @@
 package com.hunterltd.ssw.gui.controllers;
 
 import com.hunterltd.ssw.gui.SimpleServerWrapperGui;
-import com.hunterltd.ssw.gui.components.AutoScrollTextArea;
+import com.hunterltd.ssw.gui.components.SmartScrollTextArea;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
@@ -44,7 +44,7 @@ public class SimpleServerWrapperController extends FxController {
     @FXML
     private Button sendCommandButton;
     @FXML
-    private AutoScrollTextArea serverOutputTextArea;
+    private SmartScrollTextArea serverOutputTextArea;
     @FXML
     private Button runButton;
     @FXML

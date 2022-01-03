@@ -2,7 +2,7 @@ package com.hunterltd.ssw.gui.components;
 
 import javafx.scene.control.TextArea;
 
-public class AutoScrollTextArea extends TextArea {
+public class SmartScrollTextArea extends TextArea {
     private double previousMaximum = 0.0;
 
     @Override
