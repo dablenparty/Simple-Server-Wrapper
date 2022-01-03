@@ -16,14 +16,12 @@ import java.util.stream.DoubleStream;
 public class SimpleServerWrapperModel {
     private final BooleanProperty autoScroll;
     private final BooleanProperty serverRunning;
-    private final StringProperty outputtedText;
     private final StringProperty serverPath;
     private final StringProperty commandText;
     private final ObservableList<Double> serverMemoryOptions;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
-        outputtedText = new SimpleStringProperty("");
         double memGigabytes = calculateSystemMemoryGb();
         ArrayList<Double> memOpts = DoubleStream
                 .iterate(0.5, i -> i < memGigabytes, i -> i + 0.5)
@@ -96,21 +94,5 @@ public class SimpleServerWrapperModel {
 
     public ObservableList<Double> getServerMemoryOptions() {
         return serverMemoryOptions;
-    }
-
-    public String getOutputtedText() {
-        return outputtedText.get();
-    }
-
-    public void setOutputtedText(String outputtedText) {
-        this.outputtedText.set(outputtedText);
-    }
-
-    public StringProperty outputtedTextProperty() {
-        return outputtedText;
-    }
-
-    public void appendToOutputtedText(String text) {
-        this.outputtedText.set(getOutputtedText() + text);
     }
 }

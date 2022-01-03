@@ -61,19 +61,10 @@ public class SimpleServerWrapperController extends FxController {
     public void initialize() {
         SimpleServerWrapperModel model = getInternalModel();
 
-        serverOutputTextArea.textProperty().bind(model.outputtedTextProperty());
         serverPathTextField.textProperty().bind(model.serverPathProperty());
         sendCommandButton.disableProperty().bind(model.serverRunningProperty().not());
         commandTextField.disableProperty().bind(model.serverRunningProperty().not());
         selectFileButton.disableProperty().bind(model.serverRunningProperty());
-        model.outputtedTextProperty().addListener((observableValue, oldValue, newValue) -> {
-            // works... but not very well
-            // serverOutputTextArea.setScrollTop(Double.MAX_VALUE);
-            if (model.isAutoScroll()) {
-                serverOutputTextArea.selectEnd();
-                serverOutputTextArea.deselect();
-            }
-        });
 
         model.commandTextProperty().bind(commandTextField.textProperty());
         model.autoScrollProperty().bind(autoScrollMenuItem.selectedProperty());
@@ -81,15 +72,13 @@ public class SimpleServerWrapperController extends FxController {
 
     @FXML
     protected void onRunButtonClick() {
-        SimpleServerWrapperModel model = getInternalModel();
         if (!minecraftServer.isRunning())
-            model.setOutputtedText("");
+            serverOutputTextArea.clear();
         minecraftServer.setShouldBeRunning(!minecraftServer.isRunning());
     }
 
     @FXML
     protected void onSendButtonClick() {
-        SimpleServerWrapperModel model = getInternalModel();
         String command = commandTextField.getText();
         // starting/stopping is handled by a separate thread
         try {
@@ -99,7 +88,7 @@ public class SimpleServerWrapperController extends FxController {
                 minecraftServer.sendCommand(command);
         } catch (IOException e) {
             e.printStackTrace();
-            model.appendToOutputtedText("Error: %s\n".formatted(e.getMessage()));
+            serverOutputTextArea.appendText("Error: %s\n".formatted(e.getMessage()));
         } finally {
             commandTextField.clear();
         }
@@ -158,7 +147,7 @@ public class SimpleServerWrapperController extends FxController {
                     if (!text.endsWith("\n"))
                         text += '\n';
                     String finalText = text;
-                    runOnFxThread(() -> model.appendToOutputtedText(finalText));
+                    runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
                 });
         model.setServerPath(minecraftServer.getServerPath().toString());
         runButton.setDisable(false);
