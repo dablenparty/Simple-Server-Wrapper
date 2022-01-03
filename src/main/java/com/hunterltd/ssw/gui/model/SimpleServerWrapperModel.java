@@ -16,7 +16,6 @@ import java.util.stream.DoubleStream;
 public class SimpleServerWrapperModel {
     private final BooleanProperty serverRunning;
     private final StringProperty serverPath;
-    private final StringProperty commandText;
     private final ObservableList<Double> serverMemoryOptions;
     private final double maxMemory;
 
@@ -30,19 +29,6 @@ public class SimpleServerWrapperModel {
         maxMemory = memOpts.get(memOpts.size() - 1);
         serverPath = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
-        commandText = new SimpleStringProperty("");
-    }
-
-    public String getCommandText() {
-        return commandText.get();
-    }
-
-    public void setCommandText(String commandText) {
-        this.commandText.set(commandText);
-    }
-
-    public StringProperty commandTextProperty() {
-        return commandText;
     }
 
     public boolean isServerRunning() {
