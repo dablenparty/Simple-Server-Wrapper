@@ -9,6 +9,7 @@
       fx:controller="com.hunterltd.ssw.gui.controllers.SimpleServerWrapperController">
     <MenuBar>
         <Menu text="File">
+            <MenuItem text="Install CurseForge Modpack" onAction="#onInstallModpackMenuClick"/>
             <MenuItem text="Exit" onAction="#onExitMenuClick"/>
         </Menu>
         <Menu text="Server" fx:id="serverMenu" disable="true">

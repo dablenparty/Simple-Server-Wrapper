@@ -216,4 +216,20 @@ public class SimpleServerWrapperController extends FxController {
     protected void onExitMenuClick(ActionEvent actionEvent) {
         ((Stage) ((Node) actionEvent.getSource()).getScene().getWindow()).close();
     }
+
+    @FXML
+    protected void onInstallModpackMenuClick(ActionEvent event) throws IOException {
+        Stage stage = new Stage();
+        SimpleServerWrapperModel model = getInternalModel();
+        URL viewResource = SimpleServerWrapperGui.class.getResource("curse-installer-view.fxml");
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(viewResource);
+        loader.setControllerFactory(aClass -> new CurseInstallerController(model));
+        Parent root = loader.load();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Install CurseForge modpack");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initOwner(((MenuItem) event.getSource()).getStyleableNode().getScene().getWindow());
+        stage.show();
+    }
 }
