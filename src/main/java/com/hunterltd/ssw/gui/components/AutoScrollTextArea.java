@@ -1,36 +1,22 @@
 package com.hunterltd.ssw.gui.components;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.TextArea;
 
 public class AutoScrollTextArea extends TextArea {
-    private final BooleanProperty autoScroll;
-
-    public AutoScrollTextArea() {
-        autoScroll = new SimpleBooleanProperty(true);
-    }
+    private double previousMaximum = 0.0;
 
     @Override
     public void appendText(String s) {
-        if (autoScroll.get())
-            super.appendText(s);
-        else {
-            double scrollTop = getScrollTop();
+        double currentScrollTop = getScrollTop();
+        if (currentScrollTop < previousMaximum - 10) {
             setText(getText() + s);
-            setScrollTop(scrollTop);
+            setScrollTop(Double.MAX_VALUE);
+            // doesn't always go all the way down, but good enough
+            previousMaximum = getScrollTop();
+            setScrollTop(currentScrollTop);
+        } else {
+            super.appendText(s);
+            previousMaximum = getScrollTop();
         }
-    }
-
-    public boolean isAutoScroll() {
-        return autoScroll.get();
-    }
-
-    public void setAutoScroll(boolean autoScroll) {
-        this.autoScroll.set(autoScroll);
-    }
-
-    public BooleanProperty autoScrollProperty() {
-        return autoScroll;
     }
 }
