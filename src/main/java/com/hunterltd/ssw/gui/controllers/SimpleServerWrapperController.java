@@ -63,8 +63,6 @@ public class SimpleServerWrapperController extends FxController {
         sendCommandButton.disableProperty().bind(model.serverRunningProperty().not());
         commandTextField.disableProperty().bind(model.serverRunningProperty().not());
         selectFileButton.disableProperty().bind(model.serverRunningProperty());
-
-        model.commandTextProperty().bind(commandTextField.textProperty());
     }
 
     private void appendToTextArea(String text) {
