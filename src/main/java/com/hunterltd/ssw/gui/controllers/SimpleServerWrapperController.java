@@ -38,8 +38,6 @@ public class SimpleServerWrapperController extends FxController {
     @FXML
     private Menu serverMenu;
     @FXML
-    private CheckMenuItem autoScrollMenuItem;
-    @FXML
     private Button selectFileButton;
     @FXML
     private TextField commandTextField;
@@ -67,7 +65,6 @@ public class SimpleServerWrapperController extends FxController {
         selectFileButton.disableProperty().bind(model.serverRunningProperty());
 
         model.commandTextProperty().bind(commandTextField.textProperty());
-        model.autoScrollProperty().bind(autoScrollMenuItem.selectedProperty());
     }
 
     private void appendToTextArea(String text) {
