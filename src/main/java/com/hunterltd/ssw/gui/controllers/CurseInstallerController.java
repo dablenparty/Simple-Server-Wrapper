@@ -1,6 +1,10 @@
 package com.hunterltd.ssw.gui.controllers;
 
+import com.hunterltd.ssw.curse.CurseModpack;
+import com.hunterltd.ssw.curse.api.CurseAddon;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
+import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
+import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -9,6 +13,10 @@ import javafx.stage.FileChooser;
 import net.lingala.zip4j.ZipFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CurseInstallerController extends FxController {
     @FXML
@@ -19,7 +27,7 @@ public class CurseInstallerController extends FxController {
     private TextField serverFolderTextField;
     @FXML
     private TextField modpackTextField;
-    private ZipFile modpack = null;
+    private ZipFile modpackZipFile = null;
 
     public CurseInstallerController(SimpleServerWrapperModel model) {
         super(model);
@@ -32,8 +40,27 @@ public class CurseInstallerController extends FxController {
     }
 
     @FXML
-    protected void onInstallButtonClicked() {
+    protected void onInstallButtonClicked() throws IOException {
+        SimpleServerWrapperModel model = getInternalModel();
 
+        // TODO make error dialog if something goes wrong here (the modpack class is auto-closeable)
+        CurseModpack modpack = CurseModpack.createCurseModpack(modpackZipFile);
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        service.submit(() -> modpack.install(Path.of(model.getServerPath()).getParent()));
+        NamedExecutorService namedExecutorService = new NamedExecutorService("Modpack Install Service", service);
+        modpack.on("download", args -> {
+            CurseAddon mod = (CurseAddon) args[0];
+            int modNumber = (int) args[1];
+            int filesLength = (int) args[2];
+            ThreadUtils.runOnFxThread(() -> {
+                installProgressLabel.setText(String.format("Mod %d/%d: %s", modNumber, filesLength, mod));
+                installProgressBar.setProgress((double) modNumber / filesLength);
+            });
+        });
+        modpack.on("done", args -> {
+            ThreadUtils.runOnFxThread(() -> installProgressLabel.setText("Done!"));
+            ThreadUtils.tryShutdownNamedExecutorService(namedExecutorService);
+        });
     }
 
     @FXML
@@ -45,6 +72,6 @@ public class CurseInstallerController extends FxController {
         if (chosen == null)
             return;
         modpackTextField.setText(chosen.getAbsolutePath());
-        modpack = new ZipFile(chosen);
+        modpackZipFile = new ZipFile(chosen);
     }
 }
