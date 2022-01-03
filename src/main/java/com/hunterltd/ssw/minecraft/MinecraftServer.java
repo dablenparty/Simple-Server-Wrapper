@@ -419,6 +419,7 @@ public class MinecraftServer extends EventEmitter {
     /**
      * @return Boolean on if the server is shutting down
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isShuttingDown() {
         return shuttingDown;
     }
