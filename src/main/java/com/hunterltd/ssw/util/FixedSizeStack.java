@@ -17,7 +17,7 @@ import java.util.Optional;
  * @param <E> Type of elements
  */
 public class FixedSizeStack<E> {
-    private final List<E> elements;
+    private final List<StackElement<E>> elements;
     private final int maxSize;
 
     /**
@@ -55,7 +55,12 @@ public class FixedSizeStack<E> {
      */
     public void push(E item) {
         if (elements.size() == maxSize) elements.remove(0);
-        elements.add(item);
+        StackElement<E> newElement = new StackElement<>(item);
+        StackElement<E> topElement = peekElement();
+        // link new element to top of stack
+        newElement.setPrevious(topElement);
+        topElement.setNext(newElement);
+        elements.add(newElement);
     }
 
     /**
@@ -65,7 +70,7 @@ public class FixedSizeStack<E> {
      */
     public E pop() {
         if (elements.isEmpty()) throw new EmptyStackException();
-        return elements.remove(elements.size() - 1);
+        return elements.remove(elements.size() - 1).getValue();
     }
 
     /**
@@ -74,6 +79,16 @@ public class FixedSizeStack<E> {
      * @return Element on top of the stack
      */
     public E peek() {
+        if (elements.isEmpty()) throw new EmptyStackException();
+        return elements.get(elements.size() - 1).getValue();
+    }
+
+    /**
+     * Returns, but does not remove, the {@code StackElement} wrapper around the value at the top of the stack
+     *
+     * @return {@code StackElement} at the top of the stack
+     */
+    public StackElement<E> peekElement() {
         if (elements.isEmpty()) throw new EmptyStackException();
         return elements.get(elements.size() - 1);
     }
@@ -86,7 +101,7 @@ public class FixedSizeStack<E> {
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public E get(int index) {
-        return elements.get(size() - index - 1);
+        return elements.get(size() - index - 1).getValue();
     }
 
     @Override
