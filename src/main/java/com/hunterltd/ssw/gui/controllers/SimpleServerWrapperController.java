@@ -4,6 +4,7 @@ import com.hunterltd.ssw.gui.SimpleServerWrapperGui;
 import com.hunterltd.ssw.gui.components.SmartScrollTextArea;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
+import com.hunterltd.ssw.util.FixedSizeStack;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,7 +17,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EmptyStackException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +52,7 @@ public class SimpleServerWrapperController extends FxController {
     private TextField serverPathTextField;
     private MinecraftServer minecraftServer = null;
     private List<NamedExecutorService> serviceList = null;
-    private int commandHistoryIndex = 0;
+    private FixedSizeStack.StackElement<String> currentHistoryElement;
 
     public SimpleServerWrapperController(SimpleServerWrapperModel model) {
         super(model);
@@ -91,7 +92,7 @@ public class SimpleServerWrapperController extends FxController {
             appendToTextArea("Error: %s\n".formatted(e.getMessage()));
         } finally {
             commandTextField.clear();
-            commandHistoryIndex = 0;
+            currentHistoryElement = null;
         }
     }
 
@@ -186,9 +187,29 @@ public class SimpleServerWrapperController extends FxController {
 
     @FXML
     protected void onKeyPressedInCommandField(KeyEvent keyEvent) {
-        // TODO add support for arrow keys cycling command history
-        if (keyEvent.getCode() == KeyCode.ENTER)
-            sendCommandButton.fire();
+        switch (keyEvent.getCode()) {
+            case ENTER -> sendCommandButton.fire();
+            case UP -> {
+                try {
+                    currentHistoryElement = currentHistoryElement == null
+                            ? minecraftServer.getCommandHistory().peekElement()
+                            : currentHistoryElement.getNext().orElse(currentHistoryElement);
+                    commandTextField.setText(currentHistoryElement.getValue());
+                    commandTextField.positionCaret(commandTextField.getLength());
+                } catch (EmptyStackException ignored) {
+                }
+            }
+            case DOWN -> {
+                try {
+                    if (currentHistoryElement == null)
+                        break;
+                    currentHistoryElement = currentHistoryElement.getPrevious().orElse(currentHistoryElement);
+                    commandTextField.setText(currentHistoryElement.getValue());
+                    commandTextField.positionCaret(commandTextField.getLength());
+                } catch (EmptyStackException ignored) {
+                }
+            }
+        }
     }
 
     @FXML
