@@ -3,6 +3,7 @@ package com.hunterltd.ssw.minecraft;
 import com.google.gson.*;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
+import com.hunterltd.ssw.util.FixedSizeStack;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
@@ -29,10 +30,11 @@ import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndT
  * Minecraft server wrapper class
  */
 public class MinecraftServer extends EventEmitter {
+    private static final int MAX_COMMAND_HISTORY_SIZE = 10;
     private static final int CRASHES_BEFORE_SHUTDOWN = 3;
     private final ProcessBuilder pB;
     private final ServerSettings serverSettings;
-    private final Stack<String> commandHistory;
+    private final FixedSizeStack<String> commandHistory;
     private final Path serverPath;
     private volatile boolean shouldBeRunning = false;
     private volatile boolean shouldRestart = false;
@@ -89,7 +91,7 @@ public class MinecraftServer extends EventEmitter {
 
         pB.command(serverArgs);
 
-        commandHistory = new Stack<>();
+        commandHistory = new FixedSizeStack<>(MAX_COMMAND_HISTORY_SIZE);
     }
 
     private void parseEula() {
@@ -136,12 +138,7 @@ public class MinecraftServer extends EventEmitter {
         OutputStream out = serverProcess.getOutputStream();
         out.write(cmd.getBytes(StandardCharsets.UTF_8));
         out.flush(); // sends the command
-        commandHistory.add(cmd.trim());
-        // effectively allows no more than 10 items
-        if (commandHistory.size() > 10) {
-            commandHistory.remove(0);
-            commandHistory.setSize(10);
-        }
+        commandHistory.push(cmd.trim());
     }
 
     /**
@@ -405,7 +402,7 @@ public class MinecraftServer extends EventEmitter {
      *
      * @return Command history queue
      */
-    public Stack<String> getCommandHistory() {
+    public FixedSizeStack<String> getCommandHistory() {
         return commandHistory;
     }
 
