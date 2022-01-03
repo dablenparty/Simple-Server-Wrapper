@@ -1,6 +1,11 @@
 package com.hunterltd.ssw.util;
 
-import java.util.Stack;
+import java.util.ArrayList;
 
-public class FixedSizeStack<T> extends Stack<T> {
+public class FixedSizeStack<E> {
+    private final ArrayList<E> elements;
+
+    public FixedSizeStack(int size) {
+        elements = new ArrayList<>(size + 1);
+    }
 }
