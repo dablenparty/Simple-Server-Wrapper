@@ -70,6 +70,10 @@ public class SimpleServerWrapperController extends FxController {
         model.autoScrollProperty().bind(autoScrollMenuItem.selectedProperty());
     }
 
+    private void appendToTextArea(String text) {
+        text.lines().map(s -> s + '\n').forEach(serverOutputTextArea::appendText);
+    }
+
     @FXML
     protected void onRunButtonClick() {
         if (!minecraftServer.isRunning())
@@ -88,7 +92,7 @@ public class SimpleServerWrapperController extends FxController {
                 minecraftServer.sendCommand(command);
         } catch (IOException e) {
             e.printStackTrace();
-            serverOutputTextArea.appendText("Error: %s\n".formatted(e.getMessage()));
+            appendToTextArea("Error: %s\n".formatted(e.getMessage()));
         } finally {
             commandTextField.clear();
         }
@@ -147,7 +151,7 @@ public class SimpleServerWrapperController extends FxController {
                     if (!text.endsWith("\n"))
                         text += '\n';
                     String finalText = text;
-                    runOnFxThread(() -> serverOutputTextArea.appendText(finalText));
+                    runOnFxThread(() -> appendToTextArea(finalText));
                 });
         model.setServerPath(minecraftServer.getServerPath().toString());
         runButton.setDisable(false);
