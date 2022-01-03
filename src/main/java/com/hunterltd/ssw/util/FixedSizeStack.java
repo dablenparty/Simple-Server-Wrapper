@@ -3,6 +3,7 @@ package com.hunterltd.ssw.util;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A bare-bones stack implementation that holds a fixed number of elements. An {@link ArrayList} is used internally, so
@@ -91,5 +92,35 @@ public class FixedSizeStack<E> {
     @Override
     public String toString() {
         return elements.toString();
+    }
+
+    public static class StackElement<E> {
+        private final E value;
+        private StackElement<E> previous = null;
+        private StackElement<E> next = null;
+
+        public StackElement(E value) {
+            this.value = value;
+        }
+
+        public Optional<StackElement<E>> getPrevious() {
+            return Optional.ofNullable(previous);
+        }
+
+        protected void setPrevious(StackElement<E> previous) {
+            this.previous = previous;
+        }
+
+        public Optional<StackElement<E>> getNext() {
+            return Optional.ofNullable(next);
+        }
+
+        protected void setNext(StackElement<E> next) {
+            this.next = next;
+        }
+
+        public E getValue() {
+            return value;
+        }
     }
 }
