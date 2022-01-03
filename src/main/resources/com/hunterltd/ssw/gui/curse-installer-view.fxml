@@ -2,21 +2,31 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 <VBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
       fx:controller="com.hunterltd.ssw.gui.controllers.CurseInstallerController"
       prefHeight="400.0" prefWidth="600.0"
       alignment="CENTER">
-    <HBox spacing="10.0">
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+    </padding>
+    <VBox>
         <Label text="Modpack ZIP Archive"/>
-        <TextField fx:id="modpackTextField" editable="false" HBox.hgrow="ALWAYS"/>
-    </HBox>
-    <HBox spacing="10.0">
+        <HBox spacing="10.0">
+            <TextField fx:id="modpackTextField" editable="false" HBox.hgrow="ALWAYS"/>
+            <Button text="..." onAction="#onSelectModpackButtonClicked"/>
+        </HBox>
+    </VBox>
+    <VBox>
         <Label text="Server folder"/>
         <TextField fx:id="serverFolderTextField" editable="false" HBox.hgrow="ALWAYS"/>
-    </HBox>
+    </VBox>
     <VBox spacing="5.0">
-        <ProgressBar fx:id="installProgressBar"/>
+        <padding>
+            <Insets bottom="10.0" top="10.0"/>
+        </padding>
+        <ProgressBar fx:id="installProgressBar" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
         <Label fx:id="installProgressLabel"/>
     </VBox>
     <Button text="Install" onAction="#onInstallButtonClicked"/>
