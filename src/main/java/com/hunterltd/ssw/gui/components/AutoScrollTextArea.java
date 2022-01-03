@@ -11,6 +11,17 @@ public class AutoScrollTextArea extends TextArea {
         autoScroll = new SimpleBooleanProperty(true);
     }
 
+    @Override
+    public void appendText(String s) {
+        if (!autoScroll.get())
+            super.appendText(s);
+        else {
+            double scrollTop = getScrollTop();
+            super.appendText(s);
+            setScrollTop(scrollTop);
+        }
+    }
+
     public boolean isAutoScroll() {
         return autoScroll.get();
     }
