@@ -77,6 +77,17 @@ public class FixedSizeStack<E> {
         return elements.get(elements.size() - 1);
     }
 
+    /**
+     * Gets an item from the stack without removing it
+     *
+     * @param index index at which to access
+     * @return item at {@code index}
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     */
+    public E get(int index) {
+        return elements.get(size() - index - 1);
+    }
+
     @Override
     public String toString() {
         return elements.toString();
