@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.gui.controllers;
 
 import com.hunterltd.ssw.gui.SimpleServerWrapperGui;
+import com.hunterltd.ssw.gui.components.AutoScrollTextArea;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
@@ -13,7 +14,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -46,7 +46,7 @@ public class SimpleServerWrapperController extends FxController {
     @FXML
     private Button sendCommandButton;
     @FXML
-    private TextArea serverOutputTextArea;
+    private AutoScrollTextArea serverOutputTextArea;
     @FXML
     private Button runButton;
     @FXML
@@ -68,6 +68,7 @@ public class SimpleServerWrapperController extends FxController {
 
         model.commandTextProperty().bind(commandTextField.textProperty());
         model.autoScrollProperty().bind(autoScrollMenuItem.selectedProperty());
+        serverOutputTextArea.autoScrollProperty().bind(model.autoScrollProperty());
     }
 
     @FXML
