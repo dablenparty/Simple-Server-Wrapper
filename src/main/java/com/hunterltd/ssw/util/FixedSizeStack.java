@@ -106,15 +106,28 @@ public class FixedSizeStack<E> {
         return elements.toString();
     }
 
+    /**
+     * Represents an element in the stack. This class also has {@code next} and {@code previous} fields for keeping
+     * track of the order of elements in the stack. A {@code null} value in either of these fields indicates that this
+     * element is either at the top or bottom of the stack.
+     *
+     * @param <E> Value type
+     */
     public static class StackElement<E> {
         private final E value;
         private StackElement<E> previous = null;
         private StackElement<E> next = null;
 
-        public StackElement(E value) {
+        private StackElement(E value) {
             this.value = value;
         }
 
+        /**
+         * Gets the element above this one in the stack and wraps it in an {@link Optional}. If the {@code Optional} is
+         * empty, this element is at the top of the stack
+         *
+         * @return element above this in the stack
+         */
         public Optional<StackElement<E>> getPrevious() {
             return Optional.ofNullable(previous);
         }
@@ -123,6 +136,12 @@ public class FixedSizeStack<E> {
             this.previous = previous;
         }
 
+        /**
+         * Gets the element below this one in the stack and wraps it in an {@link Optional}. If the {@code Optional} is
+         * empty, this element is at the bottom of the stack
+         *
+         * @return element below this in the stack
+         */
         public Optional<StackElement<E>> getNext() {
             return Optional.ofNullable(next);
         }
@@ -131,6 +150,11 @@ public class FixedSizeStack<E> {
             this.next = next;
         }
 
+        /**
+         * Returns the value of this element
+         *
+         * @return this elements value
+         */
         public E getValue() {
             return value;
         }
