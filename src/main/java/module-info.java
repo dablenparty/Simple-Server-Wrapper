@@ -20,5 +20,6 @@ module com.hunterltd.ssw {
     exports com.hunterltd.ssw.gui.components;
     exports com.hunterltd.ssw.gui.model;
     exports com.hunterltd.ssw.minecraft;
+    exports com.hunterltd.ssw.util;
     exports com.hunterltd.ssw.util.concurrency;
 }
