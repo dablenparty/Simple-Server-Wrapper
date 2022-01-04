@@ -53,7 +53,8 @@ public class ServerSettingsController extends FxController {
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
         super(model);
         this.minecraftServer = minecraftServer;
-        oldProperties = new HashMap<>(minecraftServer.getProperties());
+        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
+        oldProperties = properties != null ? new HashMap<>(properties) : null;
     }
 
     public void initialize() {
@@ -91,10 +92,17 @@ public class ServerSettingsController extends FxController {
         valueTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getValue()));
         valueTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(minecraftServer.getProperties().entrySet());
-        propertyTableView.setItems(items);
-        //noinspection unchecked
-        propertyTableView.getColumns().setAll(propertyTableColumn, valueTableColumn);
+        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
+        if (properties != null) {
+            ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(properties.entrySet());
+            propertyTableView.setItems(items);
+            //noinspection unchecked
+            propertyTableView.getColumns().setAll(propertyTableColumn, valueTableColumn);
+        } else {
+            addPropertyButton.setDisable(true);
+            newKeyTextField.setDisable(true);
+            newValueTextField.setDisable(true);
+        }
     }
 
     @FXML
@@ -108,9 +116,11 @@ public class ServerSettingsController extends FxController {
             if (result.isEmpty() || result.get() != ButtonType.OK)
                 return;
         }
-        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
-        properties.clear();
-        properties.putAll(oldProperties);
+        if (oldProperties != null) {
+            MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
+            properties.clear();
+            properties.putAll(oldProperties);
+        }
         ((Stage) cancelButton.getScene().getWindow()).close();
     }
 
@@ -126,7 +136,9 @@ public class ServerSettingsController extends FxController {
         serverSettings.setRestart(restartCheckbox.isSelected());
         serverSettings.setShutdown(proxyCheckbox.isSelected());
         serverSettings.writeData();
-        minecraftServer.getProperties().write();
+        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
+        if (properties != null)
+            properties.write();
     }
 
     @FXML
