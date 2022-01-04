@@ -68,8 +68,7 @@ public class MinecraftServer extends EventEmitter {
     }
 
     public MinecraftServer(String serverFolder, String serverFilename, ServerSettings minecraftServerSettings) {
-        // TODO auto detect the server version and apply appropriate Log4J fixes
-        // jar files can be treated as zip files. look for the "name" property in version.json
+        // TODO auto detect the server version and apply appropriate Log4J fixes (1.14 and later)
         pB = new ProcessBuilder();
         File pBDirectory = new File(serverFolder);
         try {
