@@ -101,9 +101,10 @@ public class ServerSettingsController extends FxController {
             //noinspection unchecked
             propertyTableView.getColumns().setAll(propertyTableColumn, valueTableColumn);
         });
-        addPropertyButton.setDisable(propertiesOptional.isEmpty());
-        newKeyTextField.setDisable(propertiesOptional.isEmpty());
-        newValueTextField.setDisable(propertiesOptional.isEmpty());
+        boolean empty = propertiesOptional.isEmpty();
+        addPropertyButton.setDisable(empty);
+        newKeyTextField.setDisable(empty);
+        newValueTextField.setDisable(empty);
     }
 
     @FXML
