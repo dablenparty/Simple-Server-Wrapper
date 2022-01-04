@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -53,8 +54,9 @@ public class ServerSettingsController extends FxController {
     public ServerSettingsController(SimpleServerWrapperModel model, MinecraftServer minecraftServer) {
         super(model);
         this.minecraftServer = minecraftServer;
-        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
-        oldProperties = properties != null ? new HashMap<>(properties) : null;
+        Optional<MinecraftServer.ServerProperties> propertiesOptional = minecraftServer.getProperties();
+
+        oldProperties = propertiesOptional.map(HashMap::new).orElse(null);
     }
 
     public void initialize() {
@@ -92,17 +94,16 @@ public class ServerSettingsController extends FxController {
         valueTableColumn.setCellValueFactory(dataFeatures -> new SimpleStringProperty(dataFeatures.getValue().getValue()));
         valueTableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
-        if (properties != null) {
-            ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(properties.entrySet());
+        Optional<MinecraftServer.ServerProperties> propertiesOptional = minecraftServer.getProperties();
+        propertiesOptional.ifPresent(serverProperties -> {
+            ObservableList<Map.Entry<String, String>> items = FXCollections.observableArrayList(serverProperties.entrySet());
             propertyTableView.setItems(items);
             //noinspection unchecked
             propertyTableView.getColumns().setAll(propertyTableColumn, valueTableColumn);
-        } else {
-            addPropertyButton.setDisable(true);
-            newKeyTextField.setDisable(true);
-            newValueTextField.setDisable(true);
-        }
+        });
+        addPropertyButton.setDisable(propertiesOptional.isEmpty());
+        newKeyTextField.setDisable(propertiesOptional.isEmpty());
+        newValueTextField.setDisable(propertiesOptional.isEmpty());
     }
 
     @FXML
@@ -116,11 +117,12 @@ public class ServerSettingsController extends FxController {
             if (result.isEmpty() || result.get() != ButtonType.OK)
                 return;
         }
-        if (oldProperties != null) {
-            MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
-            properties.clear();
-            properties.putAll(oldProperties);
-        }
+        minecraftServer.getProperties().ifPresent(properties -> {
+            if (oldProperties != null) {
+                properties.clear();
+                properties.putAll(oldProperties);
+            }
+        });
         ((Stage) cancelButton.getScene().getWindow()).close();
     }
 
@@ -136,9 +138,13 @@ public class ServerSettingsController extends FxController {
         serverSettings.setRestart(restartCheckbox.isSelected());
         serverSettings.setShutdown(proxyCheckbox.isSelected());
         serverSettings.writeData();
-        MinecraftServer.ServerProperties properties = minecraftServer.getProperties();
-        if (properties != null)
-            properties.write();
+        minecraftServer.getProperties().ifPresent(properties -> {
+            try {
+                properties.write();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @FXML
@@ -150,6 +156,6 @@ public class ServerSettingsController extends FxController {
     @FXML
     protected void onAddPropertyClicked() {
         dirty = true;
-        minecraftServer.getProperties().put(newKeyTextField.getText(), newValueTextField.getText());
+        minecraftServer.getProperties().ifPresent(properties -> properties.put(newKeyTextField.getText(), newValueTextField.getText()));
     }
 }
