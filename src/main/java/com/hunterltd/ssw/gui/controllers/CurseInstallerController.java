@@ -2,11 +2,11 @@ package com.hunterltd.ssw.gui.controllers;
 
 import com.hunterltd.ssw.curse.CurseModpack;
 import com.hunterltd.ssw.curse.api.CurseAddon;
+import com.hunterltd.ssw.gui.components.ErrorAlert;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
@@ -69,20 +69,10 @@ public class CurseInstallerController extends FxController {
             });
             modpack.on("error", args -> {
                 Exception exception = (Exception) args[0];
-                ThreadUtils.runOnFxThread(() -> {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText(exception.toString());
-                    alert.setContentText(exception.getLocalizedMessage());
-                    alert.show();
-                });
+                ThreadUtils.runOnFxThread(() -> ErrorAlert.showNewDialog(exception));
             });
         } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(e.toString());
-            alert.setContentText(e.getLocalizedMessage());
-            alert.show();
+            ErrorAlert.showNewDialog(e);
             e.printStackTrace();
         }
     }
