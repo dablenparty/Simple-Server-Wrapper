@@ -328,8 +328,8 @@ public class MinecraftServer extends EventEmitter {
     /**
      * @return The servers properties
      */
-    public ServerProperties getProperties() {
-        return properties;
+    public Optional<ServerProperties> getProperties() {
+        return Optional.ofNullable(properties);
     }
 
     /**
