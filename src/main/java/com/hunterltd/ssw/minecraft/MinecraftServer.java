@@ -451,6 +451,7 @@ public class MinecraftServer extends EventEmitter {
         private int restartInterval;
         private boolean autoShutdown;
         private int shutdownInterval;
+        private String versionString;
 
         public ServerSettings(Path settingsPath) {
             memory = 1.0;
@@ -459,6 +460,7 @@ public class MinecraftServer extends EventEmitter {
             restartInterval = 6;
             autoShutdown = false;
             shutdownInterval = 15;
+            versionString = "";
             this.settingsPath = settingsPath;
         }
 
@@ -558,6 +560,14 @@ public class MinecraftServer extends EventEmitter {
 
         public void setShutdownInterval(int shutdownInterval) {
             this.shutdownInterval = shutdownInterval;
+        }
+
+        public String getVersionString() {
+            return versionString;
+        }
+
+        public void setVersionString(String versionString) {
+            this.versionString = versionString;
         }
 
         private record ServerSettingsInstanceCreator(Path path) implements InstanceCreator<ServerSettings> {
