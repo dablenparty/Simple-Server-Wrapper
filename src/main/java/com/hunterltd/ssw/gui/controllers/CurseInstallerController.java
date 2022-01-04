@@ -44,7 +44,8 @@ public class CurseInstallerController extends FxController {
     protected void onInstallButtonClicked() {
         SimpleServerWrapperModel model = getInternalModel();
 
-        try (CurseModpack modpack = CurseModpack.createCurseModpack(modpackZipFile)) {
+        try {
+            CurseModpack modpack = CurseModpack.createCurseModpack(modpackZipFile);
             ExecutorService service = Executors.newSingleThreadExecutor();
             service.submit(() -> modpack.install(Path.of(model.getServerPath()).getParent()));
             NamedExecutorService namedExecutorService = new NamedExecutorService("Modpack Install Service", service);
@@ -58,16 +59,23 @@ public class CurseInstallerController extends FxController {
                 });
             });
             modpack.on("done", args -> {
+                try {
+                    modpack.close();
+                } catch (IOException ignored) {
+                    // if the file somehow gets deleted on its own, the error will be handled before this point
+                }
                 ThreadUtils.runOnFxThread(() -> installProgressLabel.setText("Done!"));
                 ThreadUtils.tryShutdownNamedExecutorService(namedExecutorService);
             });
             modpack.on("error", args -> {
                 Exception exception = (Exception) args[0];
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(exception.toString());
-                alert.setContentText(exception.getLocalizedMessage());
-                alert.show();
+                ThreadUtils.runOnFxThread(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText(exception.toString());
+                    alert.setContentText(exception.getLocalizedMessage());
+                    alert.show();
+                });
             });
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
