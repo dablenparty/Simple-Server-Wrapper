@@ -13,17 +13,15 @@ import java.nio.file.Path;
 import java.util.Set;
 
 public class VersionManifest {
-    private static class Latest {
-        private String release;
-        private String snapshot;
-    }
+    private Latest latest;
+    private Set<MinecraftVersion> versions;
 
-    public static class MinecraftVersion {
-        private String id;
-        private VersionType type;
-        private URL url;
-        private String time;
-        private String releaseTime;
+    public static VersionManifest parseManifestFile(Path manifestPath) throws IOException {
+        GsonBuilder builder = JsonUtils.GSON_BUILDER;
+        builder.registerTypeAdapter(VersionType.class, new VersionTypeDeserializer());
+        Gson gson = builder.create();
+        InputStream manifestStream = Files.newInputStream(manifestPath);
+        return gson.fromJson(new InputStreamReader(manifestStream), VersionManifest.class);
     }
 
     public enum VersionType {
@@ -39,21 +37,23 @@ public class VersionManifest {
         }
     }
 
+    private static class Latest {
+        private String release;
+        private String snapshot;
+    }
+
+    public static class MinecraftVersion {
+        private String id;
+        private VersionType type;
+        private URL url;
+        private String time;
+        private String releaseTime;
+    }
+
     private static class VersionTypeDeserializer implements JsonDeserializer<VersionType> {
         @Override
         public VersionType deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return VersionType.parseString(jsonElement.getAsString());
         }
-    }
-
-    private Latest latest;
-    private Set<MinecraftVersion> versions;
-
-    public static VersionManifest parseManifestFile(Path manifestPath) throws IOException {
-        GsonBuilder builder = JsonUtils.GSON_BUILDER;
-        builder.registerTypeAdapter(VersionType.class, new VersionTypeDeserializer());
-        Gson gson = builder.create();
-        InputStream manifestStream = Files.newInputStream(manifestPath);
-        return gson.fromJson(new InputStreamReader(manifestStream), VersionManifest.class);
     }
 }
