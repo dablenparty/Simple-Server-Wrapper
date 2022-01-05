@@ -602,8 +602,8 @@ public class MinecraftServer extends EventEmitter {
             this.shutdownInterval = shutdownInterval;
         }
 
-        public String getVersionString() {
-            return versionString;
+        public Optional<String> getVersionString() {
+            return Optional.ofNullable(versionString);
         }
 
         public void setVersionString(String versionString) {
