@@ -247,11 +247,16 @@ public class MinecraftServer extends EventEmitter {
         }
     }
 
-    private static void downloadMinecraftVersionList(Path destinationFolder) throws IOException {
-        Files.createDirectories(destinationFolder);
-        Path path = Path.of(destinationFolder.toString(), "version_manifest.json");
+    public static void checkMinecraftVersion(String versionString) throws IOException {
+        Path versionManifest = Path.of(String.valueOf(APP_DATA_PATH), "version_manifest.json");
+        if (!Files.exists(versionManifest))
+            downloadMinecraftVersionList(versionManifest);
+    }
+
+    private static void downloadMinecraftVersionList(Path destinationPath) throws IOException {
+        Files.createDirectories(destinationPath.getParent());
         URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
-        FileUtils.copyURLToFile(downloadUrl, path.toFile());
+        FileUtils.copyURLToFile(downloadUrl, destinationPath.toFile());
     }
 
     /**
