@@ -9,9 +9,11 @@ import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import com.hunterltd.ssw.util.events.EventEmitter;
 import com.hunterltd.ssw.util.serial.GsonExclude;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -28,6 +30,7 @@ import java.util.jar.JarFile;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.util.os.SpecialFolderFactory.APP_DATA_PATH;
 
 /**
  * Minecraft server wrapper class
@@ -242,6 +245,13 @@ public class MinecraftServer extends EventEmitter {
                 System.err.println(e.getLocalizedMessage());
             }
         }
+    }
+
+    private static void downloadMinecraftVersionList(Path destinationFolder) throws IOException {
+        Files.createDirectories(destinationFolder);
+        Path path = Path.of(destinationFolder.toString(), "version_manifest.json");
+        URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
+        FileUtils.copyURLToFile(downloadUrl, path.toFile());
     }
 
     /**
