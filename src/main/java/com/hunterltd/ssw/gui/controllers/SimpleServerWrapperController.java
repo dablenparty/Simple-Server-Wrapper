@@ -114,6 +114,7 @@ public class SimpleServerWrapperController extends FxController {
                 iterator.remove();
             }
         } else {
+            // TODO show alert that the manifest is being downloaded, do so in separate thread
             selectFileButton.getScene().getWindow()
                     .setOnCloseRequest(windowEvent -> {
                         if (minecraftServer.isRunning()) {
