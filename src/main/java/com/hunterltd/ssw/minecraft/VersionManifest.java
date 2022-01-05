@@ -24,6 +24,18 @@ public class VersionManifest {
         return gson.fromJson(new InputStreamReader(manifestStream), VersionManifest.class);
     }
 
+    public Set<MinecraftVersion> getVersions() {
+        return versions;
+    }
+
+    public String getLatestRelease() {
+        return latest.release;
+    }
+
+    public String getLatestSnapshot() {
+        return latest.snapshot;
+    }
+
     public enum VersionType {
         RELEASE,
         SNAPSHOT;
@@ -48,6 +60,26 @@ public class VersionManifest {
         private URL url;
         private String time;
         private String releaseTime;
+
+        public String getId() {
+            return id;
+        }
+
+        public VersionType getType() {
+            return type;
+        }
+
+        public URL getUrl() {
+            return url;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public String getReleaseTime() {
+            return releaseTime;
+        }
     }
 
     private static class VersionTypeDeserializer implements JsonDeserializer<VersionType> {
