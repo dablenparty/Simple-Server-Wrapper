@@ -490,13 +490,21 @@ public class MinecraftServer extends EventEmitter {
                     e.printStackTrace();
                     return null;
                 }
-                return gson.fromJson(jsonString, ServerSettings.class);
+                ServerSettings settings = gson.fromJson(jsonString, ServerSettings.class);
+                try {
+                    if (settings.getVersionString().isEmpty())
+                        settings.setVersionString(tryReadVersionFromJar(settingsPath.getParent().getParent()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return settings;
             }
             try {
-                Files.createDirectories(settingsPath.getParent());
+                Path parent = settingsPath.getParent();
+                Files.createDirectories(parent);
                 Files.createFile(settingsPath);
                 ServerSettings settings = new ServerSettings(settingsPath);
-                settings.setVersionString(tryReadVersionFromJar(settingsPath.getParent()));
+                settings.setVersionString(tryReadVersionFromJar(parent.getParent()));
                 settings.writeData();
                 return settings;
             } catch (IOException e) {
