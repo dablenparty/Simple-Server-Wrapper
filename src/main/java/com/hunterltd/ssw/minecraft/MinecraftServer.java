@@ -248,10 +248,12 @@ public class MinecraftServer extends EventEmitter {
         }
     }
 
-    public static void checkMinecraftVersion(String versionString) throws IOException {
-        Path versionManifest = Path.of(String.valueOf(APP_DATA_PATH), "version_manifest.json");
-        if (!Files.exists(versionManifest))
-            downloadMinecraftVersionList(versionManifest);
+    public static boolean checkMinecraftVersion(String versionString) throws IOException {
+        Path manifestPath = Path.of(String.valueOf(APP_DATA_PATH), "version_manifest.json");
+        if (!Files.exists(manifestPath))
+            downloadMinecraftVersionList(manifestPath);
+        VersionManifest versionManifest = VersionManifest.parseManifestFile(manifestPath);
+        return versionManifest.getVersions().stream().map(VersionManifest.MinecraftVersion::getId).anyMatch(s -> s.equals(versionString));
     }
 
     private static void downloadMinecraftVersionList(Path destinationPath) throws IOException {
