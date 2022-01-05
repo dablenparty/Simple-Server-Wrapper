@@ -39,6 +39,21 @@ import static com.hunterltd.ssw.util.os.SpecialFolderFactory.APP_DATA_PATH;
 public class MinecraftServer extends EventEmitter {
     private static final int MAX_COMMAND_HISTORY_SIZE = 10;
     private static final int CRASHES_BEFORE_SHUTDOWN = 3;
+    private static final VersionManifest VERSION_MANIFEST;
+
+    static {
+        VersionManifest manifest;
+        Path manifestPath = Path.of(String.valueOf(APP_DATA_PATH), "version_manifest.json");
+        try {
+            downloadMinecraftVersionList(manifestPath);
+            manifest = VersionManifest.parseManifestFile(manifestPath);
+        } catch (IOException e) {
+            manifest = null;
+            e.printStackTrace();
+        }
+        VERSION_MANIFEST = manifest;
+    }
+
     private final ProcessBuilder pB;
     private final ServerSettings serverSettings;
     private final FixedSizeStack<String> commandHistory;
@@ -100,6 +115,16 @@ public class MinecraftServer extends EventEmitter {
         pB.command(serverArgs);
 
         commandHistory = new FixedSizeStack<>(MAX_COMMAND_HISTORY_SIZE);
+    }
+
+    public static boolean checkMinecraftVersion(String versionString) {
+        return VERSION_MANIFEST.getVersions().stream().map(VersionManifest.MinecraftVersion::getId).anyMatch(s -> s.equals(versionString));
+    }
+
+    private static void downloadMinecraftVersionList(Path destinationPath) throws IOException {
+        Files.createDirectories(destinationPath.getParent());
+        URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
+        FileUtils.copyURLToFile(downloadUrl, destinationPath.toFile());
     }
 
     private void parseEula() {
@@ -246,20 +271,6 @@ public class MinecraftServer extends EventEmitter {
                 System.err.println(e.getLocalizedMessage());
             }
         }
-    }
-
-    public static boolean checkMinecraftVersion(String versionString) throws IOException {
-        Path manifestPath = Path.of(String.valueOf(APP_DATA_PATH), "version_manifest.json");
-        if (!Files.exists(manifestPath))
-            downloadMinecraftVersionList(manifestPath);
-        VersionManifest versionManifest = VersionManifest.parseManifestFile(manifestPath);
-        return versionManifest.getVersions().stream().map(VersionManifest.MinecraftVersion::getId).anyMatch(s -> s.equals(versionString));
-    }
-
-    private static void downloadMinecraftVersionList(Path destinationPath) throws IOException {
-        Files.createDirectories(destinationPath.getParent());
-        URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
-        FileUtils.copyURLToFile(downloadUrl, destinationPath.toFile());
     }
 
     /**
