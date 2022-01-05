@@ -14,6 +14,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -117,6 +118,9 @@ public class MinecraftServer extends EventEmitter {
         }
     }
 
+    /**
+     * @return {@code true} if the EULA has been agreed to. {@code false} otherwise
+     */
     public boolean isEulaAgreedTo() {
         return eulaAgreedTo;
     }
@@ -202,6 +206,12 @@ public class MinecraftServer extends EventEmitter {
         stop(5L, TimeUnit.SECONDS);
     }
 
+    /**
+     * Sends the stop command to the server
+     *
+     * @param timeout  timeout before killing the process
+     * @param timeUnit unit of time for {@code timeout}
+     */
     public void stop(long timeout, TimeUnit timeUnit) {
         shuttingDown = true;
         emit("exiting");
@@ -455,6 +465,11 @@ public class MinecraftServer extends EventEmitter {
         private int shutdownInterval;
         private String versionString;
 
+        /**
+         * Creates an instance of this class with default values
+         *
+         * @param settingsPath {@code Path} to the JSON file this class is written to & read from
+         */
         public ServerSettings(Path settingsPath) {
             memory = 1.0;
             extraArgs = new ArrayList<>();
@@ -550,6 +565,12 @@ public class MinecraftServer extends EventEmitter {
             return null;
         }
 
+        /**
+         * Write this object to the JSON file
+         *
+         * @throws IOException if an I/O error occurs writing to or creating the file, or the text cannot be encoded
+         *                     using the specified charset (from {@link Files#writeString(Path, CharSequence, OpenOption...)}
+         */
         public void writeData() throws IOException {
             Gson gson = new GsonBuilder()
                     .setExclusionStrategies(EXCLUSION_STRATEGY)
@@ -558,62 +579,125 @@ public class MinecraftServer extends EventEmitter {
             Files.writeString(settingsPath, writeString);
         }
 
+        /**
+         * @return memory allocated to the server in GB
+         */
         public double getMemory() {
             return memory;
         }
 
+        /**
+         * Set memory allocated to the server
+         *
+         * @param memory memory in GB
+         */
         public void setMemory(double memory) {
             this.memory = memory;
         }
 
+        /**
+         * @return list of extra JVM arguments added by the user
+         */
         public List<String> getExtraArgs() {
             return extraArgs;
         }
 
+        /**
+         * Sets the list of extra JVM arguments
+         *
+         * @param extraArgs new list
+         */
         public void setExtraArgs(Collection<String> extraArgs) {
             this.extraArgs = new ArrayList<>(extraArgs);
         }
 
+        /**
+         * @return if there are more than 0 extra JVM arguments
+         */
         public boolean hasExtraArgs() {
             return extraArgs.size() != 0;
         }
 
+        /**
+         * @return {@code true} if auto-restarting is enabled. {@code false otherwise}
+         */
         public boolean getRestart() {
             return autoRestart;
         }
 
+        /**
+         * Enables/disables automatic restarting
+         *
+         * @param autoRestart new value
+         */
         public void setRestart(boolean autoRestart) {
             this.autoRestart = autoRestart;
         }
 
+        /**
+         * @return the interval after which the server will be automatically restarted (if this is enabled), in hours
+         */
         public int getRestartInterval() {
             return restartInterval;
         }
 
+        /**
+         * Sets the interval, in hours, before the server is automatically restarted (if this feature is enabled)
+         *
+         * @param restartInterval new interval in minutes
+         */
         public void setRestartInterval(int restartInterval) {
             this.restartInterval = restartInterval;
         }
 
+        /**
+         * @return {@code true} if a proxy server is inserted between the client and server to provide automatic
+         * shutdown/startup capabilities. {@code false} otherwise
+         */
         public boolean getShutdown() {
             return autoShutdown;
         }
 
+        /**
+         * Sets whether a proxy server should be inserted between the client and server for automatic shutdown/startup
+         *
+         * @param autoShutdown new value
+         */
         public void setShutdown(boolean autoShutdown) {
             this.autoShutdown = autoShutdown;
         }
 
+        /**
+         * @return the interval (in minutes) the server should remain with 0 players before shutting down
+         */
         public int getShutdownInterval() {
             return shutdownInterval;
         }
 
+        /**
+         * Sets the interval, in minutes, the server should remain with 0 players before shutting down
+         *
+         * @param shutdownInterval new value
+         */
         public void setShutdownInterval(int shutdownInterval) {
             this.shutdownInterval = shutdownInterval;
         }
 
+        /**
+         * Gets the version string wrapped in an {@link Optional}. If the server is too old (prior to 1.14), this will
+         * be empty
+         *
+         * @return Minecraft version string
+         */
         public Optional<String> getVersionString() {
             return Optional.ofNullable(versionString);
         }
 
+        /**
+         * Sets the version string for the server
+         *
+         * @param versionString new value
+         */
         public void setVersionString(String versionString) {
             this.versionString = versionString;
         }
@@ -639,6 +723,11 @@ public class MinecraftServer extends EventEmitter {
             return propsFile;
         }
 
+        /**
+         * Reads and parses the {@code server.properties} file and puts the data into a {@link HashMap}
+         *
+         * @throws IOException if the file does not exist or cannot be read due to other I/O errors
+         */
         public void read() throws IOException {
             try (BufferedReader reader = new BufferedReader(new FileReader(propsFile))) {
                 reader.lines().forEach(line -> {
@@ -654,6 +743,11 @@ public class MinecraftServer extends EventEmitter {
             }
         }
 
+        /**
+         * Writes the data stored within the {@link HashMap} to the {@code server.properties} file
+         *
+         * @throws FileNotFoundException if the file does not exist
+         */
         public void write() throws FileNotFoundException {
             PrintWriter writer = new PrintWriter(propsFile);
             writer.write(String.join("\n", comments)); // writes the comments back at the start
