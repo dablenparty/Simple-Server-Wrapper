@@ -462,7 +462,7 @@ public class MinecraftServer extends EventEmitter {
             restartInterval = 6;
             autoShutdown = false;
             shutdownInterval = 15;
-            versionString = "";
+            versionString = null;
             this.settingsPath = settingsPath;
         }
 
@@ -496,6 +496,7 @@ public class MinecraftServer extends EventEmitter {
                 Files.createDirectories(settingsPath.getParent());
                 Files.createFile(settingsPath);
                 ServerSettings settings = new ServerSettings(settingsPath);
+                settings.setVersionString(tryReadVersionFromJar(settingsPath.getParent()));
                 settings.writeData();
                 return settings;
             } catch (IOException e) {
@@ -506,11 +507,10 @@ public class MinecraftServer extends EventEmitter {
 
         /**
          * Tries to read the Minecraft version from any existing JAR files in the server folder. If the version can't be
-         * found or the version is too early (prior to 1.14), the {@link Optional} will be empty.
+         * found or the version is too early (prior to 1.14), this method will return {@code null}.
          * <p>
          * JAR files for any Minecraft server on version 1.14 or later contain a {@code version.json} file. The
-         * {@code name} property in this file is the Minecraft version string. This string is what gets wrapped inside
-         * an {@code Optional} and returned.
+         * {@code name} property in this file is the Minecraft version string. This string is what gets returned.
          * <p>
          * All JAR files must be checked because the selected server file might not be the Minecraft server JAR. For
          * example, if a server is run using Fabric, the user might select {@code fabric-server-launch.jar} as the
@@ -523,7 +523,7 @@ public class MinecraftServer extends EventEmitter {
          *                     directory)
          */
         @SuppressWarnings("unchecked")
-        private static Optional<String> tryReadVersionFromJar(Path serverFolder) throws IOException {
+        private static String tryReadVersionFromJar(Path serverFolder) throws IOException {
             File[] jarFiles = serverFolder.toFile().listFiles((dir, name) -> name.endsWith("jar"));
             if (jarFiles == null)
                 throw new IOException(String.format("An error occurred listing files in %s", serverFolder));
@@ -535,12 +535,11 @@ public class MinecraftServer extends EventEmitter {
                     if (entry.getName().equals("version.json")) {
                         String jsonString = new String(jarFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8);
                         Map<String, ?> map = new Gson().fromJson(jsonString, Map.class);
-                        String version = (String) map.get("name");
-                        return Optional.ofNullable(version);
+                        return (String) map.get("name");
                     }
                 }
             }
-            return Optional.empty();
+            return null;
         }
 
         public void writeData() throws IOException {
