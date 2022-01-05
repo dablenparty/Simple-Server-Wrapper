@@ -9,6 +9,7 @@ import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import com.hunterltd.ssw.util.events.EventEmitter;
 import com.hunterltd.ssw.util.serial.GsonExclude;
+import com.hunterltd.ssw.util.serial.JsonUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -459,17 +460,6 @@ public class MinecraftServer extends EventEmitter {
     }
 
     public static class ServerSettings {
-        private static final ExclusionStrategy EXCLUSION_STRATEGY = new ExclusionStrategy() {
-            @Override
-            public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-                return fieldAttributes.getAnnotation(GsonExclude.class) != null;
-            }
-
-            @Override
-            public boolean shouldSkipClass(Class<?> aClass) {
-                return false;
-            }
-        };
         @GsonExclude
         private final Path settingsPath;
         private double memory;
@@ -506,8 +496,7 @@ public class MinecraftServer extends EventEmitter {
             Path settingsPath = Paths.get(serverFile.getParent(), "ssw", "wrapperSettings.json");
             if (Files.exists(settingsPath)) {
                 // excludes anything annotated with @GsonExclude from serialization/deserialization
-                Gson gson = new GsonBuilder()
-                        .setExclusionStrategies(EXCLUSION_STRATEGY)
+                Gson gson = JsonUtils.GSON_BUILDER
                         .registerTypeAdapter(
                                 ServerSettings.class,
                                 new ServerSettingsInstanceCreator(settingsPath)
@@ -587,9 +576,7 @@ public class MinecraftServer extends EventEmitter {
          *                     using the specified charset (from {@link Files#writeString(Path, CharSequence, OpenOption...)}
          */
         public void writeData() throws IOException {
-            Gson gson = new GsonBuilder()
-                    .setExclusionStrategies(EXCLUSION_STRATEGY)
-                    .create();
+            Gson gson = JsonUtils.GSON_BUILDER.create();
             String writeString = gson.toJson(this);
             Files.writeString(settingsPath, writeString);
         }
