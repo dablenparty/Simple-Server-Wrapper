@@ -51,7 +51,7 @@ public class SswServerCli {
     }
 
     public static Namespace parseArgs(String[] args) {
-        Properties mavenProperties = MavenUtils.getMavenProperties();
+        Properties mavenProperties = MavenUtils.MAVEN_PROPERTIES;
         ArgumentParser parser = ArgumentParsers.newFor("ssw-server").build()
                 .defaultHelp(true)
                 .version(String.format("${prog} v%s", mavenProperties.getProperty("version")))

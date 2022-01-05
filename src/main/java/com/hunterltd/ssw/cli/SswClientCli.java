@@ -23,7 +23,7 @@ public class SswClientCli {
     private NamedExecutorService readService;
 
     public static Namespace parseArgs(String[] args) {
-        Properties mavenProperties = MavenUtils.getMavenProperties();
+        Properties mavenProperties = MavenUtils.MAVEN_PROPERTIES;
         ArgumentParser parser = ArgumentParsers.newFor("ssw-client").build()
                 .defaultHelp(true)
                 .version("${prog} v" + mavenProperties.getProperty("version"))

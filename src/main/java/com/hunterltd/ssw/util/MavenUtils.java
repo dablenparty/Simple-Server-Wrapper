@@ -7,17 +7,14 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class MavenUtils {
-    private static Properties mavenProperties = null;
+    public static final Properties MAVEN_PROPERTIES;
 
-    public static Properties getMavenProperties() {
-        if (mavenProperties == null) {
-            mavenProperties = new Properties();
-            try (InputStream resourceStream = SswClientCli.class.getClassLoader().getResourceAsStream("project.properties")) {
-                mavenProperties.load(resourceStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    static {
+        MAVEN_PROPERTIES = new Properties();
+        try (InputStream resourceStream = SswClientCli.class.getClassLoader().getResourceAsStream("project.properties")) {
+            MAVEN_PROPERTIES.load(resourceStream);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return mavenProperties;
     }
 }
