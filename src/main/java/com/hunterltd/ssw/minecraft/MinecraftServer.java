@@ -22,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
@@ -500,6 +502,45 @@ public class MinecraftServer extends EventEmitter {
                 e.printStackTrace();
                 return null;
             }
+        }
+
+        /**
+         * Tries to read the Minecraft version from any existing JAR files in the server folder. If the version can't be
+         * found or the version is too early (prior to 1.14), the {@link Optional} will be empty.
+         * <p>
+         * JAR files for any Minecraft server on version 1.14 or later contain a {@code version.json} file. The
+         * {@code name} property in this file is the Minecraft version string. This string is what gets wrapped inside
+         * an {@code Optional} and returned.
+         * <p>
+         * All JAR files must be checked because the selected server file might not be the Minecraft server JAR. For
+         * example, if a server is run using Fabric, the user might select {@code fabric-server-launch.jar} as the
+         * server file; however, despite this being the correct file to launch the server, this is not the server JAR
+         * containing {@code version.json}.
+         *
+         * @param serverFolder the server folder
+         * @return Minecraft version string
+         * @throws IOException if an I/O error occurs reading files from {@code serverFolder} (e.g. it is not a
+         *                     directory)
+         */
+        @SuppressWarnings("unchecked")
+        private static Optional<String> tryReadVersionFromJar(Path serverFolder) throws IOException {
+            File[] jarFiles = serverFolder.toFile().listFiles((dir, name) -> name.endsWith("jar"));
+            if (jarFiles == null)
+                throw new IOException(String.format("An error occurred listing files in %s", serverFolder));
+            for (File file : jarFiles) {
+                JarFile jarFile = new JarFile(file);
+                Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    if (entry.getName().equals("version.json")) {
+                        String jsonString = new String(jarFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8);
+                        Map<String, ?> map = new Gson().fromJson(jsonString, Map.class);
+                        String version = (String) map.get("name");
+                        return Optional.ofNullable(version);
+                    }
+                }
+            }
+            return Optional.empty();
         }
 
         public void writeData() throws IOException {
