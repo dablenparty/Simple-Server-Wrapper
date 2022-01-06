@@ -2,6 +2,7 @@ package com.hunterltd.ssw.minecraft;
 
 import com.google.gson.*;
 import com.hunterltd.ssw.util.serial.JsonUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,12 @@ public class VersionManifest {
         Gson gson = builder.create();
         InputStream manifestStream = Files.newInputStream(manifestPath);
         return gson.fromJson(new InputStreamReader(manifestStream), VersionManifest.class);
+    }
+
+    public static void download(Path destinationPath) throws IOException {
+        Files.createDirectories(destinationPath.getParent());
+        URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
+        FileUtils.copyURLToFile(downloadUrl, destinationPath.toFile());
     }
 
     public List<MinecraftVersion> getVersions() {

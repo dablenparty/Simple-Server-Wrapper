@@ -11,11 +11,9 @@ import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import com.hunterltd.ssw.util.events.EventEmitter;
 import com.hunterltd.ssw.util.serial.GsonExclude;
 import com.hunterltd.ssw.util.serial.JsonUtils;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -46,7 +44,7 @@ public class MinecraftServer extends EventEmitter {
         VersionManifest manifest;
         Path manifestPath = Path.of(String.valueOf(APP_DATA_PATH), "version_manifest.json");
         try {
-            downloadMinecraftVersionList(manifestPath);
+            VersionManifest.download(manifestPath);
             manifest = VersionManifest.parseManifestFile(manifestPath);
         } catch (IOException e) {
             manifest = null;
@@ -120,12 +118,6 @@ public class MinecraftServer extends EventEmitter {
 
     public static boolean checkMinecraftVersion(String versionString) {
         return VERSION_MANIFEST.getVersions().stream().map(VersionManifest.MinecraftVersion::getId).anyMatch(s -> s.equals(versionString));
-    }
-
-    private static void downloadMinecraftVersionList(Path destinationPath) throws IOException {
-        Files.createDirectories(destinationPath.getParent());
-        URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
-        FileUtils.copyURLToFile(downloadUrl, destinationPath.toFile());
     }
 
     private void parseEula() {
