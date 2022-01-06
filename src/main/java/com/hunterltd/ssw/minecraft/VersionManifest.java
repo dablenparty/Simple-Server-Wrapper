@@ -21,8 +21,8 @@ public class VersionManifest {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
         builder.registerTypeAdapter(VersionType.class, new VersionTypeDeserializer());
         Gson gson = builder.create();
-        InputStream manifestStream = Files.newInputStream(manifestPath);
-        return gson.fromJson(new InputStreamReader(manifestStream), VersionManifest.class);
+        String jsonString = Files.readString(manifestPath);
+        return gson.fromJson(jsonString, VersionManifest.class);
     }
 
     public static void download(Path destinationPath) throws IOException {
