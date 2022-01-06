@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.minecraft;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.InstanceCreator;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.util.FixedSizeStack;
