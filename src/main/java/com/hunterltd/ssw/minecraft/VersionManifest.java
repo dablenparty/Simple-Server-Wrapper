@@ -10,11 +10,11 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.List;
 
 public class VersionManifest {
     private Latest latest;
-    private Set<MinecraftVersion> versions;
+    private List<MinecraftVersion> versions;
 
     public static VersionManifest parseManifestFile(Path manifestPath) throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
@@ -24,7 +24,7 @@ public class VersionManifest {
         return gson.fromJson(new InputStreamReader(manifestStream), VersionManifest.class);
     }
 
-    public Set<MinecraftVersion> getVersions() {
+    public List<MinecraftVersion> getVersions() {
         return versions;
     }
 
