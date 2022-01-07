@@ -16,6 +16,7 @@ import java.util.Locale;
 
 public class VersionManifestV2 {
     public static final Path DEFAULT_PATH;
+    public static final VersionManifestV2 INSTANCE;
 
     static {
         String firstToken = OsConstants.OS_NAME.split(" ")[0];
@@ -28,12 +29,25 @@ public class VersionManifestV2 {
         };
         String minecraftFolder = firstToken.equals("mac") ? "minecraft" : ".minecraft";
         DEFAULT_PATH = Path.of(parentFolder.toString(), minecraftFolder, "versions", "version_manifest_v2.json");
+        VersionManifestV2 manifest = null;
+        try {
+            if (!Files.exists(DEFAULT_PATH))
+                download();
+            manifest = parseManifestFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        INSTANCE = manifest;
+    }
+
+
+    private VersionManifestV2() {
     }
 
     private Latest latest;
     private List<MinecraftVersion> versions;
 
-    public static VersionManifestV2 parseManifestFile() throws IOException {
+    private static VersionManifestV2 parseManifestFile() throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
         builder.registerTypeAdapter(VersionType.class, (JsonDeserializer<VersionType>) (jsonElement, type, jsonDeserializationContext) -> VersionType.parseString(jsonElement.getAsString()));
         Gson gson = builder.create();
@@ -41,7 +55,7 @@ public class VersionManifestV2 {
         return gson.fromJson(jsonString, VersionManifestV2.class);
     }
 
-    public static void download() throws IOException {
+    private static void download() throws IOException {
         Files.createDirectories(DEFAULT_PATH.getParent());
         URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
         FileUtils.copyURLToFile(downloadUrl, DEFAULT_PATH.toFile());
