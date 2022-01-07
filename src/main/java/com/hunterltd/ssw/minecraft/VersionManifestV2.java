@@ -1,12 +1,13 @@
 package com.hunterltd.ssw.minecraft;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.hunterltd.ssw.util.os.OsConstants;
 import com.hunterltd.ssw.util.serial.JsonUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +35,7 @@ public class VersionManifestV2 {
 
     public static VersionManifestV2 parseManifestFile() throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
-        builder.registerTypeAdapter(VersionType.class, new VersionTypeDeserializer());
+        builder.registerTypeAdapter(VersionType.class, (JsonDeserializer<VersionType>) (jsonElement, type, jsonDeserializationContext) -> VersionType.parseString(jsonElement.getAsString()));
         Gson gson = builder.create();
         String jsonString = Files.readString(DEFAULT_PATH);
         return gson.fromJson(jsonString, VersionManifestV2.class);
@@ -120,13 +121,6 @@ public class VersionManifestV2 {
         @Override
         public String toString() {
             return String.format("%s %s (comp %d)", type, id, complianceLevel);
-        }
-    }
-
-    private static class VersionTypeDeserializer implements JsonDeserializer<VersionType> {
-        @Override
-        public VersionType deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            return VersionType.parseString(jsonElement.getAsString());
         }
     }
 }
