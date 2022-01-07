@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.minecraft;
 
 import com.google.gson.*;
+import com.hunterltd.ssw.util.os.OsConstants;
 import com.hunterltd.ssw.util.serial.JsonUtils;
 import org.apache.commons.io.FileUtils;
 
@@ -10,10 +11,25 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 
 public class VersionManifestV2 {
+    public static final Path DEFAULT_PATH;
     private Latest latest;
     private List<MinecraftVersion> versions;
+
+    static {
+        String firstToken = OsConstants.OS_NAME.split(" ")[0];
+        firstToken = firstToken.toLowerCase(Locale.ROOT);
+        Path parentFolder = switch (firstToken) {
+            case "windows" -> Path.of(OsConstants.USER_HOME, "AppData", "Roaming");
+            case "mac" -> Path.of(OsConstants.USER_HOME, "Library", "Application Support");
+            case "linux", "freebsd", "sunos" -> Path.of(OsConstants.USER_HOME);
+            default -> throw new UnsupportedOperationException(OsConstants.OS_NAME + " is not a supported OS");
+        };
+        String minecraftFolder = firstToken.equals("mac") ? "minecraft" : ".minecraft";
+        DEFAULT_PATH = Path.of(parentFolder.toString(), minecraftFolder, "versions", "version_manifest_v2.json");
+    }
 
     public static VersionManifestV2 parseManifestFile(Path manifestPath) throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
