@@ -29,7 +29,6 @@ import java.util.jar.JarFile;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
-import static com.hunterltd.ssw.util.os.SpecialFolderFactory.APP_DATA_PATH;
 
 /**
  * Minecraft server wrapper class
@@ -455,7 +454,7 @@ public class MinecraftServer extends EventEmitter {
         private int restartInterval;
         private boolean autoShutdown;
         private int shutdownInterval;
-        private String versionString;
+        private VersionManifestV2.MinecraftVersion version;
 
         /**
          * Creates an instance of this class with default values
@@ -469,7 +468,7 @@ public class MinecraftServer extends EventEmitter {
             restartInterval = 6;
             autoShutdown = false;
             shutdownInterval = 15;
-            versionString = null;
+            version = null;
             this.settingsPath = settingsPath;
         }
 
@@ -498,8 +497,10 @@ public class MinecraftServer extends EventEmitter {
                 }
                 ServerSettings settings = gson.fromJson(jsonString, ServerSettings.class);
                 try {
-                    if (settings.getVersionString().isEmpty())
-                        settings.setVersionString(tryReadVersionFromJar(settingsPath.getParent().getParent()));
+                    if (settings.getVersion().isEmpty()) {
+                        String versionFromJar = tryReadVersionFromJar(settingsPath.getParent().getParent());
+                        settings.setVersion(VersionManifestV2.MinecraftVersion.of(versionFromJar));
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -510,7 +511,8 @@ public class MinecraftServer extends EventEmitter {
                 Files.createDirectories(parent);
                 Files.createFile(settingsPath);
                 ServerSettings settings = new ServerSettings(settingsPath);
-                settings.setVersionString(tryReadVersionFromJar(parent.getParent()));
+                String versionFromJar = tryReadVersionFromJar(parent.getParent());
+                settings.setVersion(VersionManifestV2.MinecraftVersion.of(versionFromJar));
                 settings.writeData();
                 return settings;
             } catch (IOException e) {
@@ -678,17 +680,17 @@ public class MinecraftServer extends EventEmitter {
          *
          * @return Minecraft version string
          */
-        public Optional<String> getVersionString() {
-            return Optional.ofNullable(versionString);
+        public Optional<VersionManifestV2.MinecraftVersion> getVersion() {
+            return Optional.ofNullable(version);
         }
 
         /**
          * Sets the version string for the server
          *
-         * @param versionString new value
+         * @param version new value
          */
-        public void setVersionString(String versionString) {
-            this.versionString = versionString;
+        public void setVersion(VersionManifestV2.MinecraftVersion version) {
+            this.version = version;
         }
 
         private record ServerSettingsInstanceCreator(Path path) implements InstanceCreator<ServerSettings> {
