@@ -32,18 +32,18 @@ public class VersionManifestV2 {
     private Latest latest;
     private List<MinecraftVersion> versions;
 
-    public static VersionManifestV2 parseManifestFile(Path manifestPath) throws IOException {
+    public static VersionManifestV2 parseManifestFile() throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
         builder.registerTypeAdapter(VersionType.class, new VersionTypeDeserializer());
         Gson gson = builder.create();
-        String jsonString = Files.readString(manifestPath);
+        String jsonString = Files.readString(DEFAULT_PATH);
         return gson.fromJson(jsonString, VersionManifestV2.class);
     }
 
-    public static void download(Path destinationPath) throws IOException {
-        Files.createDirectories(destinationPath.getParent());
+    public static void download() throws IOException {
+        Files.createDirectories(DEFAULT_PATH.getParent());
         URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
-        FileUtils.copyURLToFile(downloadUrl, destinationPath.toFile());
+        FileUtils.copyURLToFile(downloadUrl, DEFAULT_PATH.toFile());
     }
 
     public List<MinecraftVersion> getVersions() {
