@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,12 +42,11 @@ public class VersionManifestV2 {
         INSTANCE = manifest;
     }
 
+    private Latest latest;
+    private List<MinecraftVersion> versions;
 
     private VersionManifestV2() {
     }
-
-    private Latest latest;
-    private List<MinecraftVersion> versions;
 
     private static VersionManifestV2 parseManifestFile() throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
@@ -74,17 +75,17 @@ public class VersionManifestV2 {
     }
 
     public enum VersionType {
-        RELEASE,
-        SNAPSHOT,
+        ALPHA,
         BETA,
-        ALPHA;
+        RELEASE,
+        SNAPSHOT;
 
         public static VersionType parseString(String typeString) {
             return switch (typeString) {
+                case "old_alpha" -> VersionType.ALPHA;
+                case "old_beta" -> VersionType.BETA;
                 case "release" -> VersionType.RELEASE;
                 case "snapshot" -> VersionType.SNAPSHOT;
-                case "old_beta" -> VersionType.BETA;
-                case "old_alpha" -> VersionType.ALPHA;
                 default -> null;
             };
         }
@@ -95,7 +96,7 @@ public class VersionManifestV2 {
         private String snapshot;
     }
 
-    public static class MinecraftVersion {
+    public static class MinecraftVersion implements Comparable<MinecraftVersion> {
         private String id;
         private VersionType type;
         private URL url;
@@ -135,6 +136,13 @@ public class VersionManifestV2 {
         @Override
         public String toString() {
             return String.format("%s %s (comp %d)", type, id, complianceLevel);
+        }
+
+        @Override
+        public int compareTo(MinecraftVersion o) {
+            ZonedDateTime thisTime = ZonedDateTime.parse(this.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            ZonedDateTime otherTime = ZonedDateTime.parse(o.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            return thisTime.compareTo(otherTime);
         }
     }
 }
