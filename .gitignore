@@ -32,6 +32,6 @@ hs_err_pid*
 .vscode/
 
 # Test server
-test-server/
+test-server*/
 
 .DS_Store
