@@ -5,24 +5,22 @@ import com.hunterltd.ssw.util.serial.JsonUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class VersionManifest {
+public class VersionManifestV2 {
     private Latest latest;
     private List<MinecraftVersion> versions;
 
-    public static VersionManifest parseManifestFile(Path manifestPath) throws IOException {
+    public static VersionManifestV2 parseManifestFile(Path manifestPath) throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
         builder.registerTypeAdapter(VersionType.class, new VersionTypeDeserializer());
         Gson gson = builder.create();
         String jsonString = Files.readString(manifestPath);
-        return gson.fromJson(jsonString, VersionManifest.class);
+        return gson.fromJson(jsonString, VersionManifestV2.class);
     }
 
     public static void download(Path destinationPath) throws IOException {
@@ -67,6 +65,16 @@ public class VersionManifest {
         private URL url;
         private String time;
         private String releaseTime;
+        private String sha1;
+        private short complianceLevel;
+
+        public String getSha1() {
+            return sha1;
+        }
+
+        public short getComplianceLevel() {
+            return complianceLevel;
+        }
 
         public String getId() {
             return id;

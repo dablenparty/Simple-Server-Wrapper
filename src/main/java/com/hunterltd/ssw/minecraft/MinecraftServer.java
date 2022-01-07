@@ -38,14 +38,14 @@ import static com.hunterltd.ssw.util.os.SpecialFolderFactory.APP_DATA_PATH;
 public class MinecraftServer extends EventEmitter {
     private static final int MAX_COMMAND_HISTORY_SIZE = 10;
     private static final int CRASHES_BEFORE_SHUTDOWN = 3;
-    private static final VersionManifest VERSION_MANIFEST;
+    private static final VersionManifestV2 VERSION_MANIFEST;
 
     static {
-        VersionManifest manifest;
+        VersionManifestV2 manifest;
         Path manifestPath = Path.of(String.valueOf(APP_DATA_PATH), "version_manifest.json");
         try {
-            VersionManifest.download(manifestPath);
-            manifest = VersionManifest.parseManifestFile(manifestPath);
+            VersionManifestV2.download(manifestPath);
+            manifest = VersionManifestV2.parseManifestFile(manifestPath);
         } catch (IOException e) {
             manifest = null;
             e.printStackTrace();
@@ -117,7 +117,7 @@ public class MinecraftServer extends EventEmitter {
     }
 
     public static boolean checkMinecraftVersion(String versionString) {
-        return VERSION_MANIFEST.getVersions().stream().map(VersionManifest.MinecraftVersion::getId).anyMatch(s -> s.equals(versionString));
+        return VERSION_MANIFEST.getVersions().stream().map(VersionManifestV2.MinecraftVersion::getId).anyMatch(s -> s.equals(versionString));
     }
 
     private void parseEula() {
