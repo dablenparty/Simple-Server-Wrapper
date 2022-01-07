@@ -11,11 +11,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 public class VersionManifestV2 {
     public static final Path DEFAULT_PATH;
@@ -98,61 +95,4 @@ public class VersionManifestV2 {
         private String snapshot;
     }
 
-    public static class MinecraftVersion implements Comparable<MinecraftVersion> {
-        private String id;
-        private VersionType type;
-        private URL url;
-        private String time;
-        private String releaseTime;
-        private String sha1;
-        private short complianceLevel;
-
-        public static MinecraftVersion of(String versionString) {
-            for (MinecraftVersion version : VersionManifestV2.INSTANCE.versions) {
-                if (versionString.equals(version.id))
-                    return version;
-            }
-            return null;
-        }
-
-        public String getSha1() {
-            return sha1;
-        }
-
-        public short getComplianceLevel() {
-            return complianceLevel;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public VersionType getType() {
-            return type;
-        }
-
-        public URL getUrl() {
-            return url;
-        }
-
-        public String getTime() {
-            return time;
-        }
-
-        public String getReleaseTime() {
-            return releaseTime;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s %s (comp %d)", type, id, complianceLevel);
-        }
-
-        @Override
-        public int compareTo(MinecraftVersion o) {
-            ZonedDateTime thisTime = ZonedDateTime.parse(this.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            ZonedDateTime otherTime = ZonedDateTime.parse(o.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            return otherTime.compareTo(thisTime);
-        }
-    }
 }

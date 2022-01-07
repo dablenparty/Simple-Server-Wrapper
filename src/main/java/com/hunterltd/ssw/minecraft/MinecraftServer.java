@@ -454,7 +454,7 @@ public class MinecraftServer extends EventEmitter {
         private int restartInterval;
         private boolean autoShutdown;
         private int shutdownInterval;
-        private VersionManifestV2.MinecraftVersion version;
+        private MinecraftVersion version;
 
         /**
          * Creates an instance of this class with default values
@@ -499,7 +499,7 @@ public class MinecraftServer extends EventEmitter {
                 try {
                     if (settings.getVersion().isEmpty()) {
                         String versionFromJar = tryReadVersionFromJar(settingsPath.getParent().getParent());
-                        settings.setVersion(VersionManifestV2.MinecraftVersion.of(versionFromJar));
+                        settings.setVersion(MinecraftVersion.of(versionFromJar));
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -512,7 +512,7 @@ public class MinecraftServer extends EventEmitter {
                 Files.createFile(settingsPath);
                 ServerSettings settings = new ServerSettings(settingsPath);
                 String versionFromJar = tryReadVersionFromJar(parent.getParent());
-                settings.setVersion(VersionManifestV2.MinecraftVersion.of(versionFromJar));
+                settings.setVersion(MinecraftVersion.of(versionFromJar));
                 settings.writeData();
                 return settings;
             } catch (IOException e) {
@@ -680,7 +680,7 @@ public class MinecraftServer extends EventEmitter {
          *
          * @return Minecraft version string
          */
-        public Optional<VersionManifestV2.MinecraftVersion> getVersion() {
+        public Optional<MinecraftVersion> getVersion() {
             return Optional.ofNullable(version);
         }
 
@@ -689,7 +689,7 @@ public class MinecraftServer extends EventEmitter {
          *
          * @param version new value
          */
-        public void setVersion(VersionManifestV2.MinecraftVersion version) {
+        public void setVersion(MinecraftVersion version) {
             this.version = version;
         }
 
