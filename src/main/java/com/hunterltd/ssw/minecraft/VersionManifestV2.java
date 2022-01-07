@@ -60,12 +60,16 @@ public class VersionManifestV2 {
 
     public enum VersionType {
         RELEASE,
-        SNAPSHOT;
+        SNAPSHOT,
+        BETA,
+        ALPHA;
 
         public static VersionType parseString(String typeString) {
             return switch (typeString) {
                 case "release" -> VersionType.RELEASE;
                 case "snapshot" -> VersionType.SNAPSHOT;
+                case "old_beta" -> VersionType.BETA;
+                case "old_alpha" -> VersionType.ALPHA;
                 default -> null;
             };
         }
@@ -111,6 +115,11 @@ public class VersionManifestV2 {
 
         public String getReleaseTime() {
             return releaseTime;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s %s (comp %d)", type, id, complianceLevel);
         }
     }
 
