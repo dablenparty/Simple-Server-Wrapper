@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 public class VersionManifestV2 {
     public static final Path DEFAULT_PATH;
@@ -104,6 +105,14 @@ public class VersionManifestV2 {
         private String releaseTime;
         private String sha1;
         private short complianceLevel;
+
+        public static MinecraftVersion of(String versionString) {
+            for (MinecraftVersion version : VersionManifestV2.INSTANCE.versions) {
+                if (versionString.equals(version.id))
+                    return version;
+            }
+            return null;
+        }
 
         public String getSha1() {
             return sha1;
