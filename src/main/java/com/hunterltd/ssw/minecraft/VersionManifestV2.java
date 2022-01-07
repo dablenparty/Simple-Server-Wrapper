@@ -37,6 +37,7 @@ public class VersionManifestV2 {
             if (!Files.exists(DEFAULT_PATH))
                 download();
             manifest = parseManifestFile();
+            manifest.versions.sort(MinecraftVersion::compareTo);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -151,7 +152,7 @@ public class VersionManifestV2 {
         public int compareTo(MinecraftVersion o) {
             ZonedDateTime thisTime = ZonedDateTime.parse(this.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             ZonedDateTime otherTime = ZonedDateTime.parse(o.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            return thisTime.compareTo(otherTime);
+            return otherTime.compareTo(thisTime);
         }
     }
 }
