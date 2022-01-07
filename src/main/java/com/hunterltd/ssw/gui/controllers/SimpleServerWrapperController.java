@@ -58,6 +58,7 @@ public class SimpleServerWrapperController extends FxController {
         super(model);
     }
 
+    @Override
     public void initialize() {
         SimpleServerWrapperModel model = getInternalModel();
 

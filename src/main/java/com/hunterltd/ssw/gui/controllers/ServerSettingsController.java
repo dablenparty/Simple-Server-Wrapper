@@ -59,6 +59,7 @@ public class ServerSettingsController extends FxController {
         oldProperties = propertiesOptional.map(HashMap::new).orElse(null);
     }
 
+    @Override
     public void initialize() {
         SimpleServerWrapperModel model = getInternalModel();
 
