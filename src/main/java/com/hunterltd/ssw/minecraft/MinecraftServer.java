@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -99,9 +98,9 @@ public class MinecraftServer extends EventEmitter {
         pB.directory(pBDirectory);
         serverSettings = minecraftServerSettings;
 
-        Path serverPath1 = Paths.get(serverFolder, serverFilename);
+        Path serverPath1 = Path.of(serverFolder, serverFilename);
         try {
-            serverPath1 = Path.of(Paths.get(serverFolder, serverFilename).toFile().getCanonicalPath());
+            serverPath1 = Path.of(Path.of(serverFolder, serverFilename).toFile().getCanonicalPath());
         } catch (IOException ignored) {
         }
 
@@ -121,7 +120,7 @@ public class MinecraftServer extends EventEmitter {
     }
 
     private void parseEula() {
-        Path eulaPath = Paths.get(serverPath.getParent().toString(), "eula.txt");
+        Path eulaPath = Path.of(serverPath.getParent().toString(), "eula.txt");
         if (Files.exists(eulaPath)) {
             try {
                 List<String> lines = Files.readAllLines(eulaPath);
@@ -302,7 +301,7 @@ public class MinecraftServer extends EventEmitter {
     public void generateBatch(String ext) {
         updateExtraArgs();
         String command = String.join(" ", serverArgs);
-        File launchBatch = Paths.get(String.valueOf(serverPath.getParent()), String.format("launch.%s", ext)).toFile();
+        File launchBatch = Path.of(String.valueOf(serverPath.getParent()), String.format("launch.%s", ext)).toFile();
 
         try (PrintWriter writer = new PrintWriter(launchBatch)) {
             //noinspection ResultOfMethodCallIgnored
@@ -375,7 +374,7 @@ public class MinecraftServer extends EventEmitter {
      */
     public boolean updateProperties() {
         try {
-            properties = new ServerProperties(Paths.get(String.valueOf(serverPath.getParent()), "server.properties").toFile());
+            properties = new ServerProperties(Path.of(String.valueOf(serverPath.getParent()), "server.properties").toFile());
             propsExists = true;
             port = Integer.parseInt(properties.get("server-port"));
             return true;
@@ -394,7 +393,7 @@ public class MinecraftServer extends EventEmitter {
      */
     public void updateExtraArgs() {
         String javaHome = System.getProperty("java.home");
-        File executableFile = Paths.get(javaHome, "bin", "java.exe").toFile();
+        File executableFile = Path.of(javaHome, "bin", "java.exe").toFile();
         String javaCommand = executableFile.exists() ? executableFile.toString() : "java";
 
         int settingsMemoryMb = (int) (serverSettings.getMemory() * 1024);
@@ -499,7 +498,7 @@ public class MinecraftServer extends EventEmitter {
          * @return MinecraftServerSettings object
          */
         public static ServerSettings getSettingsFromDefaultPath(File serverFile) {
-            Path settingsPath = Paths.get(serverFile.getParent(), "ssw", "wrapperSettings.json");
+            Path settingsPath = Path.of(serverFile.getParent(), "ssw", "wrapperSettings.json");
             if (Files.exists(settingsPath)) {
                 // excludes anything annotated with @GsonExclude from serialization/deserialization
                 Gson gson = JsonUtils.GSON_BUILDER

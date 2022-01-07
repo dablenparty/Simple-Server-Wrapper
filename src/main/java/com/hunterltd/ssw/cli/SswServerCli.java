@@ -19,7 +19,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,7 +39,7 @@ public class SswServerCli {
     SswServerCli(int port, File serverFile) throws FileNotFoundException {
         this.port = port;
         minecraftServer = new MinecraftServer(serverFile, MinecraftServer.ServerSettings.getSettingsFromDefaultPath(serverFile));
-        logFile = Paths.get(minecraftServer.getServerPath().getParent().toString(), "ssw", "ssw.log").toFile();
+        logFile = Path.of(minecraftServer.getServerPath().getParent().toString(), "ssw", "ssw.log").toFile();
         // make the parent directory
         //noinspection ResultOfMethodCallIgnored
         logFile.getParentFile().mkdir();
@@ -144,7 +143,7 @@ public class SswServerCli {
         commandMap.put("close", new SswCliCommand(closeCommand, true));
 
         Path serverParentFolder = minecraftServer.getServerPath().getParent();
-        File minecraftLog = Paths.get(serverParentFolder.toString(), "logs", "latest.log").toFile();
+        File minecraftLog = Path.of(serverParentFolder.toString(), "logs", "latest.log").toFile();
         SswCliCommand logCommand = new SswCliCommand(client -> sendLogToClient(client, minecraftLog), false);
         commandMap.put("log", logCommand);
 

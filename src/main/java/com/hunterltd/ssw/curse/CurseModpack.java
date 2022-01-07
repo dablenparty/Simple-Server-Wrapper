@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
@@ -44,9 +43,9 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
         // extracts to a randomly named folder
         // use letters + numbers
         String folderName = RandomStringUtils.random(16, true, true);
-        Path extracted = Paths.get(modpackZip.getFile().getParent(), folderName);
+        Path extracted = Path.of(modpackZip.getFile().getParent(), folderName);
         modpackZip.extractAll(extracted.toString());
-        Path manifest = Paths.get(extracted.toString(), "manifest.json");
+        Path manifest = Path.of(extracted.toString(), "manifest.json");
         String jsonString = Files.readString(manifest);
         Gson gson = JsonUtils.GSON_BUILDER.registerTypeAdapter(
                 CurseModpack.class,
@@ -131,7 +130,7 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
         String serverFolderString = serverFolder.toString();
 
         Arrays.stream(new String[]{ "mods", "resourcepacks", "config" })
-                .map(s -> Paths.get(serverFolderString, s).toFile())
+                .map(s -> Path.of(serverFolderString, s).toFile())
                 .forEach(directory -> {
                     if (!directory.exists())
                         return;
@@ -176,7 +175,7 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
         }
         if (prettyPrint)
             System.out.println();
-        Path overrideFolder = Paths.get(getExtractedPath().toString(), "overrides");
+        Path overrideFolder = Path.of(getExtractedPath().toString(), "overrides");
         try {
             Files.list(overrideFolder).map(Path::toFile).forEach(file -> {
                 try {
@@ -185,7 +184,7 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
                     emit("override", baseName);
                     File copyTo;
                     if (file.isDirectory()) {
-                        copyTo = Paths.get(serverFolderString, file.getName()).toFile();
+                        copyTo = Path.of(serverFolderString, file.getName()).toFile();
                         FileUtils.copyDirectory(file, copyTo);
                     } else {
                         copyTo = serverFolder.toFile();
