@@ -15,8 +15,6 @@ import java.util.Locale;
 
 public class VersionManifestV2 {
     public static final Path DEFAULT_PATH;
-    private Latest latest;
-    private List<MinecraftVersion> versions;
 
     static {
         String firstToken = OsConstants.OS_NAME.split(" ")[0];
@@ -30,6 +28,9 @@ public class VersionManifestV2 {
         String minecraftFolder = firstToken.equals("mac") ? "minecraft" : ".minecraft";
         DEFAULT_PATH = Path.of(parentFolder.toString(), minecraftFolder, "versions", "version_manifest_v2.json");
     }
+
+    private Latest latest;
+    private List<MinecraftVersion> versions;
 
     public static VersionManifestV2 parseManifestFile(Path manifestPath) throws IOException {
         GsonBuilder builder = JsonUtils.GSON_BUILDER;
