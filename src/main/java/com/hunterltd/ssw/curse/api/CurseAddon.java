@@ -35,6 +35,13 @@ public class CurseAddon {
         return displayName;
     }
 
+    /**
+     * Downloads this curse addon from the {@code downloadUrl} field to the supplied folder, then into either "mods" or
+     * "resourcepacks" inside said folder (based upon the file extension).
+     *
+     * @param destinationPath destination folder
+     * @throws IOException if an I/O error occurs copying the URL to the file
+     */
     public void download(String destinationPath) throws IOException {
         String folderName = fileName.endsWith(".zip") ? "resourcepacks" : "mods";
         File destinationFile = Path.of(destinationPath, folderName, fileName).toFile();
