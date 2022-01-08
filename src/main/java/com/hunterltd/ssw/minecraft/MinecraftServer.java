@@ -191,18 +191,16 @@ public class MinecraftServer extends EventEmitter {
         });
         emit("start", serverProcess);
         Consumer<String> gobblerConsumer = text -> emit("data", text);
-        ExecutorService inputExecutorService = StreamGobbler.execute(
+        namedInputService = StreamGobbler.execute(
                 serverProcess.getInputStream(),
                 gobblerConsumer,
                 "Server Input Stream"
         );
-        namedInputService = new NamedExecutorService("MinecraftServer Input Service", inputExecutorService);
-        ExecutorService errorExecutorService = StreamGobbler.execute(
+        namedErrorService = StreamGobbler.execute(
                 serverProcess.getErrorStream(),
                 gobblerConsumer,
                 "Server Error Stream"
         );
-        namedErrorService = new NamedExecutorService("MinecraftServer Error Service", errorExecutorService);
     }
 
     /**

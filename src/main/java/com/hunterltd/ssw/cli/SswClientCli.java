@@ -66,8 +66,7 @@ public class SswClientCli {
         clientSocket = new Socket(targetIp, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         InputStream socketInputStream = clientSocket.getInputStream();
-        ExecutorService service = StreamGobbler.execute(socketInputStream, System.out::println, "Socket Read Service");
-        readService = new NamedExecutorService("Socket Read Service", service);
+        readService = StreamGobbler.execute(socketInputStream, System.out::println, "Socket Read Service");
     }
 
     public void closeConnection() throws IOException {

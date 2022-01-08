@@ -11,11 +11,11 @@ import java.util.function.Consumer;
 public record StreamGobbler(InputStream inputStream,
                             Consumer<String> consumer) implements Runnable {
 
-    public static ExecutorService execute(InputStream inputStream, Consumer<String> consumer, String threadName) {
+    public static NamedExecutorService execute(InputStream inputStream, Consumer<String> consumer, String threadName) {
         StreamGobbler gobbler = new StreamGobbler(inputStream, consumer);
         ExecutorService service = Executors.newSingleThreadExecutor(ThreadUtils.newNamedThreadFactory(threadName));
         service.submit(gobbler);
-        return service;
+        return new NamedExecutorService(threadName, service);
     }
 
     @Override
