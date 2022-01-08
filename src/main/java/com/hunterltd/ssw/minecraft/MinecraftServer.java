@@ -688,8 +688,8 @@ public class MinecraftServer extends EventEmitter {
         }
 
         /**
-         * Gets the version string wrapped in an {@link Optional}. If the server is too old (prior to 1.14), this will
-         * be empty
+         * Gets the version string. If the server is too old (prior to 1.14), this will be {@code null} unless manually
+         * set.
          *
          * @return Minecraft version string
          */
