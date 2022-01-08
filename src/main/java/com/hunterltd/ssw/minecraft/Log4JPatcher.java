@@ -1,7 +1,12 @@
 package com.hunterltd.ssw.minecraft;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 class Log4JPatcher {
     private static final MinecraftVersion ONE_EIGHTEEN_ONE = MinecraftVersion.of("1.18.1");
@@ -46,6 +51,29 @@ class Log4JPatcher {
 
     public String getJvmArgs() {
         return jvmArgs;
+    }
+
+    /**
+     * Downloads the patch file (if necessary) and adds the JVM arguments (if necessary)
+     *
+     * @throws IOException if an I/O error occurs downloading the patch file
+     */
+    public void patch() throws IOException {
+        if (patchFileUrl != null) {
+            String file = patchFileUrl.getFile();
+            int sepIndex = file.lastIndexOf('/');
+            String fileName = file.substring(sepIndex + 1);
+            File destination = new File(minecraftServer.getServerPath().getParent().toString(), fileName);
+            FileUtils.copyURLToFile(patchFileUrl, destination);
+        }
+        if (!jvmArgs.isEmpty()) {
+            MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
+            List<String> extraArgs = serverSettings.getExtraArgs();
+            extraArgs.add(jvmArgs);
+            serverSettings.setExtraArgs(extraArgs);
+            serverSettings.writeData();
+            minecraftServer.updateExtraArgs();
+        }
     }
 
     /**
