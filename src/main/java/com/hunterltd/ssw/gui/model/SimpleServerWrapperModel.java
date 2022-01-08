@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class SimpleServerWrapperModel {
     private final BooleanProperty serverRunning;
     private final StringProperty serverPath;
     private final ObservableList<Double> serverMemoryOptions;
-    private final ObservableList<String> minecraftVersionOptions;
+    private final FilteredList<String> minecraftVersionOptions;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
@@ -34,13 +35,12 @@ public class SimpleServerWrapperModel {
         serverPath = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
         List<String> releaseStrings = VersionManifestV2.INSTANCE.getVersions().stream()
-                .filter(minecraftVersion -> minecraftVersion.getType() == VersionManifestV2.VersionType.RELEASE)
                 .map(MinecraftVersion::toString)
-                .collect(Collectors.toList());
-        minecraftVersionOptions = FXCollections.observableArrayList(releaseStrings);
+                .toList();
+        minecraftVersionOptions = FXCollections.observableArrayList(releaseStrings).filtered(s -> !s.startsWith("SNAPSHOT"));
     }
 
-    public ObservableList<String> getMinecraftVersionOptions() {
+    public FilteredList<String> getMinecraftVersionOptions() {
         return minecraftVersionOptions;
     }
 
