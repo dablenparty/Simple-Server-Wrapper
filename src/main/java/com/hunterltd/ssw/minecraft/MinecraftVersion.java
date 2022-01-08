@@ -71,9 +71,8 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
 
     @Override
     public int compareTo(MinecraftVersion o) {
-        // sorts in descending order, meaning the most recent releases are at the start (or have lower indices)
         ZonedDateTime thisTime = ZonedDateTime.parse(this.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         ZonedDateTime otherTime = ZonedDateTime.parse(o.releaseTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        return otherTime.compareTo(thisTime);
+        return thisTime.compareTo(otherTime);
     }
 }
