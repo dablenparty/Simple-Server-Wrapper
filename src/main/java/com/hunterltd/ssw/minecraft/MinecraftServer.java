@@ -514,7 +514,8 @@ public class MinecraftServer extends EventEmitter {
                 try {
                     if (settings.getVersion() == null) {
                         String versionFromJar = tryReadVersionFromJar(settingsPath.getParent().getParent());
-                        settings.setVersion(MinecraftVersion.of(versionFromJar));
+                        if (versionFromJar != null)
+                            settings.setVersion(MinecraftVersion.of(versionFromJar));
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
