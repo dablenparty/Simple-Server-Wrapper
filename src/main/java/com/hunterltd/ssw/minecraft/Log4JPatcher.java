@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 
 class Log4JPatcher {
@@ -64,15 +65,19 @@ class Log4JPatcher {
             int sepIndex = file.lastIndexOf('/');
             String fileName = file.substring(sepIndex + 1);
             File destination = new File(minecraftServer.getServerPath().getParent().toString(), fileName);
-            FileUtils.copyURLToFile(patchFileUrl, destination);
+            if (!destination.exists()) {
+                FileUtils.copyURLToFile(patchFileUrl, destination);
+            }
         }
         if (!jvmArgs.isEmpty()) {
             MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
             List<String> extraArgs = serverSettings.getExtraArgs();
-            extraArgs.add(jvmArgs);
-            serverSettings.setExtraArgs(extraArgs);
-            serverSettings.writeData();
-            minecraftServer.updateExtraArgs();
+            if (!extraArgs.contains(jvmArgs)) {
+                extraArgs.add(jvmArgs);
+                serverSettings.setExtraArgs(extraArgs);
+                serverSettings.writeData();
+                minecraftServer.updateExtraArgs();
+            }
         }
     }
 
