@@ -16,7 +16,23 @@ import java.util.Locale;
 import static com.hunterltd.ssw.util.serial.GsonUtils.GSON_EXCLUDE_STRATEGY;
 
 public class VersionManifestV2 {
+    /**
+     * The default path to {@code version_manifest_v2.json}
+     *
+     * It is found in the following folders on each corresponding system:
+     * <ul>
+     *     <li>Windows - %APPDATA%\.minecraft\versions</li>
+     *     <li>Mac - ~/Library/Application Support/minecraft/versions</li>
+     *     <li>Linux - ~/.minecraft/versions</li>
+     * </ul>
+     *
+     * This constant contains the full path, for example a Linux machine would return
+     * {@code ~/.minecraft/versions/version_manifest_v2.json}
+     */
     public static final Path DEFAULT_PATH;
+    /**
+     * This class's instance
+     */
     public static final VersionManifestV2 INSTANCE;
 
     static {
@@ -48,6 +64,14 @@ public class VersionManifestV2 {
     private VersionManifestV2() {
     }
 
+    /**
+     * Parses the manifest file found at {@link VersionManifestV2#DEFAULT_PATH} into a new instance of
+     * {@link VersionManifestV2}
+     *
+     * @return deserialized {@code VersionManifestV2}
+     * @throws IOException if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is
+     * read (from {@link Files#readString(Path)})
+     */
     private static VersionManifestV2 parseManifestFile() throws IOException {
         GsonBuilder builder = new GsonBuilder().setExclusionStrategies(GSON_EXCLUDE_STRATEGY);
         builder.registerTypeAdapter(VersionType.class, (JsonDeserializer<VersionType>) (jsonElement, type, jsonDeserializationContext) -> VersionType.parseString(jsonElement.getAsString()));
@@ -56,6 +80,11 @@ public class VersionManifestV2 {
         return gson.fromJson(jsonString, VersionManifestV2.class);
     }
 
+    /**
+     * Downloads the version manifest
+     *
+     * @throws IOException if an I/O error occurs copying the URL to a file
+     */
     private static void download() throws IOException {
         Files.createDirectories(DEFAULT_PATH.getParent());
         URL downloadUrl = new URL("https://launchermeta.mojang.com/mc/game/version_manifest.json");
@@ -80,7 +109,14 @@ public class VersionManifestV2 {
         RELEASE,
         SNAPSHOT;
 
-        public static VersionType parseString(String typeString) {
+        /**
+         * Parses a string into a {@code VersionType} constant
+         *
+         * @param typeString can be either {@code old_alpha}, {@code old_beta}, {@code release}, or {@code snapshot}
+         * @return {@code VersionType} constant associated with {@code typeString}, or {@code null} if {@code typeString}
+         * is invalid
+         */
+        private static VersionType parseString(String typeString) {
             return switch (typeString) {
                 case "old_alpha" -> VersionType.ALPHA;
                 case "old_beta" -> VersionType.BETA;
