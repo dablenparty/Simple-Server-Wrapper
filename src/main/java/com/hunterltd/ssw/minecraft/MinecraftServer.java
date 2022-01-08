@@ -527,7 +527,8 @@ public class MinecraftServer extends EventEmitter {
                 Files.createFile(settingsPath);
                 ServerSettings settings = new ServerSettings(settingsPath);
                 String versionFromJar = tryReadVersionFromJar(parent.getParent());
-                settings.setVersion(MinecraftVersion.of(versionFromJar));
+                if (versionFromJar != null)
+                    settings.setVersion(MinecraftVersion.of(versionFromJar));
                 settings.writeData();
                 return settings;
             } catch (IOException e) {
