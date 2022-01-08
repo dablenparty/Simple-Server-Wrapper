@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +32,7 @@ import static com.hunterltd.ssw.util.serial.GsonUtils.GSON_EXCLUDE_STRATEGY;
  * Minecraft server wrapper class
  */
 public class MinecraftServer extends EventEmitter {
+    private static final String JAVA_HOME = System.getProperty("java.home");
     private static final int MAX_COMMAND_HISTORY_SIZE = 10;
     private static final int CRASHES_BEFORE_SHUTDOWN = 3;
 
@@ -375,8 +375,7 @@ public class MinecraftServer extends EventEmitter {
      * Updates the extra args for the server
      */
     public void updateExtraArgs() {
-        String javaHome = System.getProperty("java.home");
-        File executableFile = Path.of(javaHome, "bin", "java.exe").toFile();
+        File executableFile = Path.of(JAVA_HOME, "bin", "java.exe").toFile();
         String javaCommand = executableFile.exists() ? executableFile.toString() : "java";
 
         int settingsMemoryMb = (int) (serverSettings.getMemory() * 1024);
