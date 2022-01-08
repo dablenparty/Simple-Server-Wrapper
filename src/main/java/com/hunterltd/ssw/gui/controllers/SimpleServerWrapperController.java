@@ -28,10 +28,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.EmptyStackException;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
 
@@ -109,11 +107,7 @@ public class SimpleServerWrapperController extends FxController {
         if (minecraftServer != null) {
             minecraftServer.removeAllListeners();
             serviceList.forEach(NamedExecutorService::shutdown);
-            Iterator<NamedExecutorService> iterator = serviceList.listIterator();
-            while (iterator.hasNext()) {
-                iterator.next();
-                iterator.remove();
-            }
+            serviceList = new ArrayList<>(serviceList.size());
         } else {
             // TODO show alert that the manifest is being downloaded, do so in separate thread
             selectFileButton.getScene().getWindow()
@@ -128,9 +122,13 @@ public class SimpleServerWrapperController extends FxController {
                                 windowEvent.consume();
                                 return;
                             }
-                            minecraftServer.stop();
+                            minecraftServer.setShouldBeRunning(false);
+                            minecraftServer.setShouldRestart(false);
                         }
-                        serviceList.forEach(NamedExecutorService::shutdown);
+                        minecraftServer.getServerProcess().onExit().thenApply(process -> {
+                            serviceList.forEach(NamedExecutorService::shutdown);
+                            return process;
+                        });
                     });
         }
         SimpleServerWrapperModel model = getInternalModel();
