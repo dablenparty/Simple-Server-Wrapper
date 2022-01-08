@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 
 class Log4JPatcher {
@@ -14,6 +13,11 @@ class Log4JPatcher {
     private static final MinecraftVersion ONE_SEVENTEEN = MinecraftVersion.of("1.17");
     private static final MinecraftVersion ONE_TWELVE = MinecraftVersion.of("1.12");
     private static final MinecraftVersion ONE_SEVEN = MinecraftVersion.of("1.7");
+    private static final String[] POSSIBLE_ARGS = new String[]{
+            "-Dlog4j2.formatMsgNoLookups=true",
+            "-Dlog4j.configurationFile=log4j2_112-116.xml",
+            "-Dlog4j.configurationFile=log4j2_17-111.xml"
+    };
     private final URL patchFileUrl;
     private final String jvmArgs;
     private final MinecraftServer minecraftServer;
@@ -26,18 +30,18 @@ class Log4JPatcher {
         URL url = null;
         // versions 1.18.1 and later are patched, versions 1.7 and earlier are not affected
         if (versionInRange(serverVersion, ONE_SEVENTEEN, ONE_EIGHTEEN_ONE)) {
-            args = "-Dlog4j2.formatMsgNoLookups=true";
+            args = POSSIBLE_ARGS[0];
         } else if (versionInRange(serverVersion, ONE_TWELVE, ONE_SEVENTEEN)) {
             try {
                 url = new URL("https://launcher.mojang.com/v1/objects/02937d122c86ce73319ef9975b58896fc1b491d1/log4j2_112-116.xml");
-                args = "-Dlog4j.configurationFile=log4j2_112-116.xml";
+                args = POSSIBLE_ARGS[1];
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
         } else if (versionInRange(serverVersion, ONE_SEVEN, ONE_TWELVE)) {
             try {
                 url = new URL("https://launcher.mojang.com/v1/objects/4bb89a97a66f350bc9f73b3ca8509632682aea2e/log4j2_17-111.xml");
-                args = "-Dlog4j.configurationFile=log4j2_17-111.xml";
+                args = POSSIBLE_ARGS[2];
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -73,6 +77,10 @@ class Log4JPatcher {
             MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
             List<String> extraArgs = serverSettings.getExtraArgs();
             if (!extraArgs.contains(jvmArgs)) {
+                // clean list
+                for (String arg : POSSIBLE_ARGS)
+                    extraArgs.remove(arg);
+
                 extraArgs.add(jvmArgs);
                 serverSettings.setExtraArgs(extraArgs);
                 serverSettings.writeData();
