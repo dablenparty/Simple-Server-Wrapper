@@ -1,8 +1,6 @@
 package com.hunterltd.ssw.minecraft;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
+import com.google.gson.*;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
 import com.hunterltd.ssw.util.FixedSizeStack;
@@ -455,7 +453,6 @@ public class MinecraftServer extends EventEmitter {
         private int restartInterval;
         private boolean autoShutdown;
         private int shutdownInterval;
-        // TODO make this store only the version string
         private MinecraftVersion version;
 
         /**
@@ -485,6 +482,11 @@ public class MinecraftServer extends EventEmitter {
             if (Files.exists(settingsPath)) {
                 Gson gson = new GsonBuilder()
                         .setExclusionStrategies(GSON_EXCLUDE_STRATEGY)
+                        .registerTypeAdapter(
+                                MinecraftVersion.class,
+                                (JsonDeserializer<MinecraftVersion>)
+                                        (jsonElement, type, jsonDeserializationContext) -> MinecraftVersion.of(jsonElement.getAsString())
+                        )
                         .registerTypeAdapter(
                                 ServerSettings.class,
                                 new ServerSettingsInstanceCreator(settingsPath)
@@ -567,7 +569,14 @@ public class MinecraftServer extends EventEmitter {
          *                     using the specified charset (from {@link Files#writeString(Path, CharSequence, OpenOption...)}
          */
         public void writeData() throws IOException {
-            Gson gson = new GsonBuilder().setExclusionStrategies(GSON_EXCLUDE_STRATEGY).create();
+            Gson gson = new GsonBuilder()
+                    .setExclusionStrategies(GSON_EXCLUDE_STRATEGY)
+                    .registerTypeAdapter(
+                            MinecraftVersion.class,
+                            (JsonSerializer<MinecraftVersion>)
+                                    (minecraftVersion, type, jsonSerializationContext) -> new JsonPrimitive(minecraftVersion.getId())
+                    )
+                    .create();
             String writeString = gson.toJson(this);
             Files.writeString(settingsPath, writeString);
         }
