@@ -1,5 +1,7 @@
 package com.hunterltd.ssw.gui.model;
 
+import com.hunterltd.ssw.minecraft.MinecraftVersion;
+import com.hunterltd.ssw.minecraft.VersionManifestV2;
 import com.sun.management.OperatingSystemMXBean;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -10,6 +12,7 @@ import javafx.collections.ObservableList;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
@@ -17,6 +20,7 @@ public class SimpleServerWrapperModel {
     private final BooleanProperty serverRunning;
     private final StringProperty serverPath;
     private final ObservableList<Double> serverMemoryOptions;
+    private final ObservableList<String> minecraftVersionOptions;
     private final double maxMemory;
 
     public SimpleServerWrapperModel() {
@@ -29,6 +33,15 @@ public class SimpleServerWrapperModel {
         maxMemory = memOpts.get(memOpts.size() - 1);
         serverPath = new SimpleStringProperty();
         serverRunning = new SimpleBooleanProperty(false);
+        List<String> releaseStrings = VersionManifestV2.INSTANCE.getVersions().stream()
+                .filter(minecraftVersion -> minecraftVersion.getType() == VersionManifestV2.VersionType.RELEASE)
+                .map(MinecraftVersion::toString)
+                .collect(Collectors.toList());
+        minecraftVersionOptions = FXCollections.observableArrayList(releaseStrings);
+    }
+
+    public ObservableList<String> getMinecraftVersionOptions() {
+        return minecraftVersionOptions;
     }
 
     public boolean isServerRunning() {
