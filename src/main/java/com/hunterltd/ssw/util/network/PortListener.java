@@ -17,6 +17,11 @@ public class PortListener extends EventEmitter {
         this.port = port;
     }
 
+    /**
+     * Starts this listener on the port specified by the {@code port} field
+     *
+     * @throws IOException if an I/O error occurs opening the asynchronous channel
+     */
     public void start() throws IOException {
         socketChannel = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
         socketChannel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
@@ -41,10 +46,16 @@ public class PortListener extends EventEmitter {
         });
     }
 
+    /**
+     * @return {@code true} if this socket channel is not null and is open. {@code false} otherwise
+     */
     public boolean isOpen() {
         return socketChannel != null && socketChannel.isOpen();
     }
 
+    /**
+     * Stops this listener
+     */
     public void stop() {
         try {
             socketChannel.close();
