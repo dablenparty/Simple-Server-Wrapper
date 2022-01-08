@@ -375,8 +375,8 @@ public class MinecraftServer extends EventEmitter {
      * Updates the extra args for the server
      */
     public void updateExtraArgs() {
-        File executableFile = Path.of(JAVA_HOME, "bin", "java.exe").toFile();
-        String javaCommand = executableFile.exists() ? executableFile.toString() : "java";
+        Path executablePath = Path.of(JAVA_HOME, "bin", "java.exe");
+        String javaCommand = Files.exists(executablePath) ? executablePath.toString() : "java";
 
         int settingsMemoryMb = (int) (serverSettings.getMemory() * 1024);
         serverArgs = new ArrayList<>(Arrays.asList(javaCommand,
