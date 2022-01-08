@@ -12,6 +12,12 @@ import java.util.concurrent.TimeUnit;
 public class ThreadUtils {
     private static final SimpleDateFormat SIMPLE_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
+    /**
+     * Creates a new {@link ThreadFactory} with the supplied name
+     *
+     * @param threadName name of the thread
+     * @return {@link ThreadFactory}
+     */
     public static ThreadFactory newNamedThreadFactory(String threadName) {
         return new ThreadFactoryBuilder().setNameFormat(threadName).build();
     }
