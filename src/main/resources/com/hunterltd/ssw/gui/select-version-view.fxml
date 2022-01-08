@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.hunterltd.ssw.gui.controllers.SelectVersionController"
-            prefHeight="400.0" prefWidth="600.0">
-    <Label text="Select version"/>
-</AnchorPane>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml"
+      xmlns="http://javafx.com/javafx"
+      fx:controller="com.hunterltd.ssw.gui.controllers.SelectVersionController"
+      prefHeight="100.0" prefWidth="350.0"
+      alignment="CENTER"
+      spacing="10.0">
+    <Label text="You must specify what version of Minecraft this server is for"/>
+    <ComboBox fx:id="versionsComboBox"/>
+    <CheckBox fx:id="snapshotsCheckBox" text="Include Snapshots" onAction="#onSnapshotsCheckBoxAction"/>
+</VBox>
