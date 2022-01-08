@@ -187,7 +187,7 @@ public class MinecraftServer extends EventEmitter {
             }
             shutdownReadServices();
             emit("exit", process);
-            return null;
+            return process;
         });
         emit("start", serverProcess);
         Consumer<String> gobblerConsumer = text -> emit("data", text);
