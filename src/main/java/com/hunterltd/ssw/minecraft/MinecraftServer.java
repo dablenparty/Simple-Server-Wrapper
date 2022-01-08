@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.minecraft;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
 import com.hunterltd.ssw.cli.tasks.ServerPingTask;
@@ -10,7 +11,6 @@ import com.hunterltd.ssw.util.concurrency.StreamGobbler;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import com.hunterltd.ssw.util.events.EventEmitter;
 import com.hunterltd.ssw.util.serial.GsonExclude;
-import com.hunterltd.ssw.util.serial.JsonUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -29,6 +29,7 @@ import java.util.jar.JarFile;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printlnWithTimeAndThread;
+import static com.hunterltd.ssw.util.serial.GsonUtils.GSON_EXCLUDE_STRATEGY;
 
 /**
  * Minecraft server wrapper class
@@ -454,6 +455,7 @@ public class MinecraftServer extends EventEmitter {
         private int restartInterval;
         private boolean autoShutdown;
         private int shutdownInterval;
+        // TODO make this store only the version string
         private MinecraftVersion version;
 
         /**
@@ -481,8 +483,8 @@ public class MinecraftServer extends EventEmitter {
         public static ServerSettings getSettingsFromDefaultPath(File serverFile) {
             Path settingsPath = Path.of(serverFile.getParent(), "ssw", "wrapperSettings.json");
             if (Files.exists(settingsPath)) {
-                // excludes anything annotated with @GsonExclude from serialization/deserialization
-                Gson gson = JsonUtils.GSON_BUILDER
+                Gson gson = new GsonBuilder()
+                        .setExclusionStrategies(GSON_EXCLUDE_STRATEGY)
                         .registerTypeAdapter(
                                 ServerSettings.class,
                                 new ServerSettingsInstanceCreator(settingsPath)
@@ -565,7 +567,7 @@ public class MinecraftServer extends EventEmitter {
          *                     using the specified charset (from {@link Files#writeString(Path, CharSequence, OpenOption...)}
          */
         public void writeData() throws IOException {
-            Gson gson = JsonUtils.GSON_BUILDER.create();
+            Gson gson = new GsonBuilder().setExclusionStrategies(GSON_EXCLUDE_STRATEGY).create();
             String writeString = gson.toJson(this);
             Files.writeString(settingsPath, writeString);
         }

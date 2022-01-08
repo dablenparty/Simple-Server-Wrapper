@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.hunterltd.ssw.util.os.OsConstants;
-import com.hunterltd.ssw.util.serial.JsonUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -13,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+
+import static com.hunterltd.ssw.util.serial.GsonUtils.GSON_EXCLUDE_STRATEGY;
 
 public class VersionManifestV2 {
     public static final Path DEFAULT_PATH;
@@ -48,7 +49,7 @@ public class VersionManifestV2 {
     }
 
     private static VersionManifestV2 parseManifestFile() throws IOException {
-        GsonBuilder builder = JsonUtils.GSON_BUILDER;
+        GsonBuilder builder = new GsonBuilder().setExclusionStrategies(GSON_EXCLUDE_STRATEGY);
         builder.registerTypeAdapter(VersionType.class, (JsonDeserializer<VersionType>) (jsonElement, type, jsonDeserializationContext) -> VersionType.parseString(jsonElement.getAsString()));
         Gson gson = builder.create();
         String jsonString = Files.readString(DEFAULT_PATH);

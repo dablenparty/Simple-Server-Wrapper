@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.hunterltd.ssw.curse.api.CurseAddon;
 import com.hunterltd.ssw.util.events.EventEmitter;
-import com.hunterltd.ssw.util.serial.JsonUtils;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
@@ -23,6 +22,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.printfWithTimeAndThread;
+import static com.hunterltd.ssw.util.serial.GsonUtils.GSON_EXCLUDE_STRATEGY;
 
 public class CurseModpack extends EventEmitter implements AutoCloseable {
     private final Path extractedPath;
@@ -47,7 +47,7 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
         modpackZip.extractAll(extracted.toString());
         Path manifest = Path.of(extracted.toString(), "manifest.json");
         String jsonString = Files.readString(manifest);
-        Gson gson = JsonUtils.GSON_BUILDER.registerTypeAdapter(
+        Gson gson = new GsonBuilder().setExclusionStrategies(GSON_EXCLUDE_STRATEGY).registerTypeAdapter(
                 CurseModpack.class,
                 new CurseModpackInstanceCreator(extracted)
         ).create();
