@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class MavenUtils {
+    /**
+     * The properties of this Maven project
+     */
     public static final Properties MAVEN_PROPERTIES;
 
     static {
