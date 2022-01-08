@@ -503,7 +503,7 @@ public class MinecraftServer extends EventEmitter {
                 }
                 ServerSettings settings = gson.fromJson(jsonString, ServerSettings.class);
                 try {
-                    if (settings.getVersion().isEmpty()) {
+                    if (settings.getVersion() == null) {
                         String versionFromJar = tryReadVersionFromJar(settingsPath.getParent().getParent());
                         settings.setVersion(MinecraftVersion.of(versionFromJar));
                     }
@@ -693,8 +693,8 @@ public class MinecraftServer extends EventEmitter {
          *
          * @return Minecraft version string
          */
-        public Optional<MinecraftVersion> getVersion() {
-            return Optional.ofNullable(version);
+        public MinecraftVersion getVersion() {
+            return version;
         }
 
         /**
