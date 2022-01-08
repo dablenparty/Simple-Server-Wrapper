@@ -1,6 +1,7 @@
 package com.hunterltd.ssw.gui.controllers;
 
 import com.hunterltd.ssw.gui.SimpleServerWrapperGui;
+import com.hunterltd.ssw.gui.components.ErrorAlert;
 import com.hunterltd.ssw.gui.components.SmartScrollTextArea;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
@@ -28,8 +29,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static com.hunterltd.ssw.util.concurrency.ThreadUtils.runOnFxThread;
 
@@ -96,7 +100,7 @@ public class SimpleServerWrapperController extends FxController {
     }
 
     @FXML
-    protected void onSelectFileButtonClick() {
+    protected void onSelectFileButtonClick(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select server JAR");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR archives", "*.jar"));
@@ -125,15 +129,37 @@ public class SimpleServerWrapperController extends FxController {
                             minecraftServer.setShouldBeRunning(false);
                             minecraftServer.setShouldRestart(false);
                         }
-                        minecraftServer.getServerProcess().onExit().thenApply(process -> {
+                        Process serverProcess = minecraftServer.getServerProcess();
+
+                        Function<Process, Process> closeAllServices = process -> {
                             serviceList.forEach(NamedExecutorService::shutdown);
                             return process;
-                        });
+                        };
+                        if (serverProcess != null)
+                            serverProcess.onExit().thenApply(closeAllServices);
+                        else
+                            closeAllServices.apply(null);
                     });
         }
         SimpleServerWrapperModel model = getInternalModel();
 
         minecraftServer = new MinecraftServer(chosen);
+        if (minecraftServer.getServerSettings().getVersion() == null) {
+            Stage stage = new Stage();
+            URL viewResource = SimpleServerWrapperGui.class.getResource("select-version-view.fxml");
+            FXMLLoader loader = new FXMLLoader(viewResource);
+            loader.setControllerFactory(aClass -> new SelectVersionController(model));
+            stage.setTitle("Select Server Version");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(((Node) actionEvent.getSource()).getScene().getWindow());
+            try {
+                stage.setScene(new Scene(loader.load()));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                ErrorAlert.showNewDialog(e);
+            }
+        }
         serviceList = minecraftServer.startAllBackgroundServices();
         minecraftServer.on("start", args -> runOnFxThread(() -> {
                     runButton.setText("Stop");
