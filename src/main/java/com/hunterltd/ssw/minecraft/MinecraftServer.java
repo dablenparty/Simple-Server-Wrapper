@@ -99,6 +99,11 @@ public class MinecraftServer extends EventEmitter {
         commandHistory = new FixedSizeStack<>(MAX_COMMAND_HISTORY_SIZE);
     }
 
+    /**
+     * Parses the {@code eula.txt} file in the working directory. If it is found, and contains {@code eula=true}, then
+     * the {@code eula} field is set to {@code true}. Otherwise, it is set to {@code false}. If the file is not found,
+     * or some other I/O error occurs, it will also be set to {@code false}.
+     */
     private void parseEula() {
         Path eulaPath = Path.of(serverPath.getParent().toString(), "eula.txt");
         if (Files.exists(eulaPath)) {
