@@ -44,6 +44,7 @@ public class MinecraftServer extends EventEmitter {
     private volatile boolean shouldRestart = false;
     private volatile boolean shuttingDown = false;
     private volatile NamedExecutorService namedInputService, namedErrorService;
+    private Log4JPatcher log4JPatcher;
     private Process serverProcess;
     private List<String> serverArgs;
     private ServerProperties properties = null;
@@ -97,6 +98,9 @@ public class MinecraftServer extends EventEmitter {
         pB.command(serverArgs);
 
         commandHistory = new FixedSizeStack<>(MAX_COMMAND_HISTORY_SIZE);
+
+        if (serverSettings.version != null)
+            log4JPatcher = new Log4JPatcher(this);
     }
 
     /**
@@ -160,8 +164,13 @@ public class MinecraftServer extends EventEmitter {
      * @throws IOException if an I/O error occurs starting the server process
      */
     public void run() throws IOException {
+        if (serverSettings.version == null)
+            throw new NullPointerException("Version must not be null");
+        if (log4JPatcher == null)
+            log4JPatcher = new Log4JPatcher(this);
         propsExists = updateProperties();
         parseEula();
+        log4JPatcher.patch();
         serverProcess = pB.start();
         serverProcess.onExit().thenApply(process -> {
             // if the server should be running, but it isn't, it crashed

@@ -57,7 +57,7 @@ public class AliveStateCheckTask extends ServerBasedRunnable {
                     ScheduledExecutorService service = (ScheduledExecutorService) scheduledRestartService.service();
                     restartServiceFuture = service.schedule(new RestartService(server), 1L, TimeUnit.SECONDS);
                 }
-            } catch (IOException e) {
+            } catch (IOException | NullPointerException e) {
                 // an error occurred starting the process
                 e.printStackTrace();
                 server.setShouldBeRunning(false);
