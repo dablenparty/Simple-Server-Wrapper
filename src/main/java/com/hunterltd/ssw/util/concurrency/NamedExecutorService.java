@@ -26,10 +26,19 @@ public final class NamedExecutorService {
         return executorService;
     }
 
+    /**
+     * Adds a child service to an internal list of child services. Most often, this is used to track any services
+     * spawned by this service
+     *
+     * @param namedExecutorService child service
+     */
     public void addChildService(NamedExecutorService namedExecutorService) {
         childServices.add(namedExecutorService);
     }
 
+    /**
+     * Recursively shuts down all child services
+     */
     public void shutdownAllChildServices() {
         childServices.forEach(namedService -> {
             if (namedService.hasChildServices())
@@ -38,11 +47,17 @@ public final class NamedExecutorService {
         });
     }
 
+    /**
+     * Shuts down this service
+     */
     public void shutdown() {
         shutdownAllChildServices();
         ThreadUtils.tryShutdownNamedExecutorService(this);
     }
 
+    /**
+     * @return {@code true} if this service has child services. {@code false} otherwise
+     */
     public boolean hasChildServices() {
         return childServices.size() > 0;
     }
