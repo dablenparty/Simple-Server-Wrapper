@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -18,14 +19,14 @@ import static com.hunterltd.ssw.util.serial.GsonUtils.GSON_EXCLUDE_STRATEGY;
 public class VersionManifestV2 {
     /**
      * The default path to {@code version_manifest_v2.json}
-     *
+     * <p>
      * It is found in the following folders on each corresponding system:
      * <ul>
      *     <li>Windows - %APPDATA%\.minecraft\versions</li>
      *     <li>Mac - ~/Library/Application Support/minecraft/versions</li>
      *     <li>Linux - ~/.minecraft/versions</li>
      * </ul>
-     *
+     * <p>
      * This constant contains the full path, for example a Linux machine would return
      * {@code ~/.minecraft/versions/version_manifest_v2.json}
      */
@@ -51,7 +52,7 @@ public class VersionManifestV2 {
             if (!Files.exists(DEFAULT_PATH))
                 download();
             manifest = parseManifestFile();
-            manifest.versions.sort(MinecraftVersion::compareTo);
+            manifest.versions.sort(Comparator.reverseOrder());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,7 +71,7 @@ public class VersionManifestV2 {
      *
      * @return deserialized {@code VersionManifestV2}
      * @throws IOException if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is
-     * read (from {@link Files#readString(Path)})
+     *                     read (from {@link Files#readString(Path)})
      */
     private static VersionManifestV2 parseManifestFile() throws IOException {
         GsonBuilder builder = new GsonBuilder().setExclusionStrategies(GSON_EXCLUDE_STRATEGY);
