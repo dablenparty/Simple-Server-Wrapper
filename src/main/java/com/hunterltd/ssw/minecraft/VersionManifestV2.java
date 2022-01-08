@@ -21,15 +21,15 @@ public class VersionManifestV2 {
 
     static {
         String firstToken = OsConstants.OS_NAME.split(" ")[0];
+        // prevents issues from case differences
         firstToken = firstToken.toLowerCase(Locale.ROOT);
         Path parentFolder = switch (firstToken) {
-            case "windows" -> Path.of(OsConstants.USER_HOME, "AppData", "Roaming");
-            case "mac" -> Path.of(OsConstants.USER_HOME, "Library", "Application Support");
-            case "linux", "freebsd", "sunos" -> Path.of(OsConstants.USER_HOME);
+            case "windows" -> Path.of(OsConstants.USER_HOME, "AppData", "Roaming", ".minecraft");
+            case "mac" -> Path.of(OsConstants.USER_HOME, "Library", "Application Support", "minecraft");
+            case "linux", "freebsd", "sunos" -> Path.of(OsConstants.USER_HOME, ".minecraft");
             default -> throw new UnsupportedOperationException(OsConstants.OS_NAME + " is not a supported OS");
         };
-        String minecraftFolder = firstToken.equals("mac") ? "minecraft" : ".minecraft";
-        DEFAULT_PATH = Path.of(parentFolder.toString(), minecraftFolder, "versions", "version_manifest_v2.json");
+        DEFAULT_PATH = Path.of(parentFolder.toString(), "versions", "version_manifest_v2.json");
         VersionManifestV2 manifest = null;
         try {
             if (!Files.exists(DEFAULT_PATH))
