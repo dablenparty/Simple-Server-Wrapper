@@ -20,9 +20,7 @@ public class CurseCli {
     public void run() {
         printlnWithTimeAndThread(System.out, "Extracting modpack...");
         try (CurseModpack modpack = CurseModpack.createCurseModpack(modpackZip)) {
-            if (!modpack.install(serverFolder, true)) {
-                System.out.println("Install aborted");
-            }
+            modpack.install(serverFolder, true);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -39,6 +39,13 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
         this.extractedPath = extractedPath;
     }
 
+    /**
+     * Creates a new instance of {@code CurseModpack} from a supplied {@link ZipFile}
+     *
+     * @param modpackZip {@code ZipFile} file
+     * @return extracted {@code CurseModpack}
+     * @throws IOException if an I/O error occurs extracting the {@code ZipFile} or reading the manifest
+     */
     public static CurseModpack createCurseModpack(ZipFile modpackZip) throws IOException {
         // extracts to a randomly named folder
         // use letters + numbers
@@ -121,11 +128,22 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
         cleanUpExtractedFiles();
     }
 
-    public boolean install(Path serverFolder) {
-        return install(serverFolder, false);
+    /**
+     * Installs this modpack into the supplied server folder with no pretty-printing of output
+     *
+     * @param serverFolder root folder of the server to install this pack in
+     */
+    public void install(Path serverFolder) {
+        install(serverFolder, false);
     }
 
-    public boolean install(Path serverFolder, boolean prettyPrint) {
+    /**
+     * Installs this modpack into the supplied server folder
+     *
+     * @param serverFolder root folder of the server to install this pack in
+     * @param prettyPrint whether to pretty-print the output or not (it can be long for large packs when not prettied)
+     */
+    public void install(Path serverFolder, boolean prettyPrint) {
         CurseMod[] files = getFiles();
         String serverFolderString = serverFolder.toString();
 
@@ -201,7 +219,6 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
             e.printStackTrace();
         }
         emit("done");
-        return true;
     }
 
     private static final class MinecraftOptions {
