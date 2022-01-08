@@ -474,8 +474,8 @@ public class MinecraftServer extends EventEmitter {
         /**
          * Creates a new settings file in the default path ({serverFile.parent}/ssw/wrapperSettings.json)
          *
-         * @param serverFile Server file object
-         * @return MinecraftServerSettings object
+         * @param serverFile Server {@link File} object
+         * @return {@code ServerSettings} object
          */
         public static ServerSettings getSettingsFromDefaultPath(File serverFile) {
             Path settingsPath = Path.of(serverFile.getParent(), "ssw", "wrapperSettings.json");
