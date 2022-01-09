@@ -148,10 +148,21 @@ public class SimpleServerWrapperController extends FxController {
             Stage stage = new Stage();
             URL viewResource = SimpleServerWrapperGui.class.getResource("select-version-view.fxml");
             FXMLLoader loader = new FXMLLoader(viewResource);
-            loader.setControllerFactory(aClass -> new SelectVersionController(model));
+            loader.setControllerFactory(aClass -> new SelectVersionController(model, minecraftServer.getServerSettings()));
             stage.setTitle("Select Server Version");
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initOwner(((Node) actionEvent.getSource()).getScene().getWindow());
+            stage.setOnCloseRequest(windowEvent -> {
+                if (minecraftServer.getServerSettings().getVersion() == null) {
+                    windowEvent.consume();
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Choose a Version");
+                    alert.setHeaderText("No version selected!");
+                    alert.setContentText("A version could not be automatically detected for this server, so it must be manually set.");
+                    alert.show();
+                }
+            });
+
             try {
                 stage.setScene(new Scene(loader.load()));
                 stage.show();
