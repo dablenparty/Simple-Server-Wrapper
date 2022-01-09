@@ -170,7 +170,10 @@ public class MinecraftServer extends EventEmitter {
             log4JPatcher = new Log4JPatcher(this);
         propsExists = updateProperties();
         parseEula();
-        log4JPatcher.patch();
+        if (log4JPatcher.patch()) {
+            updateExtraArgs();
+            pB.command(serverArgs);
+        }
         serverProcess = pB.start();
         serverProcess.onExit().thenApply(process -> {
             // if the server should be running, but it isn't, it crashed
