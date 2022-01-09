@@ -2,6 +2,7 @@ package com.hunterltd.ssw.gui;
 
 import com.hunterltd.ssw.gui.controllers.SimpleServerWrapperController;
 import com.hunterltd.ssw.gui.model.SimpleServerWrapperModel;
+import com.hunterltd.ssw.minecraft.VersionManifestV2;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -17,6 +18,7 @@ public class SimpleServerWrapperGui extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        VersionManifestV2.load();
         final SimpleServerWrapperModel model = new SimpleServerWrapperModel();
         FXMLLoader fxmlLoader = new FXMLLoader(SimpleServerWrapperGui.class.getResource("simple-server-wrapper-view.fxml"));
         fxmlLoader.setControllerFactory(aClass -> new SimpleServerWrapperController(model));
