@@ -1,6 +1,6 @@
 # Simple Server Wrapper (SSW)
 
-A native Java wrapper for Minecraft servers. Works on Windows, Linux (tested on Ubuntu), and macOSX
+A native Java wrapper for Minecraft servers. Works on Windows, Linux, and macOSX
 
 ---
 
@@ -21,38 +21,33 @@ Features currently included in SSW
 
 * Support for any version or type of Minecraft server (Vanilla, Spigot, Forge, etc.)
 
+* Automatically patches [Log4Shell](https://en.wikipedia.org/wiki/Log4Shell) to ensure the server is safe to play on
+
 * GUI & CLI
 
 * Per-server settings
 
 * Automatic restarting
 
-* Automatically close/reopen a server when nobody is on/tries to connect
+* Automatically close a server when nobody is online and restart it when someone tries to connect
 
-* Custom memory slider
+* Set server memory
 
-* Extra server arguments (memory allocation is coded in already)
+* Manage server properties *(GUI only)*
+
+* Extra server arguments (memory allocation is hard-coded in already)
 
 * Batch file (launch.bat) generation (.sh file on macOSX/Linux)
 
 * CurseForge Modpack installation into an existing server
 
-* Edit server properties
+### Planned
 
-### Future
+* Optimize automatic starting on connection by making a full proxy server between the client and server
 
-These are features I want to add but either haven't gotten to them yet or don't have the capabilities right now. Crossed
-off items have been added.
+* Specify JVM to run server with
 
-* [x] ~~Edit server.properties~~
-
-* [x] ~~Batch file (launch.bat) generation~~
-
-* [x] ~~Realtime player data (either through mod or server)~~
-
-* [x] ~~Automatically close/reopen a server when nobody is on~~
-
-I'm sure I'll think of more
+* Better logging
 
 ---
 
@@ -71,25 +66,17 @@ Any commands not immediately recognized by the wrapper are passed on to the Mine
 
 ---
 
-## Notice for those building themselves
-
-Since I used this project as an introduction to GUI programming, I made the questionable decision to use IntelliJ's
-Swing Form Designer. As such, this project can only be built using [IntelliJ](https://www.jetbrains.com/idea/). At some
-point, I might migrate to JavaFX, but this is not guaranteed.
-
----
-
 ## Troubleshooting
 
 ### Settings file
 
-The settings file is stored at `<minecraft server folder>/ssw/wrapperSettings.json`.
+The settings file is stored at `<server folder>/ssw/wrapperSettings.json`.
 
 If you're using the GUI, just don't manually edit this file. Use the settings menu.
 
 Otherwise, use this guide:
 
-* `memory`: How much memory (in MB) to allocate to the server. Google this if you don't know what to put here.
+* `memory`: How much memory (in GB) to allocate to the server. Google this if you don't know what to put here.
 * `extraArgs`: An array of extra arguments to pass to the server. Note that the memory args are automatically passed by
   the wrapper. I recommend using those referenced in
   [this reddit post](https://www.reddit.com/r/feedthebeast/comments/5jhuk9/modded_mc_and_memory_usage_a_history_with_a/)
@@ -100,6 +87,9 @@ Otherwise, use this guide:
 * `autoShutdown`: Whether the server should automatically shut down the server. This is also what determines whether the
   wrapper will automatically start the server again when someone tries to connect on its port.
 * `shutdownInterval`: How long (in minutes) the server should remain without players before shutting down.
+* `version`: The Minecraft server version (e.g., `1.18.1`). If your server is on `1.14` or later, the wrapper can
+  auto-detect the version from the server JAR file. Otherwise, both the GUI and CLI will prompt you to set it before you
+  can do anything
 
 Note: don't move it out of the "ssw" folder or rename it. The wrapper looks to that specific folder for that specific
 file. If it doesn't find the correct file in there, it will create a new one and use that instead
@@ -112,11 +102,25 @@ intended.** Most of these cases I've accounted for, and the server process is de
 doesn't work, use Task Manager (Windows), Activity Monitor (macOSX), or the terminal (Linux) to kill the server process
 yourself. Most likely, the issue was not my application, but the log would give more info.
 
-### Internal Errors/Forge errors
+### A note about Forge
 
-In my experience, these are heavily correlated. It is *almost always* caused by a bad Java version. Forge servers are
-made on **Java 8** and for whatever reason get pissy when they're not run with such. If you don't know what version you
-have, run the command `java -version` in a terminal, and ensure the version number begins with `1.8`. If it doesn't,
-look up how to change it and try running the server again. So far, this has solved the issue every single time. If
-you're using Forge on Minecraft 1.17 or later and have this issue, I have no clue. I haven't used that myself and
-encourage you to use Fabric instead.
+In my experience, Forge servers simply will not work sometimes. I do not know the cause and none of my attempts to fix
+it have succeeded. I've noticed before that running it with `Java 1.8` can sometimes fix this, but as of right now, this
+application uses `Java 17` to ensure any server can be launched and does not support running the server with a different
+JVM than the application was launched with.
+
+## Credits
+
+* Now on [JavaFX](https://openjfx.io/)!
+
+* [Apache Commons IO](https://commons.apache.org/proper/commons-io/)
+
+* [Apache Commons Lang](https://commons.apache.org/proper/commons-lang/)
+
+* [Argparse4j](https://argparse4j.github.io/)
+
+* [Eclipse Jersey](https://eclipse-ee4j.github.io/jersey/)
+
+* [gson](https://github.com/google/gson)
+
+* [Zip4j](https://github.com/srikanth-lingala/zip4j)
