@@ -1,6 +1,6 @@
 package com.hunterltd.ssw.cli;
 
-import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
+import com.hunterltd.ssw.minecraft.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.curse.CurseCli;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
 import com.hunterltd.ssw.minecraft.MinecraftVersion;

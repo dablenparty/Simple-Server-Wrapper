@@ -1,8 +1,8 @@
 package com.hunterltd.ssw.minecraft;
 
 import com.google.gson.*;
-import com.hunterltd.ssw.cli.tasks.AliveStateCheckTask;
-import com.hunterltd.ssw.cli.tasks.ServerPingTask;
+import com.hunterltd.ssw.minecraft.tasks.AliveStateCheckTask;
+import com.hunterltd.ssw.minecraft.tasks.ServerPingTask;
 import com.hunterltd.ssw.util.FixedSizeStack;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.StreamGobbler;
