@@ -262,11 +262,6 @@ public class SimpleServerWrapperController extends FxController {
     }
 
     @FXML
-    protected void onExitMenuClick(ActionEvent actionEvent) {
-        ((Stage) ((Node) actionEvent.getSource()).getScene().getWindow()).close();
-    }
-
-    @FXML
     protected void onInstallModpackMenuClick(ActionEvent event) throws IOException {
         Stage stage = new Stage();
         SimpleServerWrapperModel model = getInternalModel();
