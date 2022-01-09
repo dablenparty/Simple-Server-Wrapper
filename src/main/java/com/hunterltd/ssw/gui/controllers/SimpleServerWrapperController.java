@@ -115,7 +115,6 @@ public class SimpleServerWrapperController extends FxController {
             serviceList.forEach(NamedExecutorService::shutdown);
             serviceList = new ArrayList<>(serviceList.size());
         } else {
-            // TODO show alert that the manifest is being downloaded, do so in separate thread
             selectFileButton.getScene().getWindow()
                     .setOnCloseRequest(windowEvent -> {
                         if (minecraftServer.isRunning()) {
@@ -230,7 +229,7 @@ public class SimpleServerWrapperController extends FxController {
         try {
             Desktop.getDesktop().browse(serverPath.toUri());
         } catch (IOException e) {
-            // TODO make alerts on errors
+            ErrorAlert.showNewDialog(e);
             e.printStackTrace();
         }
     }
