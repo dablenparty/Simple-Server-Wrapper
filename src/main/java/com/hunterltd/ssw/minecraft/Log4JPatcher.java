@@ -61,9 +61,11 @@ class Log4JPatcher {
     /**
      * Downloads the patch file (if necessary) and adds the JVM arguments (if necessary)
      *
+     * @return {@code true} if a patch is applied. {@code false} otherwise
      * @throws IOException if an I/O error occurs downloading the patch file
      */
-    public void patch() throws IOException {
+    public boolean patch() throws IOException {
+        boolean result = false;
         if (patchFileUrl != null) {
             String file = patchFileUrl.getFile();
             int sepIndex = file.lastIndexOf('/');
@@ -71,6 +73,7 @@ class Log4JPatcher {
             File destination = new File(minecraftServer.getServerPath().getParent().toString(), fileName);
             if (!destination.exists()) {
                 FileUtils.copyURLToFile(patchFileUrl, destination);
+                result = true;
             }
         }
         if (!jvmArgs.isEmpty()) {
@@ -85,8 +88,10 @@ class Log4JPatcher {
                 serverSettings.setExtraArgs(extraArgs);
                 serverSettings.writeData();
                 minecraftServer.updateExtraArgs();
+                result = true;
             }
         }
+        return result;
     }
 
     /**
