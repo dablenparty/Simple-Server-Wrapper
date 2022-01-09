@@ -3,6 +3,7 @@ package com.hunterltd.ssw.cli;
 import com.hunterltd.ssw.cli.tasks.ServerBasedRunnable;
 import com.hunterltd.ssw.curse.CurseCli;
 import com.hunterltd.ssw.minecraft.MinecraftServer;
+import com.hunterltd.ssw.minecraft.MinecraftVersion;
 import com.hunterltd.ssw.util.MavenUtils;
 import com.hunterltd.ssw.util.concurrency.NamedExecutorService;
 import com.hunterltd.ssw.util.concurrency.ThreadUtils;
@@ -36,9 +37,9 @@ public class SswServerCli {
     private volatile boolean cancel = false;
     private int clientId = 0;
 
-    SswServerCli(int port, File serverFile) throws FileNotFoundException {
+    SswServerCli(int port, MinecraftServer minecraftServer) throws FileNotFoundException {
         this.port = port;
-        minecraftServer = new MinecraftServer(serverFile, MinecraftServer.ServerSettings.getSettingsFromDefaultPath(serverFile));
+        this.minecraftServer = minecraftServer;
         logFile = Path.of(minecraftServer.getServerPath().getParent().toString(), "ssw", "ssw.log").toFile();
         // make the parent directory
         //noinspection ResultOfMethodCallIgnored
@@ -89,8 +90,27 @@ public class SswServerCli {
             return;
         }
 
+        MinecraftServer minecraftServer = new MinecraftServer(server);
+        MinecraftServer.ServerSettings serverSettings = minecraftServer.getServerSettings();
+        if (serverSettings.getVersion() == null) {
+            System.out.println("The Minecraft version this server runs on could not be detected");
+            System.out.println("This information is used to patch the Log4Shell exploit in specific versions of Minecraft");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            MinecraftVersion minecraftVersion;
+            do {
+                System.out.print("Please enter the version of Minecraft you are playing (e.g., 1.18.1): ");
+                String versionString = reader.readLine();
+                minecraftVersion = MinecraftVersion.of(versionString);
+                if (minecraftVersion == null)
+                    System.out.println("Invalid version");
+                else
+                    break;
+            } while (true);
+            serverSettings.setVersion(minecraftVersion);
+            serverSettings.writeData();
+        }
         int port = namespace.getInt("port");
-        SswServerCli serverCli = new SswServerCli(port, server);
+        SswServerCli serverCli = new SswServerCli(port, minecraftServer);
         serverCli.start();
         serverCli.stop();
     }
