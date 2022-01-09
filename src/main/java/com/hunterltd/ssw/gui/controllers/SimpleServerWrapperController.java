@@ -25,7 +25,9 @@ import javafx.stage.Stage;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -144,6 +146,16 @@ public class SimpleServerWrapperController extends FxController {
         SimpleServerWrapperModel model = getInternalModel();
 
         minecraftServer = new MinecraftServer(chosen);
+        try {
+            File logFile = Path.of(minecraftServer.getServerPath().getParent().toString(), "ssw", "ssw.log").toFile();
+            //noinspection ResultOfMethodCallIgnored
+            logFile.getParentFile().mkdirs();
+            PrintStream logStream = new PrintStream(logFile);
+            System.setOut(logStream);
+            System.setErr(logStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         if (minecraftServer.getServerSettings().getVersion() == null) {
             Stage stage = new Stage();
             URL viewResource = SimpleServerWrapperGui.class.getResource("select-version-view.fxml");
@@ -186,6 +198,7 @@ public class SimpleServerWrapperController extends FxController {
                     if (!text.endsWith("\n"))
                         text += '\n';
                     String finalText = text;
+                    System.out.println(finalText.strip());
                     runOnFxThread(() -> appendToTextArea(finalText));
                 });
         model.setServerPath(minecraftServer.getServerPath().toString());
