@@ -3,6 +3,7 @@ package com.hunterltd.ssw.minecraft;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
+import com.hunterltd.ssw.util.concurrency.ThreadUtils;
 import com.hunterltd.ssw.util.os.OsConstants;
 import org.apache.commons.io.FileUtils;
 
@@ -63,6 +64,16 @@ public class VersionManifestV2 {
     private List<MinecraftVersion> versions;
 
     private VersionManifestV2() {
+    }
+
+    /**
+     * Loads the version manifest
+     *
+     * This cheats a little since the loading is actually done in the static block, but by loading the class into memory
+     * it forces that block to be run, thus loading all the data (and downloading the manifest if necessary)
+     */
+    public static void load() {
+        ThreadUtils.printlnWithTimeAndThread(System.out, "Loading version manifest...");
     }
 
     /**
