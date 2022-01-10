@@ -61,14 +61,6 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
         return gson.fromJson(jsonString, CurseModpack.class);
     }
 
-    public static void main(String[] args) {
-        try (CurseModpack modpack = createCurseModpack(new ZipFile(new File("C:\\Users\\Hunter\\Documents\\Calm+Craft+v4.1-v4.1.zip")))) {
-            System.out.println(modpack.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public String toString() {
         return name + " on " + minecraft.version + " (" + files.length + " mods)";
@@ -141,7 +133,7 @@ public class CurseModpack extends EventEmitter implements AutoCloseable {
      * Installs this modpack into the supplied server folder
      *
      * @param serverFolder root folder of the server to install this pack in
-     * @param prettyPrint whether to pretty-print the output or not (it can be long for large packs when not prettied)
+     * @param prettyPrint  whether to pretty-print the output or not (it can be long for large packs when not prettied)
      */
     public void install(Path serverFolder, boolean prettyPrint) {
         CurseMod[] files = getFiles();
